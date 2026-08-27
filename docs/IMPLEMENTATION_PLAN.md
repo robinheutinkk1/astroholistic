@@ -1,0 +1,134 @@
+# Implementatieplan
+
+> Fasering volgens §66. Elke fase eindigt met een werkende, getoetste staat —
+> niet met een half afgebouwde volgende fase.
+
+## Definition of Done (§68)
+
+Een feature is klaar als **alle** punten afgevinkt zijn:
+
+- [ ] Migration geschreven en `supabase db reset` slaagt vanaf leeg
+- [ ] RLS-policies aanwezig, met tests
+- [ ] Autorisatie in de service-laag (`requirePermission`)
+- [ ] Frontend af, inclusief error-, loading- en empty-states
+- [ ] Mobiel gedrag gecontroleerd (chauffeursflows op een echt toestelformaat)
+- [ ] Tests geschreven en groen
+- [ ] `npm run lint` en `npm run build` slagen
+- [ ] Documentatie in `docs/` bijgewerkt
+- [ ] Auditlogging waar de actie dat vereist (§37)
+
+"De pagina werkt" is niet klaar.
+
+---
+
+## Fase 0 — Audit ✅ afgerond
+Repository-audit (`AUDIT_PHASE0.md`), architectuurdocumenten, ER-model,
+permissiemodel, beslispunten (`RISKS_AND_DECISIONS.md`).
+
+**Wacht op bevestiging + besluit D-02 en D-03 voordat Fase 1 begint.**
+
+---
+
+## Fase 1 — Projectfundament
+Next.js 15 + TypeScript strict + Tailwind v4 opzetten; mappenstructuur uit
+`ARCHITECTURE.md` §4; ESLint/Prettier; Vitest; Supabase CLI als dev-dependency;
+`.env.example`; CI-workflow (lint, typecheck, build, test); design tokens en de
+eerste UI-primitives (Button, Input, Card, Badge, Dialog, Table).
+
+*Klaar als:* `npm run lint && npm run build && npm test` groen is en er een
+lege, ingelogde shell staat.
+
+## Fase 2 — Database en RLS
+Migrations in de volgorde uit `DATABASE.md` §11. Alle tabellen, enums,
+constraints, indexes, `app`-helperfuncties, RLS-policies, append-only triggers,
+seed van `permissions` en systeemrollen.
+
+pgTAP-tests plus de Vitest-suite met echte JWT's per persona. **De volledige
+S1–S21-matrix uit `SECURITY.md` §8 moet groen zijn.** CI-check op tabellen
+zonder RLS.
+
+*Klaar als:* tenant-isolatie aantoonbaar werkt. **Fase 3 begint niet eerder.**
+
+## Fase 3 — Auth en RBAC
+Login, logout, wachtwoordreset, e-mailverificatie, profiel; organisatiekeuze bij
+meerdere lidmaatschappen; ledenbeheer, uitnodigingen, rollen toewijzen;
+`requirePermission`, `usePermission`; escalatiebeschermingen uit
+`ROLES_AND_PERMISSIONS.md` §8. Seed data (§55) met de vijf persona's.
+
+*Klaar als:* elke rol handmatig én in tests is doorlopen.
+
+## Fase 4 — Beheer-core
+Dashboard met dagcijfers; CRUD voor cliënten, contacten, opdrachtgevers,
+chauffeurs, voertuigen, locaties; server-side paginatie, filtering en sortering
+vanaf het begin (§49); auditlogging op alle mutaties.
+
+## Fase 5 — Ritten en planning
+Ritten-CRUD; terugkerende templates; generatiejob met idempotentie; dag- en
+weekplanning; chauffeur- en voertuigtoewijzing; uitzonderingen, annulering,
+extra ritten; state machine in service én databasetrigger; conflictdetectie
+(dubbel geboekte chauffeur of voertuig).
+
+## Fase 6 — Chauffeurs-PWA
+Mobile-first "Vandaag"-scherm; ritdetail; navigatie-deeplink; grote knoppen voor
+de hele flow (§24); afwezigheid met redenen; notities; probleemmelding;
+optionele GPS-capture; manifest, service worker, installatie.
+
+## Fase 7 — NFC en QR
+Volgens `NFC.md`: tags aanmaken, tokenafgifte, koppelen/ontkoppelen, statussen,
+vervangen, QR-rendering, bulk-PDF; `/t/[token]`-landingspagina; check-in RPC in
+één transactie; duplicaathandling; rate limiting; volledige beveiligingstests.
+
+## Fase 8 — Realtime dispatch
+Dispatchscherm met live statussen; `useRideStream`-hook; gedebouncede
+dashboardtellers; probleemsignalering.
+
+## Fase 9 — Portalen
+Cliënt-, contact- en opdrachtgeverportaal; `change_requests`-workflow met
+beoordeling door planners; per-portaal beveiligingstests.
+
+## Fase 10 — White label en domeinen
+Brandinginstellingen met validatie; logo-upload; CSS-variabelen server-rendered;
+`organization_domains` met verificatie; host-resolutie in middleware; Vercel
+wildcard-configuratie.
+
+## Fase 11 — Rapportages
+Ritten per dag, afgerond/geannuleerd/afwezig, check-in-tijden,
+chauffeurprestaties, cliënthistorie; CSV-export met auditlogging.
+
+## Fase 12 — Hardening
+Volledige beveiligingsaudit langs `SECURITY.md` §2; `support_access_grants`;
+GDPR-export en -erasurepad; bewaartermijnen; security headers en CSP;
+rate limiting overal; dependency-audit; penetratietest van de
+tenant-isolatiegrens.
+
+## Fase 13 — Testen en stabilisatie
+Volledige suite; E2E van de kritieke paden (plannen → rijden → inchecken →
+afronden); performancetest met realistisch volume (100 organisaties, 50.000
+ritten, 500.000 events); queryplannen controleren op ontbrekende indexes.
+
+## Fase 14 — Deployment
+Vercel-productieproject; Supabase-productieproject; migrations; auth-redirect-
+URL's; domeinen; PWA-verificatie op echte toestellen; monitoring en alerting;
+`DEPLOYMENT.md` en `DEVELOPMENT.md`.
+
+---
+
+## Volgorde-afhankelijkheden
+
+```
+Fase 1 ─→ Fase 2 ─→ Fase 3 ─→ Fase 4 ─→ Fase 5 ─┬─→ Fase 6 ─→ Fase 7 ─→ Fase 8
+                                                 └─→ Fase 9
+                                    Fase 10 kan parallel aan 8/9
+                                    Fase 11 na Fase 5
+                                    Fase 12–14 als afsluiting
+```
+
+Fase 2 is de enige harde poort: zonder bewezen tenant-isolatie wordt er geen UI
+gebouwd, omdat elke pagina die je daarna bouwt op die aanname rust.
+
+## Git-workflow (§52)
+
+`main` (productie) ← `develop` (integratie) ← `feature/*`.
+Conventional commits: `feat:`, `fix:`, `chore:`, `docs:`, `test:`, `refactor:`.
+Eén fase = één of meer feature-branches, elk met een eigen PR.
+CI moet groen zijn; de beveiligingstestsuite blokkeert de merge.
