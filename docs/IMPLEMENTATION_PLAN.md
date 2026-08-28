@@ -103,14 +103,54 @@ altijd teruggedraaid, met een testcase die op residu controleert.
 Ook geverifieerd met `EXPLAIN`: de permissiecheck draait als `InitPlan` met
 `loops=1`, dus één keer per query in plaats van één keer per rij.
 
-## Fase 3 — Auth en RBAC
+## Fase 3 — Auth en RBAC ✅ afgerond
 
-Login, logout, wachtwoordreset, e-mailverificatie, profiel; organisatiekeuze bij
-meerdere lidmaatschappen; ledenbeheer, uitnodigingen, rollen toewijzen;
-`requirePermission`, `usePermission`; escalatiebeschermingen uit
-`ROLES_AND_PERMISSIONS.md` §8. Seed data (§55) met de vijf persona's.
+Opgeleverd:
 
-_Klaar als:_ elke rol handmatig én in tests is doorlopen.
+- Inloggen, uitloggen, wachtwoord vergeten en resetten, plus de
+  `/auth/callback`-route die e-maillinks inwisselt voor een sessie
+- Profielpagina
+- Organisatiecontext: een gebruiker kan bij meerdere organisaties horen en
+  wisselt via een switcher. De keuze staat in een cookie, maar wordt alleen
+  gehonoreerd als hij een actief lidmaatschap benoemt — een gemanipuleerde
+  cookie selecteert niets
+- App-shell met sidebar die per rol gefilterd wordt, gebruikersmenu en
+  white-label kleuren server-side toegepast (geen flits van platformkleuren)
+- Gebruikersbeheer: rollen toewijzen en leden schorsen, met de escalatieregels
+  uit `ROLES_AND_PERMISSIONS.md` §8
+- `requirePermission` / `PermissionGate`
+- Databasetypes gegenereerd uit het echte schema (36 tabellen, 26 enums,
+  inclusief foreign keys zodat geneste queries typeerbaar zijn)
+
+_Verificatie:_ `npm run verify` groen (81 tests), `npm run test:security` groen
+(107 tests). De draaiende app stuurt onbevoegde routes door naar `/login` met
+terugkeerpad, en laat `/t/…` publiek — beide gecontroleerd tegen de dev-server.
+
+**Beveiligingskeuzes met een test erachter:**
+
+- De redirect na inloggen accepteert alleen relatieve paden. `//evil.example`
+  is de subtiele: die begint met een `/` maar leest voor de browser als een
+  ander domein. Zeven testgevallen dekken dit af — een open redirect op een
+  inlogformulier is een klassieke phishingroute.
+- Fout wachtwoord en onbekend account geven hetzelfde antwoord, en "wachtwoord
+  vergeten" meldt altijd succes. Anders is het formulier een middel om te
+  ontdekken welke e-mailadressen een account hebben.
+- Je kunt je eigen rollen niet wijzigen en jezelf niet schorsen, en geen rol
+  toekennen met meer rechten dan je zelf hebt. Geweigerd in de service én in
+  RLS.
+
+**Parity-test tegen stille drift.** De permissielijst bestaat twee keer: als
+getypeerde constante (zodat een typefout een compileerfout wordt) en in de
+database (die daadwerkelijk beslist). Lopen ze uiteen, dan weigert een
+permissie stilzwijgend alles zonder foutmelding. Vier tests bewaken de
+gelijkheid in beide richtingen; beide mutaties zijn gecontroleerd.
+
+**Bekende beperking van deze omgeving:** het daadwerkelijke inloggen kon hier
+niet end-to-end getest worden, omdat Supabase Auth (GoTrue) een Docker-image
+nodig heeft dat door het egress-beleid geblokkeerd is. Getest is: de routering,
+de redirects, de permissielogica tegen de echte database, en de
+formuliervalidatie. Op een omgeving met `npm run db:start` is de inlogflow wel
+end-to-end te doorlopen — dat is de eerste controle die daar hoort te gebeuren.
 
 ## Fase 4 — Beheer-core
 

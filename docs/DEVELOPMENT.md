@@ -30,7 +30,8 @@ npm run dev                    # http://localhost:3000
 | `npm run format` | Prettier |
 | `npm run db:start` / `db:stop` | Lokale Supabase-stack (Docker) |
 | `npm run db:reset` | Database leegmaken en alle migrations opnieuw draaien |
-| `npm run db:types` | `src/types/database.ts` genereren uit het schema |
+| `npm run db:types` | `src/types/database.ts` genereren (Supabase CLI, gezaghebbend) |
+| `npm run db:types:local` | Idem, via introspectie — voor omgevingen zonder Docker |
 | `npm run db:test` | pgTAP-tests (RLS en constraints) |
 
 Draai `npm run verify` vóór elke push. Het is dezelfde keten als CI, dus als het

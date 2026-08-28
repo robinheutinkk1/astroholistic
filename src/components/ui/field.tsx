@@ -13,11 +13,13 @@ import { cn } from '@/lib/utils/cn';
 export interface FieldProps {
   label: string;
   htmlFor: string;
-  hint?: string;
-  error?: string;
-  required?: boolean;
+  // `| undefined` is explicit because of exactOptionalPropertyTypes: callers
+  // pass `state.fieldErrors?.email?.[0]`, which is legitimately undefined.
+  hint?: string | undefined;
+  error?: string | undefined;
+  required?: boolean | undefined;
   children: React.ReactNode;
-  className?: string;
+  className?: string | undefined;
 }
 
 export function Field({

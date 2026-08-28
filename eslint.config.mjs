@@ -125,6 +125,15 @@ export default tseslint.config(
     },
   },
 
+  // Node scripts run outside the browser: process and console are legitimate.
+  {
+    files: ['scripts/**/*.{mjs,js}'],
+    languageOptions: {
+      globals: { process: 'readonly', console: 'readonly', URL: 'readonly' },
+    },
+    rules: { 'no-console': 'off' },
+  },
+
   // Config files in .mjs/.mts live outside the TypeScript project, so the
   // type-aware rules cannot run on them.
   {

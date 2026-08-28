@@ -298,10 +298,10 @@ describe('tenant isolation extends to trips', () => {
 
   it('a driver sees only the trips assigned to them', async () => {
     // Sanne drives this run; Kees does not.
-    const sanne = await asUser(USERS.driverA2, 'select id from trips');
-    const kees = await asUser(USERS.driverA1, 'select id from trips');
-    expect(sanne.rows.map((r) => (r as { id: string }).id)).toContain(TRIP);
-    expect(kees.rows.map((r) => (r as { id: string }).id)).not.toContain(TRIP);
+    const sanne = await asUser<{ id: string }>(USERS.driverA2, 'select id from trips');
+    const kees = await asUser<{ id: string }>(USERS.driverA1, 'select id from trips');
+    expect(sanne.rows.map((r) => r.id)).toContain(TRIP);
+    expect(kees.rows.map((r) => r.id)).not.toContain(TRIP);
   });
 
   it('a driver can mark the whole stop as arrived, in one action', async () => {
