@@ -361,6 +361,75 @@ Vanuit elke actieve status: → PROBLEM (herstelbaar) en → CANCELLED ●
   daarbuiten (voor dispatchers die een vastgelopen rit rechttrekken); dat wordt
   altijd geaudit.
 
+## 7bis. Groepsvervoer — trips en stops
+
+**Dit is het kernscenario van het platform:** één bus haalt meerdere cliënten op
+bij één locatie — een dagbesteding, een school — en de chauffeur checkt ze daar
+in.
+
+De per-cliënt `rides`-rij blijft ongewijzigd; dat is de juiste korrel voor
+check-in, afwezigheid en rapportage. Wat erboven komt is de rit die het
+voertuig daadwerkelijk maakt.
+
+### `trips`
+`id` · `organization_id` · `name` · `scheduled_date` · `driver_id` ·
+`vehicle_id` · `status` enum (`PLANNED`\|`ASSIGNED`\|`IN_PROGRESS`\|`COMPLETED`\|`CANCELLED`)
+· `planned_start_time` (lokaal) · `planned_start_at`, `planned_end_at`
+(timestamptz) · `started_at`, `completed_at` · timestamps
+
+Twee exclusion-constraints (`btree_gist`) verbieden dat dezelfde chauffeur of
+hetzelfde voertuig op twee overlappende ritten staat. Bewust een
+exclusion-constraint en geen trigger: die is race-safe, twee planners die
+tegelijk opslaan kunnen niet allebei winnen. Geannuleerde ritten tellen niet mee,
+zodat een vervangende rit het gat mag opvullen.
+
+### `trip_stops`
+`id` · `organization_id` · `trip_id` · `location_id` · `sequence` ·
+`kind` enum (`PICKUP`\|`DROPOFF`\|`BOTH`) · `planned_arrival_time` ·
+`planned_arrival_at` · `arrived_at`
+`unique (trip_id, sequence)`
+
+`arrived_at` staat op de **stop**, niet op de rit. Dat is het hele punt: de
+chauffeur drukt bij De Es één keer op "ik ben aangekomen" en scant daarna vier
+tags — in plaats van vier keer een rit openen en vier keer op aangekomen drukken.
+
+### Koppeling vanuit `rides`
+`trip_id` · `pickup_stop_id` · `dropoff_stop_id` · `checked_in_method`
+
+Een trigger bewaakt dat de stops bij dezelfde trip horen, dat trip en rit
+dezelfde organisatie hebben, en dat een passagier instapt vóór hij uitstapt.
+
+`checked_in_method` legt vast of er gescand is of handmatig afgevinkt. Beide
+routes zijn toegestaan (besluit 2026-08-28): een chauffeur moet een cliënt die
+zijn tag vergeten is of al in de bus zit kunnen afvinken. In rapportages blijft
+het verschil zichtbaar, zodat een organisatie kan zien hoe vaak de tag echt
+gebruikt wordt.
+
+### Capaciteit — piekbezetting, geen hoofdentelling
+`app.trip_peak_occupancy(trip_id)` geeft het grootste aantal passagiers dat op
+enig moment tegelijk aan boord is, plus hetzelfde voor rolstoelen.
+
+Simpelweg de passagiers van een rit tellen is fout: mensen stappen onderweg uit,
+dus een bus met zes plaatsen kan op een ochtend prima tien mensen vervoeren.
+Wat telt is de piek. Bezetting na stop *k* = passagiers met instapvolgnummer ≤ *k*
+en uitstapvolgnummer > *k*; het maximum daarvan over alle stops is de werkelijke
+belasting.
+
+Een uitgestelde constraint-trigger toetst dit bij commit, zodat een planner een
+hele rit in één transactie kan opbouwen zonder halverwege geblokkeerd te worden.
+
+### `trip_templates`
+`id` · `organization_id` · `name` · `departure_time` · `days_of_week` ·
+`starts_on` · `ends_on` · `default_driver_id` · `default_vehicle_id` · `status`
+
+Terugkerend groepsvervoer: één sjabloon voor de hele busrit, met per passagier
+een `ride_templates`-rij eraan (`ride_templates.trip_template_id`). Zonder deze
+laag zou een groep van vijf nog steeds vijf losse sjablonen zijn die een planner
+handmatig gelijk moet houden — verandert de vertrektijd, dan vijf keer dezelfde
+wijziging.
+
+---
+
 ### `ride_events` — append-only (§18)
 
 `id` · `organization_id` · `ride_id` · `event_type` enum · `occurred_at

@@ -214,4 +214,58 @@ insert into nfc_tags (id, organization_id, public_code, token_hash, client_id, s
 insert into tag_assignments (organization_id, nfc_tag_id, client_id) values
   ('0a000000-0000-4000-8000-000000000000', '90000000-0000-4000-8000-00000000000a', '30000000-0000-4000-8000-00000000000a');
 
+-- --- Group transport ------------------------------------------------------
+-- The core scenario: one bus collects four clients at day care De Es at 16:00
+-- and drops them at three different home addresses. This is what the driver
+-- sees as ONE stop with four people, not four separate rides.
+insert into trips (id, organization_id, name, scheduled_date, driver_id, vehicle_id,
+                   status, planned_start_time, planned_start_at, planned_end_at)
+values ('a1000000-0000-4000-8000-00000000000a', '0a000000-0000-4000-8000-000000000000',
+        'Terugrit De Es', current_date,
+        '50000000-0000-4000-8000-00000000000b', '60000000-0000-4000-8000-00000000000b',
+        'ASSIGNED', '16:00',
+        (current_date + time '16:00') at time zone 'Europe/Amsterdam',
+        (current_date + time '17:15') at time zone 'Europe/Amsterdam');
+
+insert into trip_stops (id, organization_id, trip_id, location_id, sequence, kind, planned_arrival_time) values
+  ('a2000000-0000-4000-8000-000000000001', '0a000000-0000-4000-8000-000000000000', 'a1000000-0000-4000-8000-00000000000a', '10000000-0000-4000-8000-00000000000b', 1, 'PICKUP',  '16:00'),
+  ('a2000000-0000-4000-8000-000000000002', '0a000000-0000-4000-8000-000000000000', 'a1000000-0000-4000-8000-00000000000a', '10000000-0000-4000-8000-00000000000a', 2, 'DROPOFF', '16:25'),
+  ('a2000000-0000-4000-8000-000000000003', '0a000000-0000-4000-8000-000000000000', 'a1000000-0000-4000-8000-00000000000a', '10000000-0000-4000-8000-00000000000c', 3, 'DROPOFF', '16:50'),
+  ('a2000000-0000-4000-8000-000000000004', '0a000000-0000-4000-8000-000000000000', 'a1000000-0000-4000-8000-00000000000a', '10000000-0000-4000-8000-00000000000d', 4, 'DROPOFF', '17:10');
+
+-- Four passengers, all boarding at stop 1, alighting at stops 2, 3, 3 and 4.
+-- The bus has six seats, so peak occupancy of four fits.
+insert into rides (organization_id, client_id, scheduled_date, scheduled_pickup_time,
+                   scheduled_pickup_at, pickup_location_id, destination_location_id,
+                   driver_id, vehicle_id, status, source,
+                   trip_id, pickup_stop_id, dropoff_stop_id)
+values
+  ('0a000000-0000-4000-8000-000000000000', '30000000-0000-4000-8000-00000000000a', current_date, '16:00',
+   (current_date + time '16:00') at time zone 'Europe/Amsterdam',
+   '10000000-0000-4000-8000-00000000000b', '10000000-0000-4000-8000-00000000000a',
+   '50000000-0000-4000-8000-00000000000b', '60000000-0000-4000-8000-00000000000b',
+   'DRIVER_ASSIGNED', 'MANUAL',
+   'a1000000-0000-4000-8000-00000000000a', 'a2000000-0000-4000-8000-000000000001', 'a2000000-0000-4000-8000-000000000002'),
+
+  ('0a000000-0000-4000-8000-000000000000', '30000000-0000-4000-8000-00000000000c', current_date, '16:00',
+   (current_date + time '16:00') at time zone 'Europe/Amsterdam',
+   '10000000-0000-4000-8000-00000000000b', '10000000-0000-4000-8000-00000000000c',
+   '50000000-0000-4000-8000-00000000000b', '60000000-0000-4000-8000-00000000000b',
+   'DRIVER_ASSIGNED', 'MANUAL',
+   'a1000000-0000-4000-8000-00000000000a', 'a2000000-0000-4000-8000-000000000001', 'a2000000-0000-4000-8000-000000000003'),
+
+  ('0a000000-0000-4000-8000-000000000000', '30000000-0000-4000-8000-00000000000d', current_date, '16:00',
+   (current_date + time '16:00') at time zone 'Europe/Amsterdam',
+   '10000000-0000-4000-8000-00000000000b', '10000000-0000-4000-8000-00000000000c',
+   '50000000-0000-4000-8000-00000000000b', '60000000-0000-4000-8000-00000000000b',
+   'DRIVER_ASSIGNED', 'MANUAL',
+   'a1000000-0000-4000-8000-00000000000a', 'a2000000-0000-4000-8000-000000000001', 'a2000000-0000-4000-8000-000000000003'),
+
+  ('0a000000-0000-4000-8000-000000000000', '30000000-0000-4000-8000-00000000000e', current_date, '16:00',
+   (current_date + time '16:00') at time zone 'Europe/Amsterdam',
+   '10000000-0000-4000-8000-00000000000b', '10000000-0000-4000-8000-00000000000d',
+   '50000000-0000-4000-8000-00000000000b', '60000000-0000-4000-8000-00000000000b',
+   'DRIVER_ASSIGNED', 'MANUAL',
+   'a1000000-0000-4000-8000-00000000000a', 'a2000000-0000-4000-8000-000000000001', 'a2000000-0000-4000-8000-000000000004');
+
 commit;

@@ -62,7 +62,7 @@ was. Beide zijn in de implementatie gecorrigeerd, niet in de test.
 
 ## Fase 2 — Database en RLS ✅ afgerond
 
-**13 migrations, 33 tabellen, 96 policies, 78 beveiligingstests.**
+**15 migrations, 36 tabellen, 111 policies, 96 beveiligingstests.**
 
 Opgeleverd:
 
@@ -77,17 +77,28 @@ Opgeleverd:
   test bewijst dat beide identiek zijn
 - Append-only handhaving op `ride_events` en `audit_logs` in drie lagen
 - Escalatietriggers: cross-tenant rolinjectie, laatste eigenaar, eigen rollen
-- Seed data met twee organisaties en acht persona's (fictief)
+- Groepsvervoer (besluit D-17): `trips`, `trip_stops`, `trip_templates`,
+  piekbezettingsberekening, en exclusion-constraints tegen dubbelgeboekte
+  chauffeurs en voertuigen
+- Seed data met twee organisaties, acht persona's en een echte busrit met vier
+  passagiers (fictief)
 
 _Verificatie:_ `npm run db:rebuild` slaagt vanaf een lege database.
 `npm run test:security` is groen: 68 inbraakscenario's plus 10 structurele
 garanties.
 
-**De suite is gevalideerd met mutatietesten.** Drie policies zijn expres
-verzwakt om te controleren dat de tests dat vangen: `clients_select` openzetten
-liet 12 tests falen, chauffeursisolatie weghalen 2, en de append-only trigger
-verwijderen 2. Een suite die alleen "nul rijen" verwacht kan groen zijn zonder
-iets te bewijzen; deze niet.
+**De suite is gevalideerd met mutatietesten.** Zes beveiligingen zijn expres
+uitgeschakeld om te controleren dat de tests dat vangen: `clients_select`
+openzetten liet 12 tests falen, chauffeursisolatie 2, de append-only trigger 2,
+de capaciteitscontrole 2, de dubbelboeking-constraint 1 en de trip-scoping 1.
+Een suite die alleen "nul rijen" verwacht kan groen zijn zonder iets te bewijzen;
+deze niet.
+
+De suite is ook idempotent: drie runs achter elkaar leveren hetzelfde resultaat
+en laten de data ongemoeid. Dat was aanvankelijk **niet** zo — één capaciteitstest
+deed een echte commit, waardoor de tweede run faalde. Uitgestelde constraints
+worden nu met `set constraints all immediate` binnen de transactie getoetst en
+altijd teruggedraaid, met een testcase die op residu controleert.
 
 Ook geverifieerd met `EXPLAIN`: de permissiecheck draait als `InitPlan` met
 `loops=1`, dus één keer per query in plaats van één keer per rij.

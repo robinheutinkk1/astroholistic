@@ -255,6 +255,41 @@ verplaatsen als je ze liever in de root hebt.
 
 ---
 
+### D-17 — Groepsvervoer krijgt een eigen laag (trips)
+**Impact: datamodel, planning, chauffeurs-app**
+
+Aanleiding: je gaf aan dat het platform vooral bedoeld is voor organisaties met
+**meerdere cliënten per locatie** die daar ingecheckt worden. Het model had toen
+alleen ritten per cliënt, zonder iets dat zei dat vijf ritten samen één busrit
+zijn. Getest en bevestigd vóór de wijziging: vijf cliënten pasten in een bus met
+zes plaatsen, maar negen ook, en dezelfde chauffeur kon om 16:00 op twee plekken
+tegelijk worden ingepland.
+
+Toegevoegd: `trips` (de rit van het voertuig), `trip_stops` (de stops in
+volgorde) en `trip_templates` (terugkerend groepsvervoer). De per-cliënt
+`rides`-rij blijft ongewijzigd — die korrel was goed.
+
+*Waarom nu:* er hing nog geen enkel scherm aan het datamodel. Na Fase 5 en 6
+hadden de planning én de chauffeurs-app opnieuw gebouwd moeten worden.
+
+*Wat het oplevert:* capaciteitscontrole op zitplaatsen en rolstoelplaatsen,
+detectie van dubbelgeboekte chauffeurs en voertuigen, één "ik ben aangekomen"
+per stop in plaats van per passagier, en één terugkerend sjabloon per groep.
+
+### D-18 — Inchecken kan met tag én handmatig afvinken
+**Impact: chauffeurs-app, rapportage**
+
+Elke cliënt houdt een eigen NFC-tag; de chauffeur tapt ze bij de deur na elkaar
+en het scherm toont wie er nog mist. Daarnaast kan hij handmatig afvinken — voor
+een cliënt die zijn tag vergeten is of al in de bus zit.
+
+*Het risico dat je moet kennen:* handmatig afvinken is makkelijker dan scannen,
+dus als het niet uitmaakt zal het scannen op termijn verwateren en verdwijnt de
+waarde van de tags. Daarom legt `rides.checked_in_method` en
+`ride_events.source` vast welke route gebruikt is, en tonen de rapportages dat
+verschil. Zo kan een organisatie zien of de tags daadwerkelijk gebruikt worden
+in plaats van dat aan te nemen.
+
 ### D-14 — Offline werken voor chauffeurs: niet in V1
 **Impact: scope, chauffeurs-PWA**
 

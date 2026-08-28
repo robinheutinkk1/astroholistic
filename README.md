@@ -4,9 +4,9 @@ Multi-tenant SaaS-platform voor vervoersbedrijven: cliëntenbeheer, terugkerende
 ritplanning, dispatching, een chauffeurs-PWA met NFC/QR check-in, en portalen
 voor cliënten, contactpersonen en opdrachtgevers.
 
-> **Status: Fase 2 afgerond** — database en tenant-isolatie staan.
+> **Status: Fase 2 afgerond** — database, tenant-isolatie en groepsvervoer staan.
 > `npm run verify` groen (74 tests), `npm run test:security` groen
-> (78 tests, waaronder 68 inbraakscenario's tussen organisaties).
+> (96 tests, waaronder 68 inbraakscenario's tussen organisaties).
 > Er is nog geen bruikbare gebruikersinterface; die begint in Fase 3.
 
 ## Documentatie
@@ -35,6 +35,10 @@ voor cliënten, contactpersonen en opdrachtgevers.
   persoonsgegevens in publieke NFC-URL's, geen persoonsgegevens in logs.
 - **NFC en QR zijn één systeem.** Eén tag, één token, één statusmodel, één
   check-in flow.
+- **Gebouwd voor groepsvervoer.** Meerdere cliënten bij één locatie zijn één
+  busrit met één stop: de chauffeur drukt één keer op "aangekomen" en checkt
+  daarna iedereen in. Capaciteit wordt getoetst op piekbezetting, niet op
+  hoofdental.
 
 ## Techniek
 
