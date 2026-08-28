@@ -21,6 +21,12 @@ const ALL_NAV_ITEMS: readonly NavItem[] = [
   },
   { href: '/planning', label: 'Planning', icon: 'planning', permission: 'planning.view' },
   {
+    href: '/terugkerend',
+    label: 'Terugkerend',
+    icon: 'planning',
+    permission: 'ride_templates.view',
+  },
+  {
     href: '/dispatch',
     label: 'Dispatch',
     icon: 'dispatch',

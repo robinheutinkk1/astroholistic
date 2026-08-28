@@ -19,6 +19,13 @@ const PUBLIC_PATHS = [
   /** NFC/QR landing must be reachable signed-out — a tap just opens a browser.
    *  The page itself shows no personal data to anonymous visitors (docs/NFC.md §5). */
   '/t',
+  /**
+   * API routes do their own authentication and must answer with a status code,
+   * not an HTML redirect. Without this the nightly cron job — which
+   * authenticates with a shared secret, not a session — would be redirected to
+   * the login page and silently never run.
+   */
+  '/api',
 ];
 
 function isPublicPath(pathname: string): boolean {

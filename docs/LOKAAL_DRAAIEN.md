@@ -127,7 +127,13 @@ Log in als `admin@voorbeeldtaxi.test`. Je ziet Klaas Bakker en Marie Visser, en
 niemand van Taxi Ontzorgd. Probeer eens een cliënt-URL van het andere bedrijf te
 plakken — je krijgt "niet gevonden".
 
-**4. Wat mist er in de formulieren?**
+**4. Plan een terugkerende rit in.**
+Ga naar Terugkerend → Nieuwe afspraak. Kies een cliënt, maandag t/m vrijdag,
+08:00. Na opslaan staan de komende weken meteen in de planning. Klik daarna een
+losse rit aan en verzet de tijd: die rit krijgt het label "afwijkend" en wordt
+bij een volgende generatie niet meer overschreven.
+
+**5. Wat mist er in de formulieren?**
 Kijk bij een cliënt of je alle velden mist die Taxi Ontzorgd nodig heeft. Het
 rolstoelveld ontbreekt met opzet (besluit D-03); alles wat je verder mist, hoor
 ik graag.

@@ -197,12 +197,59 @@ Een planner mag een auditregel schrijven maar de auditlog niet lezen, dus
 `recordAudit()` doet bewust geen `returning` — anders faalt elke mutatie die een
 planner doet. Vastgelegd in een test met die uitleg.
 
-## Fase 5 — Ritten en planning
+## Fase 5 — Ritten en planning ✅ afgerond
 
-Ritten-CRUD; terugkerende templates; generatiejob met idempotentie; dag- en
-weekplanning; chauffeur- en voertuigtoewijzing; uitzonderingen, annulering,
-extra ritten; state machine in service én databasetrigger; conflictdetectie
-(dubbel geboekte chauffeur of voertuig).
+Opgeleverd:
+
+- Terugkerende ritten: aanmaken, wijzigen, stoppen — met een leesbare
+  samenvatting ("Maandag t/m vrijdag") en overerving van de vervoersbehoefte
+- Ritgeneratie: idempotent, additief, rollend venster van 60 dagen. Handmatig
+  te starten door een planner en nachtelijks via Vercel Cron
+- Planning: dagoverzicht met chauffeur- en voertuigtoewijzing per rit, plus
+  tellers voor totaal, niet-toegewezen en geannuleerd
+- Losse ritten aanmaken en wijzigen, annuleren, statuswijziging via de state
+  machine, en de rit-tijdlijn met alle vastgelegde gebeurtenissen
+- Conflictsignalering: dezelfde chauffeur of bus binnen 30 minuten op twee
+  ritten
+
+_Verificatie:_ `npm run verify` groen (130 tests), `npm run test:security` groen
+(142 tests). Alle routes en de cron-authenticatie gecontroleerd tegen de
+draaiende server.
+
+**Drie echte bugs die de tests en de handmatige controle vonden:**
+
+1. *De duplicaatbeveiliging was onbruikbaar voor `ON CONFLICT`.* De unique index
+   was partieel, en PostgreSQL kan een partiële index niet inferren zonder
+   dezelfde `WHERE`-clausule — die PostgREST niet meestuurt. De allereerste
+   generatie zou zijn afgebroken met een constraint-fout in plaats van
+   bestaande ritten over te slaan. Vervangen door een gewone unique index, die
+   dankzij `NULLS DISTINCT` exact dezelfde semantiek heeft (migration 0016).
+
+2. *Een terugkerende rit zonder dagen werd geaccepteerd.* `array_length('{}', 1)`
+   geeft `NULL`, en een CHECK-constraint laat `NULL` door. Zo'n afspraak
+   genereerde vervolgens stilzwijgend niets — een planner zou nooit ontdekken
+   waarom. Ook aanwezig op `trip_templates` (migration 0017).
+
+3. *De nachtelijke generatie zou nooit gedraaid hebben.* Twee oorzaken: de
+   generatiefunctie gebruikte de sessie van de gebruiker, die er bij een
+   cronjob niet is (RLS gaf dan nul templates terug), én de middleware stuurde
+   `/api/cron/...` door naar de inlogpagina. Beide zijn opgelost; de route
+   weigert nu met 401 zonder geldig geheim en met 503 als het geheim niet is
+   ingesteld.
+
+**Generatie is additief, en dat wordt uitgelegd.** Een wijziging aan een
+terugkerende afspraak raakt al ingeplande ritten niet. Het bewerkingsscherm
+toont daarom vooraf hoeveel toekomstige ritten er al staan en hoeveel daarvan
+handmatig zijn aangepast, en de bevestiging na opslaan zegt het opnieuw.
+
+**Conflictsignalering is adviserend, niet blokkerend.** Twee ophaalpunten een
+kwartier na elkaar in dezelfde straat is prima; dwars door de stad niet, en het
+systeem kan dat verschil zonder routeplanning niet zien. Blokkeren zou planners
+leren om het systeem te omzeilen.
+
+**Secrets worden apart gevalideerd.** Eén gezamenlijke validatie betekende dat
+ritgeneratie weigerde te draaien omdat `TAG_TOKEN_PEPPER` — een Fase 7-geheim
+dat hij nooit gebruikt — niet ingesteld was.
 
 ## Fase 6 — Chauffeurs-PWA
 

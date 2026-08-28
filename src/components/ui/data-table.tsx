@@ -16,7 +16,7 @@ export function Table({
 }: {
   caption: string;
   children: React.ReactNode;
-  className?: string;
+  className?: string | undefined;
 }) {
   return (
     // Wide tables scroll inside their own container instead of pushing the page
@@ -44,7 +44,7 @@ export function Th({
   scope = 'col',
 }: {
   children: React.ReactNode;
-  className?: string;
+  className?: string | undefined;
   scope?: 'col' | 'row';
 }) {
   return (
@@ -66,7 +66,7 @@ export function Tr({
   className,
 }: {
   children: React.ReactNode;
-  className?: string;
+  className?: string | undefined;
 }) {
   return (
     <tr className={cn('border-b border-[var(--tp-border)] last:border-0', className)}>
@@ -80,7 +80,7 @@ export function Td({
   className,
 }: {
   children: React.ReactNode;
-  className?: string;
+  className?: string | undefined;
 }) {
   return <td className={cn('py-3 pr-4 align-top', className)}>{children}</td>;
 }
