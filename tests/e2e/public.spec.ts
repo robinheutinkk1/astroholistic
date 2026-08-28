@@ -143,6 +143,23 @@ test.describe('the NFC landing page tells an anonymous visitor nothing', () => {
   });
 });
 
+test.describe('the health endpoint', () => {
+  test('answers without leaking anything', async ({ request }) => {
+    const response = await request.get('/api/health');
+
+    // Either state is a valid answer; what matters is the shape. In this
+    // environment there is no reachable Supabase, so 503 is expected.
+    expect([200, 503]).toContain(response.status());
+    expect(response.headers()['cache-control']).toContain('no-store');
+
+    const body: unknown = await response.json();
+    // Exactly two fields, both of which a stranger may know. A health check
+    // that helpfully reports "relation X does not exist" is a free schema dump.
+    expect(Object.keys(body as object).sort()).toEqual(['database', 'status']);
+    expect(JSON.stringify(body)).not.toMatch(/supabase|postgres|relation|error/i);
+  });
+});
+
 test.describe('routing for a signed-out visitor', () => {
   test('a protected page redirects to login and remembers where you were going', async ({
     page,

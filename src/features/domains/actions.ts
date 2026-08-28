@@ -9,7 +9,21 @@ const CONTEXT = 'domain action';
 const PATH = '/instellingen/domeinen';
 
 const VERIFY_MESSAGES: Record<service.VerifyResult['status'], FormState> = {
-  VERIFIED: { status: 'success', message: 'De domeinnaam is geverifieerd.' },
+  VERIFIED: {
+    status: 'success',
+    message:
+      'De domeinnaam is geverifieerd en staat klaar. Dit kan een paar minuten duren.',
+  },
+  VERIFIED_MANUAL: {
+    status: 'success',
+    message:
+      'De domeinnaam is geverifieerd. Hij wordt door TagPoint aangezet zodra het certificaat klaar is; u hoeft verder niets te doen.',
+  },
+  VERIFIED_NOT_ATTACHED: {
+    status: 'success',
+    message:
+      'De domeinnaam is geverifieerd, maar het aanzetten bij de hosting is nog niet gelukt. Wij pakken dit op; probeer het over een uur opnieuw als hij dan nog niet werkt.',
+  },
   NO_RECORD: {
     status: 'error',
     message:

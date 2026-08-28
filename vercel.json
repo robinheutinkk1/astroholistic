@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/cron/generate-rides",
+      "path": "/api/cron/nightly",
       "schedule": "0 2 * * *"
     }
   ]

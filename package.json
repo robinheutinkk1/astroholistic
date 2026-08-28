@@ -10,6 +10,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "typegen": "next typegen",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
@@ -22,7 +23,7 @@
     "db:reset": "supabase db reset",
     "db:types": "supabase gen types typescript --local > src/types/database.ts.tmp && mv src/types/database.ts.tmp src/types/database.ts",
     "db:test": "supabase test db",
-    "verify": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run build",
+    "verify": "npm run format:check && npm run typegen && npm run lint && npm run typecheck && npm run test && npm run build",
     "db:local": "bash scripts/local-postgres.sh start",
     "db:local:stop": "bash scripts/local-postgres.sh stop",
     "db:local:reset": "bash scripts/local-postgres.sh reset",
@@ -32,7 +33,9 @@
     "test:security": "vitest run --config vitest.security.config.mts",
     "test:e2e": "playwright test",
     "test:e2e:public": "playwright test tests/e2e/public.spec.ts",
-    "perf": "node scripts/volume-test.mjs"
+    "perf": "node scripts/volume-test.mjs",
+    "check:env": "node scripts/check-env.mjs",
+    "check:env:production": "node scripts/check-env.mjs --production"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

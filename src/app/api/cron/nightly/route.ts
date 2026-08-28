@@ -14,6 +14,10 @@ import { generateRidesForOrganization } from '@/features/ride-templates/generati
 /**
  * The nightly job: ride generation, the retention sweep and housekeeping.
  *
+ * Named `nightly`, not `generate-rides`: it stopped being only about rides in
+ * fase 12, and an endpoint whose name lies is a bad thing to meet at three in
+ * the morning.
+ *
  * Runs for every active organisation. It is idempotent, so a retried or
  * double-fired schedule is harmless — that property is what makes an unattended
  * job safe to run at all.

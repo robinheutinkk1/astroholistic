@@ -621,11 +621,50 @@ Docker-images zijn in deze omgeving geblokkeerd. Ze draaien zodra
 `npm run db:start` werkt. Een overgeslagen test die uitlegt waarom is eerlijk;
 een falende test die iedereen leert negeren is erger dan geen test.
 
-## Fase 14 — Deployment
+## Fase 14 — Deployment ✅ afgerond
 
-Vercel-productieproject; Supabase-productieproject; migrations; auth-redirect-
-URL's; domeinen; PWA-verificatie op echte toestellen; monitoring en alerting;
-`DEPLOYMENT.md` en `DEVELOPMENT.md`.
+Opgeleverd:
+
+- `docs/DEPLOYMENT.md`: van leeg account naar productie, met per stap een
+  controle, een rookproef, monitoring, back-up, terugdraaien en een eerlijke
+  lijst van wat er nog niet is
+- `/api/health` voor monitoring: bewijst de hele keten tot en met onze eigen
+  migraties, zonder iets prijs te geven
+- `npm run check:env:production`: weigert onder andere een service-role key in
+  een `NEXT_PUBLIC_`-variabele
+- `DomainProvider` als naad: een Vercel-implementatie plus een handmatige
+  standaard die zichtbaar zegt dat er nog een stap open staat
+- De nachtelijke cronroute heet nu `/api/cron/nightly` in plaats van
+  `generate-rides` — hij doet sinds fase 12 drie dingen
+
+_Verificatie:_ `npm run verify` groen (278 tests, +7),
+`npm run test:security` groen (345 tests).
+
+**CI heeft nog nooit gedraaid.** De workflow triggert op `main`, `develop` en
+pull requests, en er is alleen naar een featurebranch gepusht zonder PR. Dat
+verklaart waarom de kapotte seedstap uit fase 13 zo lang onopgemerkt bleef — en
+het legde in deze fase een tweede probleem bloot: op een schone checkout draait
+`npm run lint` vóór `npm run build`, en zonder `.next/types` valt Next's `Route`
+terug op `string`, waardoor elke `as Route`-cast als overbodig wordt gemeld en
+lint faalt. Een ontwikkelaar ziet dat nooit, want diens `.next` is warm.
+Opgelost met een `typegen`-stap vóór lint, in `verify` en in CI.
+
+**De preflightcontrole vangt wat runtimevalidatie niet kan zien.** Een
+service-role key in `NEXT_PUBLIC_SUPABASE_ANON_KEY` is een op zichzelf geldige
+waarde; alleen de rol in het token verraadt hem. Staat hij daar, dan wordt de
+sleutel die álle RLS omzeilt in de browserbundle gecompileerd.
+
+**De domeinkoppeling zit achter een interface.** Bewijzen dat een klant een
+domein bezit is ons probleem en dat is opgelost; er een certificaat voor krijgen
+is dat van de hostingpartij, en die keuze staat nog open (D-23). Zonder
+configuratie is de uitkomst `MANUAL` en niet stilzwijgend niets — een domein dat
+verifieert en daarna niets serveert is de slechtste van de drie uitkomsten.
+
+**Niet gedaan, en dat kan hier ook niet:** er is niet echt gedeployd. Er is geen
+Vercel-account, geen Supabase-productieproject en geen DNS-toegang in deze
+omgeving. Wat er ligt is de handleiding, de controles en de code die het
+mogelijk maakt; de eerste echte deploy is jouw stap, met `docs/DEPLOYMENT.md`
+ernaast.
 
 ---
 

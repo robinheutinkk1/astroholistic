@@ -4,9 +4,13 @@ Multi-tenant SaaS-platform voor vervoersbedrijven: cliëntenbeheer, terugkerende
 ritplanning, dispatching, een chauffeurs-PWA met NFC/QR check-in, en portalen
 voor cliënten, contactpersonen en opdrachtgevers.
 
-> **Status: Fase 9 afgerond** — de portalen voor cliënt, ouder en opdrachtgever
-> werken, inclusief wijzigingsverzoeken. `npm run verify` groen (174 tests),
-> `npm run test:security` groen (227 tests). White label volgt in Fase 10.
+> **Status: alle veertien fasen afgerond.** Het platform is functioneel
+> compleet en gedocumenteerd; wat er nog niet is, staat expliciet in
+> [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) §14 en
+> [`docs/SECURITY_AUDIT.md`](docs/SECURITY_AUDIT.md).
+>
+> `npm run verify` groen (278 tests) · `npm run test:security` groen (345 tests)
+> · `npm run test:e2e` 22 geslaagd, 12 overgeslagen zonder authenticatiedienst.
 
 ## Documentatie
 
@@ -20,8 +24,13 @@ voor cliënten, contactpersonen en opdrachtgevers.
 | [`docs/NFC.md`](docs/NFC.md)                                     | TagPoint tag/QR-ontwerp en check-in flow                |
 | [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md)     | Fasering en Definition of Done                          |
 | [`docs/RISKS_AND_DECISIONS.md`](docs/RISKS_AND_DECISIONS.md)     | **Openstaande beslispunten en aannames**                |
+| [`docs/SECURITY_AUDIT.md`](docs/SECURITY_AUDIT.md)               | Beveiligingsaudit met bevindingen en openstaande gaten  |
+| [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)                       | Van leeg account naar productie, met rookproef          |
+| [`docs/LOKAAL_DRAAIEN.md`](docs/LOKAAL_DRAAIEN.md)               | Stap voor stap draaien op je eigen pc                   |
+| [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md)                     | Werkwijze, codeconventies, teststrategie                |
 
-`DEPLOYMENT.md` volgt in Fase 14.
+Begin bij `RISKS_AND_DECISIONS.md` als je wilt weten waar keuzes zijn gemaakt
+die jou aangaan — en welke vragen nog openstaan.
 
 ## Kernpunten
 
@@ -38,6 +47,12 @@ voor cliënten, contactpersonen en opdrachtgevers.
   busrit met één stop: de chauffeur drukt één keer op "aangekomen" en checkt
   daarna iedereen in. Capaciteit wordt getoetst op piekbezetting, niet op
   hoofdental.
+- **White label.** Elke organisatie heeft een eigen naam, logo, kleuren en
+  desgewenst een eigen domeinnaam — zichtbaar vóór het inloggen, ook voor een
+  ouder die een link kreeg.
+- **Support kan niets zien.** Medewerkers van het platform hebben geen toegang
+  tot klantgegevens. De organisatie geeft die zelf tijdelijk, alleen-lezen, en
+  ziet in haar eigen logboek wat er gebeurd is.
 
 ## Techniek
 
@@ -55,9 +70,15 @@ ontwikkelen of te testen — de CLI draait de hele stack lokaal.
 ```bash
 npm install
 cp .env.example .env.local
-npm run dev        # http://localhost:3000
-npm run verify     # format, lint, typecheck, test, build — hetzelfde als CI
+npm run dev              # http://localhost:3000
+npm run verify           # format, typegen, lint, typecheck, test, build — als CI
+npm run test:security    # tenant-isolatie, tegen een lokale PostgreSQL
+npm run test:e2e         # end-to-end in een echte browser
+npm run perf             # volumetest — WIST de lokale database
 ```
+
+Deployen? [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md), en draai
+`npm run check:env:production` voordat je iets aanzet.
 
 Zie [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) voor de rest.
 

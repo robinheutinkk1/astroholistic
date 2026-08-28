@@ -7,6 +7,7 @@ import { err, ok, type Result } from '@/lib/result/result';
 import { checkHostname, HOSTNAME_MESSAGES } from './hostname';
 import * as repository from './repository';
 import { nodeTxtResolver } from './dns';
+import { getDomainProvider } from './provider-config';
 import { checkDomainToken, type TxtResolver } from './verify';
 import { markFailed, markVerified } from './verification-store';
 
@@ -54,6 +55,10 @@ export async function addDomain(
 
 export type VerifyResult =
   | { readonly status: 'VERIFIED' }
+  /** Verified, but the hosting platform still needs a manual step (D-23). */
+  | { readonly status: 'VERIFIED_MANUAL' }
+  /** Verified, but attaching it at the hosting platform failed. */
+  | { readonly status: 'VERIFIED_NOT_ATTACHED' }
   | { readonly status: 'NO_RECORD' }
   | { readonly status: 'TOKEN_MISMATCH' }
   | { readonly status: 'TAKEN' };
@@ -104,6 +109,22 @@ export async function verifyDomain(
     entityType: 'organization_domains',
     entityId: domainId,
   });
+
+  // Ownership is proven and recorded. Attaching the hostname to the hosting
+  // platform is a separate concern that may not be configured at all, and it
+  // must not undo the verification if it fails — the DNS proof is still valid
+  // and retrying costs nothing.
+  const attached = await getDomainProvider().attach(domain.hostname);
+
+  if (attached.status === 'MANUAL') return ok({ status: 'VERIFIED_MANUAL' });
+  if (attached.status === 'FAILED') {
+    console.error('Domain verified but not attached at the hosting platform', {
+      organizationId,
+      domainId,
+      reason: attached.reason,
+    });
+    return ok({ status: 'VERIFIED_NOT_ATTACHED' });
+  }
 
   return ok({ status: 'VERIFIED' });
 }

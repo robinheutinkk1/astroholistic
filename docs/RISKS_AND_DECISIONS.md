@@ -624,6 +624,40 @@ reden die niets met de code te maken heeft.
 databaseniveau) en door unittests (op logicaniveau), niet door een klik-door-de-
 applicatie-test. Dat gat sluit zodra `npm run db:start` ergens draait.
 
+### D-32 — De koppeling met de hostingpartij zit achter een interface
+**Impact: deployment, leveranciersafhankelijkheid**
+
+Bewijzen dat een organisatie een domeinnaam bezit is ons probleem, en dat is
+opgelost met een DNS-TXT-record. Een TLS-certificaat voor dat domein krijgen is
+het probleem van de hostingpartij, en daar zijn twee plausibele antwoorden met
+totaal verschillende code (D-23). Die keuze mag niet in de verificatielogica
+lekken.
+
+`verifyDomain()` roept daarom `attachDomain()` aan en weet verder van niets. Er
+is een Vercel-implementatie en een handmatige standaard.
+
+*Het risico dat je moet kennen:* zonder `VERCEL_API_TOKEN` en
+`VERCEL_PROJECT_ID` verifieert een domein wél maar wordt het niet aangezet. Dat
+is bewust zichtbaar — de organisatie krijgt te lezen dat TagPoint het domein
+aanzet — maar het is dan wel iemands taak om dat ook te doen. Zet die twee
+variabelen, of maak er een vast onderdeel van je aanmeldproces van.
+
+### D-33 — CI heeft nog nooit gedraaid
+**Impact: kwaliteitsbewaking**
+
+De workflow triggert op `main`, `develop` en pull requests. Er is alleen naar
+`claude/tagpoint-taxi-dispatch-d69dpb` gepusht, zonder PR. Alles wat "CI moet
+groen zijn" in deze documenten belooft, is tot nu toe lokaal gecontroleerd en
+nooit door de pipeline zelf.
+
+Dat is niet theoretisch gebleven: twee fouten die CI had moeten vangen, zijn
+langs geglipt tot ze handmatig gevonden werden — een seedbestand dat niet meer
+bestond (fase 13) en een lintstap die faalt op een schone checkout (fase 14).
+
+*Wat je moet doen:* open een pull request naar `main` of `develop`, of voeg
+`claude/**` toe aan de `push`-trigger. Zolang dat niet gebeurt is de
+merge-blokkade op de securitysuite een afspraak, geen mechanisme.
+
 ## Openstaande vragen aan jou
 
 1. ~~Bestaat er al een Supabase-project?~~ **Beantwoord: nee.** Zie hierboven.
@@ -634,6 +668,9 @@ applicatie-test. Dat gat sluit zodra `npm run db:start` ergens draait.
 4. ~~**Domeinen:** is `tagpoint.nl` in bezit en waar staat de DNS?~~
    **Beantwoord: in eigen bezit, DNS bij Strato.** Zie D-23 hieronder voor wat
    dat wel en niet bepaalt.
-5. **Moeten chauffeurs offline kunnen werken?** Het datamodel (`occurred_at`
+5. **Wie doet de eerste deploy, en wanneer?** `docs/DEPLOYMENT.md` staat klaar,
+   maar er is in deze omgeving geen Vercel-account, geen Supabase-productie-
+   project en geen DNS-toegang. De eerste echte deploy is een stap die jij zet.
+6. **Moeten chauffeurs offline kunnen werken?** Het datamodel (`occurred_at`
    los van `recorded_at`) ondersteunt het al, maar een offline-queue in de PWA
    is substantieel extra werk en hoort dan nu in de planning.

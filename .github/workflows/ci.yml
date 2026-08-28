@@ -27,6 +27,13 @@ jobs:
       - name: Format
         run: npm run format:check
 
+      # Before lint and typecheck, not after. Next's typed routes are generated
+      # into .next/types, and without them `Route` falls back to `string` — so
+      # every `as Route` cast reads as unnecessary and lint fails on a clean
+      # checkout. A developer never sees it because their .next is warm.
+      - name: Generate route types
+        run: npm run typegen
+
       - name: Lint
         run: npm run lint
 
