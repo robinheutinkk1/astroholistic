@@ -290,6 +290,22 @@ waarde van de tags. Daarom legt `rides.checked_in_method` en
 verschil. Zo kan een organisatie zien of de tags daadwerkelijk gebruikt worden
 in plaats van dat aan te nemen.
 
+### D-19 — Chauffeurs bereiken een rit via de toewijzing, niet via de cliënt
+**Impact: privacy, chauffeursscherm**
+
+Gevonden tijdens Fase 8. "Welke cliënten mag ik zien" en "welke ritten mag ik
+volgen" gebruikten dezelfde regel. Een chauffeur die Jan om 08:00 rijdt, zag
+daardoor óók de groepsrit van 16:00 die een collega rijdt.
+
+Dat is meer dan een schoonheidsfoutje: het toont andermans planning én het
+volledige dagpatroon van een cliënt — waar iemand elke dag is en wanneer hij
+niet thuis is. `SECURITY.md` §1 noemt dat net zo gevoelig als het adres.
+
+Nu gescheiden in twee regels. Een chauffeur ziet de cliënt van zijn eigen rit
+(nodig om hem op te halen), maar bereikt een rit uitsluitend via de toewijzing.
+Portalen zijn ongewijzigd: een ouder volgt de cliënt en ziet dus wél beide
+ritten van zijn kind.
+
 ### D-14 — Offline werken voor chauffeurs: niet in V1
 **Impact: scope, chauffeurs-PWA**
 

@@ -339,10 +339,50 @@ plaatsing of masking zichtbaar wordt in CI in plaats van pas op een telefoon —
 al blijft een echte camera de enige manier om contrast en printkwaliteit te
 bevestigen.
 
-## Fase 8 — Realtime dispatch
+## Fase 8 — Realtime dispatch ✅ afgerond
 
-Dispatchscherm met live statussen; `useRideStream`-hook; gedebouncede
-dashboardtellers; probleemsignalering.
+Opgeleverd:
+
+- Dispatchbord met de kolommen uit §29: probleem, wacht op vertrek, onderweg
+  naar cliënt, wacht op cliënt, onderweg met cliënt, afgerond, niet gereden
+- "Vraagt aandacht": problemen, chauffeurs die te lang voor de deur staan, en
+  ritten waarvan de vertrektijd verstreken is zonder dat er iets beweegt
+- Live bijwerken via Supabase Realtime, achter één hook (`useRideStream`)
+- Dashboardcijfers werken zichzelf bij, ruimer gedebounced
+- Zichtbare verbindingsindicator met terugval op polling
+
+_Verificatie:_ `npm run verify` groen (174 tests), `npm run test:security` groen
+(205 tests).
+
+**Realtime signaleert, het levert geen data.** De hook zegt "er is iets
+veranderd" en de pagina haalt opnieuw op bij de server. De alternatieve aanpak —
+rijen uit de socket in React-state patchen — vraagt dezelfde joins die de server
+al doet (cliëntnaam, locaties, chauffeur), en die in de browser opnieuw afleiden
+is precies hoe twee versies van hetzelfde scherm uit elkaar gaan lopen.
+
+**Een bord dat stilletjes stopt met bijwerken is erger dan een bord dat nooit
+beweerde live te zijn.** De indicator toont de verbindingsstatus en het tijdstip
+van de laatste wijziging; valt de verbinding weg, dan gaat het scherm over op
+ververen elke 30 seconden en zegt dat er ook bij.
+
+**Alleen ritten, ritgebeurtenissen en groepsritten worden gepubliceerd.**
+Cliënten of chauffeurs publiceren zou persoonsgegevens naar elk open bord
+streamen voor wijzigingen waar niemand op wacht. Een test bewaakt dat.
+
+**Een echt lek dat de eigen test vond.** De test "een chauffeur ziet alleen zijn
+eigen ritten" gaf er twee terug. Oorzaak: "welke cliënten mag ik zien" en
+"welke ritten mag ik volgen" gebruikten dezelfde helper. Chauffeur Kees rijdt
+Jan om 08:00 — daardoor werd Jan zichtbaar voor Kees, wat klopt. Maar het toonde
+hem óók de groepsrit van 16:00 die een collega rijdt: andermans planning én
+Jans volledige dagpatroon, dat `SECURITY.md` §1 net zo gevoelig noemt als een
+adres. Nu zijn het twee helpers, en bereikt een chauffeur een rit uitsluitend
+via de toewijzing (migration 0020).
+
+**Wat hier niet getest kon worden:** de levering zelf. Supabase Realtime is een
+aparte dienst die het replicatielogboek leest en per abonnee RLS herbeoordeelt;
+die heeft de Docker-stack nodig. Wél getest is alles waar hij van afhangt: wat
+er gepubliceerd wordt, of die tabellen RLS aan hebben, en of de policies die hij
+raadpleegt de organisaties daadwerkelijk scheiden.
 
 ## Fase 9 — Portalen
 

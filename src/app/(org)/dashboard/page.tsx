@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { LoadingState } from '@/components/ui/states';
+import { LiveCounters } from '@/features/dashboard/components/live-counters';
 import { StatCard } from '@/features/dashboard/components/stat-card';
 import { getFleetCounts, getTodayCounts } from '@/features/dashboard/service';
 import { getActiveMembership } from '@/features/organizations/active-organization';
@@ -90,6 +91,8 @@ export default async function DashboardPage() {
 
       {canSeeRides ? (
         <section className="flex flex-col gap-3">
+          {/* Renders nothing; subscribes so the figures refresh themselves. */}
+          <LiveCounters organizationId={membership.organizationId} />
           <h2 className="text-sm font-medium">Vandaag</h2>
           {/* Suspense per section: the fleet counts render immediately even if
               the ride counts are slower, instead of the page waiting for both. */}

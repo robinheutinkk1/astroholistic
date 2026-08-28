@@ -4,10 +4,9 @@ Multi-tenant SaaS-platform voor vervoersbedrijven: cliëntenbeheer, terugkerende
 ritplanning, dispatching, een chauffeurs-PWA met NFC/QR check-in, en portalen
 voor cliënten, contactpersonen en opdrachtgevers.
 
-> **Status: Fase 7 afgerond** — NFC en QR werken: tags aanmaken, koppelen,
-> scannen en inchecken. `npm run verify` groen (158 tests),
-> `npm run test:security` groen (187 tests).
-> Realtime dispatch volgt in Fase 8.
+> **Status: Fase 8 afgerond** — het dispatchbord werkt en werkt zichzelf live
+> bij. `npm run verify` groen (174 tests), `npm run test:security` groen
+> (205 tests). De portalen voor cliënt, ouder en opdrachtgever volgen in Fase 9.
 
 ## Documentatie
 

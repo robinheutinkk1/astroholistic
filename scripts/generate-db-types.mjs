@@ -89,7 +89,10 @@ function parseArgs(signature) {
   return signature.split(',').map((raw) => {
     const part = raw.trim();
     const optional = / DEFAULT /i.test(part);
-    const [name, ...rest] = part.replace(/ DEFAULT .*/i, '').trim().split(/\s+/);
+    const [name, ...rest] = part
+      .replace(/ DEFAULT .*/i, '')
+      .trim()
+      .split(/\s+/);
     return { name, optional, type: mapUdt(rest.join(' ').replace(/\[\]$/, '')) };
   });
 }
