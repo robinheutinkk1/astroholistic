@@ -1,18 +1,16 @@
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { LoadingState } from '@/components/ui/states';
 import { LiveCounters } from '@/features/dashboard/components/live-counters';
 import { StatCard } from '@/features/dashboard/components/stat-card';
-import { getFleetCounts, getTodayCounts } from '@/features/dashboard/service';
+import {
+  getFleetCounts,
+  getSetupCounts,
+  getTodayCounts,
+} from '@/features/dashboard/service';
+import { GettingStarted } from '@/features/dashboard/components/getting-started';
+import { type Permission } from '@/features/rbac/permissions';
 import { getActiveMembership } from '@/features/organizations/active-organization';
 import { getCurrentUser } from '@/features/rbac/session';
 import { createClient } from '@/lib/supabase/server';
@@ -112,29 +110,70 @@ export default async function DashboardPage() {
         </Suspense>
       </section>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Wat er nog niet is</CardTitle>
-          <CardDescription>
-            Ritplanning en dispatch volgen in de volgende fase. Tot die tijd zijn de
-            cijfers hierboven gebaseerd op ritten die al in de database staan.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-wrap gap-3 text-sm">
-          <Link href="/clienten" className="underline underline-offset-4">
-            Cliënten beheren
-          </Link>
-          <Link href="/chauffeurs" className="underline underline-offset-4">
-            Chauffeurs
-          </Link>
-          <Link href="/voertuigen" className="underline underline-offset-4">
-            Voertuigen
-          </Link>
-          <Link href="/locaties" className="underline underline-offset-4">
-            Locaties
-          </Link>
-        </CardContent>
-      </Card>
+      <Suspense fallback={null}>
+        <SetupChecklist
+          organizationId={membership.organizationId}
+          permissions={membership.permissions}
+        />
+      </Suspense>
     </div>
+  );
+}
+
+/**
+ * De startchecklist, met de tellingen die hij nodig heeft.
+ *
+ * In een eigen Suspense-grens, zodat de cijfers bovenaan het scherm niet hoeven
+ * te wachten op een kaart die in een ingerichte organisatie toch niets toont.
+ */
+async function SetupChecklist({
+  organizationId,
+  permissions,
+}: {
+  organizationId: string;
+  permissions: ReadonlySet<Permission>;
+}) {
+  const counts = await getSetupCounts(organizationId);
+
+  return (
+    <GettingStarted
+      steps={[
+        {
+          label: 'Voeg locaties toe',
+          description: 'Woonadressen, dagbestedingen en scholen waar u rijdt.',
+          href: '/locaties/nieuw',
+          done: counts.locations > 0,
+          visible: permissions.has('locations.manage'),
+        },
+        {
+          label: 'Voeg cliënten toe',
+          description: 'De mensen die u vervoert.',
+          href: '/clienten/nieuw',
+          done: counts.clients > 0,
+          visible: permissions.has('clients.create'),
+        },
+        {
+          label: 'Voeg chauffeurs toe',
+          description: 'Wie er rijdt, en welk account daarbij hoort.',
+          href: '/chauffeurs/nieuw',
+          done: counts.drivers > 0,
+          visible: permissions.has('drivers.manage'),
+        },
+        {
+          label: 'Voeg voertuigen toe',
+          description: 'Met het aantal zitplaatsen en rolstoelplekken.',
+          href: '/voertuigen/nieuw',
+          done: counts.vehicles > 0,
+          visible: permissions.has('vehicles.manage'),
+        },
+        {
+          label: 'Zet een terugkerende afspraak klaar',
+          description: 'Dagelijks vervoer plant zichzelf daarna vooruit.',
+          href: '/terugkerend/nieuw',
+          done: counts.templates > 0,
+          visible: permissions.has('ride_templates.manage'),
+        },
+      ]}
+    />
   );
 }

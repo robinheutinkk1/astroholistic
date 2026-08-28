@@ -103,3 +103,46 @@ export async function getFleetCounts(organizationId: string): Promise<FleetCount
     vehicles: vehicles.count ?? 0,
   };
 }
+
+export interface SetupCounts {
+  readonly locations: number;
+  readonly clients: number;
+  readonly drivers: number;
+  readonly vehicles: number;
+  readonly templates: number;
+}
+
+/**
+ * Hoe ver een organisatie is met inrichten.
+ *
+ * Alleen tellingen met `head: true`, dus vijf goedkope queries en geen rijen
+ * over de lijn. De vraag is per stap ook maar "bestaat er één", niet "hoeveel".
+ */
+export async function getSetupCounts(organizationId: string): Promise<SetupCounts> {
+  const supabase = await createClient();
+
+  const count = (
+    table: 'locations' | 'clients' | 'drivers' | 'vehicles' | 'ride_templates',
+  ) =>
+    supabase
+      .from(table)
+      .select('id', { count: 'exact', head: true })
+      .eq('organization_id', organizationId)
+      .is('deleted_at', null);
+
+  const [locations, clients, drivers, vehicles, templates] = await Promise.all([
+    count('locations'),
+    count('clients'),
+    count('drivers'),
+    count('vehicles'),
+    count('ride_templates'),
+  ]);
+
+  return {
+    locations: locations.count ?? 0,
+    clients: clients.count ?? 0,
+    drivers: drivers.count ?? 0,
+    vehicles: vehicles.count ?? 0,
+    templates: templates.count ?? 0,
+  };
+}
