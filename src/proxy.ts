@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { publicEnv } from '@/lib/env';
+import { buildCsp, generateNonce } from '@/lib/security/csp';
 
 /**
  * Proxy (formerly "middleware") refreshes the Supabase session cookie and
@@ -36,7 +37,23 @@ function isPublicPath(pathname: string): boolean {
 }
 
 export async function proxy(request: NextRequest) {
-  let response = NextResponse.next({ request });
+  // The nonce goes onto the *request* headers before Next renders, which is how
+  // Next learns to stamp it on its own inline bootstrap script, and onto the
+  // response header so the browser accepts that script. Both halves are
+  // required; either one alone produces a blank page.
+  const nonce = generateNonce();
+  const csp = buildCsp({
+    nonce,
+    supabaseUrl: publicEnv.NEXT_PUBLIC_SUPABASE_URL,
+    development: process.env.NODE_ENV !== 'production',
+  });
+
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-nonce', nonce);
+  requestHeaders.set('content-security-policy', csp);
+
+  let response = NextResponse.next({ request: { headers: requestHeaders } });
+  response.headers.set('content-security-policy', csp);
 
   const supabase = createServerClient(
     publicEnv.NEXT_PUBLIC_SUPABASE_URL,
@@ -50,7 +67,8 @@ export async function proxy(request: NextRequest) {
           for (const { name, value } of cookiesToSet) {
             request.cookies.set(name, value);
           }
-          response = NextResponse.next({ request });
+          response = NextResponse.next({ request: { headers: requestHeaders } });
+          response.headers.set('content-security-policy', csp);
           for (const { name, value, options } of cookiesToSet) {
             response.cookies.set(name, value, options);
           }
@@ -68,7 +86,9 @@ export async function proxy(request: NextRequest) {
   if (!user && !isPublicPath(request.nextUrl.pathname)) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('next', request.nextUrl.pathname);
-    return NextResponse.redirect(loginUrl);
+    const redirect = NextResponse.redirect(loginUrl);
+    redirect.headers.set('content-security-policy', csp);
+    return redirect;
   }
 
   return response;

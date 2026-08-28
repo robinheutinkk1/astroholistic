@@ -151,7 +151,13 @@ const { rows: functions } = await client.query(`
   join pg_namespace n on n.oid = p.pronamespace
   where n.nspname = 'public'
     and p.prokind = 'f'
-    and has_function_privilege('authenticated', p.oid, 'execute')
+    -- service_role too, not just authenticated: some RPCs are deliberately
+    -- reachable only by the server (the rate limiter), and the admin client is
+    -- typed with this same Database type.
+    and (
+      has_function_privilege('authenticated', p.oid, 'execute')
+      or has_function_privilege('service_role', p.oid, 'execute')
+    )
     -- Extension-owned functions (pgcrypto, citext, ...) are not ours to type,
     -- and their overloads would collide on name.
     and not exists (

@@ -57,7 +57,12 @@ export type AuditAction =
   | 'domain.verification_failed'
   | 'domain.removed'
   | 'domain.primary_changed'
-  | 'report.exported';
+  | 'report.exported'
+  | 'support.granted'
+  | 'support.revoked'
+  | 'client.exported'
+  | 'client.anonymized'
+  | 'retention.applied';
 
 export interface AuditEntry {
   readonly organizationId: string;

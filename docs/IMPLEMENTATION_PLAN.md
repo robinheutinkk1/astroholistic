@@ -517,12 +517,54 @@ Zie D-25 — dat is een gezondheidsdossier via de achterdeur.
 **Niet lokaal te testen:** niets van deze fase. Alles draait tegen de lokale
 database, inclusief de export.
 
-## Fase 12 — Hardening
+## Fase 12 — Hardening ✅ afgerond
 
-Volledige beveiligingsaudit langs `SECURITY.md` §2; `support_access_grants`;
-GDPR-export en -erasurepad; bewaartermijnen; security headers en CSP;
-rate limiting overal; dependency-audit; penetratietest van de
-tenant-isolatiegrens.
+Opgeleverd:
+
+- Content-Security-Policy met een nonce per request, gezet in `src/proxy.ts`;
+  extra headers (`X-Robots-Tag`, `Cross-Origin-Opener-Policy`)
+- Rate limiting in de database, per adres én per account, op inloggen,
+  wachtwoordherstel, portaalverzoeken en exports
+- Support-toegang werkt echt: twee scopes, tijdgebonden, alleen-lezen, door de
+  tenant zelf verleend en ingetrokken, met een scherm op
+  `/instellingen/support`
+- AVG-export (art. 15/20) en wissen (art. 17) per cliënt, op de cliëntpagina
+- Bewaartermijnen per organisatie, standaard uit, uitgevoerd door de
+  nachtelijke job
+- Migraties 0023–0026; `docs/SECURITY_AUDIT.md` met de audit langs T1–T26
+
+_Verificatie:_ `npm run verify` groen (271 tests), `npm run test:security` groen
+(334 tests, waarvan 43 nieuw). Acht mutatietests uitgevoerd. `npm audit`:
+0 kwetsbaarheden.
+
+**Vier bevindingen, waarvan drie echte bugs.** Ze staan uitgewerkt in
+`docs/SECURITY_AUDIT.md`; kort:
+
+1. Een chauffeur kon een volledig cliëntdossier exporteren. RLS liet hem door,
+   want een chauffeur mag de cliënt van zijn eigen rit lezen. Mogen zien wie je
+   ophaalt is niet hetzelfde als het dossier mogen downloaden.
+2. Twee policies verwezen naar elkaar en veroorzaakten oneindige recursie —
+   alleen voor de rol waarvoor ze geschreven waren, want voor iedereen mét het
+   recht sloot de eerste tak kort.
+3. Tabellen die ná migratie 0010 zijn aangemaakt kregen geen grants. `grant on
+   all tables` is een momentopname.
+4. De CSP bestond alleen in een comment.
+
+**En één die ik zelf maakte.** Migratie 0024 moest `vehicles_select` droppen en
+opnieuw aanmaken om er één regel aan toe te voegen; de eerste versie verloor de
+clausule waarmee een chauffeur het voertuig van zijn eigen rit ziet. Geen enkele
+test ving dat op. Nu wel (S46).
+
+**Support is alleen-lezen en in twee maten.** Eén grant "support ziet alles"
+betekent dat een engineer het huisadres van een kind leest om een planningsbug
+te vinden. Eén grant "support ziet niets persoonlijks" betekent dat het ticket
+"er wordt een verkeerd adres gebruikt voor Jan" onbeantwoordbaar is. De tenant
+kiest per keer; de kleinste optie is de standaard.
+
+**Wat er niet is:** een geautomatiseerde test op de rate limiter (die draait via
+de service-role-client, de suite praat rechtstreeks met PostgreSQL), en een
+penetratietest door een derde. Beide staan in `docs/SECURITY_AUDIT.md` onder
+"Wat nog niet af is".
 
 ## Fase 13 — Testen en stabilisatie
 

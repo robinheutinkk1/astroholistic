@@ -1,6 +1,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { requireUser } from '@/features/rbac/session';
+import { consumeForUser } from '@/lib/security/rate-limit';
 import { z } from 'zod';
 import { getActiveMembership } from '@/features/organizations/active-organization';
 import {
@@ -40,6 +42,18 @@ export async function submitRequestAction(
     note: formData.get('note'),
   });
   if (!parsed.success) return fromValidationIssues(parsed.error.flatten().fieldErrors);
+
+  // Keyed on the user, not the address: a parent and a care co-ordinator often
+  // sit behind the same office NAT, and one of them filing absences should not
+  // silence the other.
+  const user = await requireUser();
+  if (!(await consumeForUser('portal-write', user.id))) {
+    return {
+      status: 'error',
+      message:
+        'Er zijn in korte tijd veel verzoeken vanaf dit account verstuurd. Probeer het later opnieuw of bel de vervoerder.',
+    };
+  }
 
   try {
     const result = await portalService.submitRequest(parsed.data);

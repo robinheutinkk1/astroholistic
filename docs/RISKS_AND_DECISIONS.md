@@ -522,6 +522,68 @@ Twee dingen die de cijfers beïnvloeden en die je moet weten:
   laat. Dat is een reden te meer om geen beoordeling aan deze cijfers te hangen
   (D-24).
 
+### D-27 — Support-toegang kent twee maten, en de tenant kiest
+**Impact: privacy, support, D-02**
+
+D-02 stelde support-grants uit. Fase 12 maakt ze echt, met een keuze erin.
+
+Eén enkele grant zou hoe dan ook verkeerd zijn. "Support ziet alles" betekent
+dat een engineer het huisadres van een kind leest om een planningsbug op te
+lossen. "Support ziet niets persoonlijks" betekent dat het ticket "er wordt een
+verkeerd adres gebruikt voor Jan" niet te beantwoorden is. Daarom kiest de
+organisatie per keer tussen `OPERATIONAL` (ritten, gebeurtenissen, vloot,
+instellingen) en `PERSONAL` (ook cliënt- en contactgegevens). De kleinste staat
+voorgeselecteerd.
+
+Verder: alleen-lezen, tijdgebonden met een korte lijst duren in plaats van een
+datumkiezer, in te trekken, en elke verlening staat in de audit trail met de
+opgegeven reden.
+
+*Het risico dat je moet kennen:* een grant is een momentopname van vertrouwen.
+Wie hem eenmaal heeft, kan gedurende die uren alles lezen wat binnen de scope
+valt — er is geen controle per record en geen "support keek naar deze cliënt"-
+regel per inzage. Wil je dat, dan is dat een aparte bouwstap (toegangslogging op
+leesniveau) met een merkbare prestatieprijs.
+
+### D-28 — Automatisch anonimiseren staat standaard uit
+**Impact: AVG, vertrouwen**
+
+`retention_policies.auto_anonymize_enabled` is `false` bij een nieuwe
+organisatie. Een product dat vanzelf begint met het wissen van gegevens van een
+klant die daar nooit voor koos, heeft een beslissing voor hen genomen die niet
+terug te draaien is.
+
+De keerzijde is even eerlijk: een organisatie die de schakelaar nooit aanzet,
+bewaart persoonsgegevens langer dan de AVG toestaat, en zij zijn daarvoor
+verantwoordelijk — niet wij. Het scherm zegt dat, maar een zin op een scherm is
+geen naleving.
+
+*Overweeg later:* een melding wanneer er cliënten zijn die langer dan de
+ingestelde termijn inactief zijn terwijl de automaat uit staat. Dat maakt de
+keuze zichtbaar zonder hem voor hen te maken.
+
+### D-29 — Rate limiting staat in de database, niet in het geheugen
+**Impact: beveiliging, prestaties**
+
+De voor de hand liggende implementatie is een `Map` in modulescope. Die is hier
+waardeloos: de app draait als serverless functies, dus elke instantie houdt zijn
+eigen teller bij en een aanvaller die zijn verzoeken over tien koude starts
+verdeelt krijgt tien keer de ruimte.
+
+Dus een tabel. `consume_rate_limit()` is `security definer` en uitsluitend
+uitvoerbaar door de service role — als `anon` erbij kon, kon een aanvaller een
+limiet van een miljoen meegeven, of erger, de ruimte van iemand *anders*
+opbranden en hen uit hun eigen account sluiten.
+
+De limiter **faalt open**: is de database onbereikbaar, dan wordt het verzoek
+toegestaan en luid gelogd. Een rate limiter die zelf een storing wordt is erger
+dan wat hij voorkomt.
+
+*Het risico dat je moet kennen:* elke geweigerde poging kost nog steeds een
+databasequery. Bij een echte aanval is dat belasting die je liever eerder
+afvangt — bij de hostingpartij of een WAF. Dit is de laag die je zelf in de hand
+hebt, niet de enige laag die je zou moeten willen.
+
 ## Openstaande vragen aan jou
 
 1. ~~Bestaat er al een Supabase-project?~~ **Beantwoord: nee.** Zie hierboven.

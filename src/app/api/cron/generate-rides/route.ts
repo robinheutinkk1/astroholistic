@@ -12,7 +12,7 @@ import { optionalSecret } from '@/lib/env.server';
 import { generateRidesForOrganization } from '@/features/ride-templates/generation';
 
 /**
- * Nightly ride generation (Vercel Cron).
+ * The nightly job: ride generation, the retention sweep and housekeeping.
  *
  * Runs for every active organisation. It is idempotent, so a retried or
  * double-fired schedule is harmless — that property is what makes an unattended
@@ -61,9 +61,39 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // Housekeeping runs after the work that matters. If generation failed for an
+  // organisation we still want the sweeps to happen — they are what keeps the
+  // retention promise and stops the rate-limit table growing without end.
+  let anonymized = 0;
+  for (const organization of organizations ?? []) {
+    try {
+      const { data } = await admin.rpc('apply_retention', {
+        p_organization_id: organization.id,
+      });
+      anonymized += data ?? 0;
+    } catch (error) {
+      console.error('Retention sweep failed for organisation', {
+        organizationId: organization.id,
+        message: error instanceof Error ? error.message : 'unknown',
+      });
+    }
+  }
+
+  let rateLimitRowsRemoved = 0;
+  try {
+    const { data } = await admin.rpc('sweep_rate_limit_hits', { p_older_than_hours: 24 });
+    rateLimitRowsRemoved = data ?? 0;
+  } catch (error) {
+    console.error('Rate-limit sweep failed', {
+      message: error instanceof Error ? error.message : 'unknown',
+    });
+  }
+
   return NextResponse.json({
     organizations: results.length,
     created: results.reduce((sum, result) => sum + result.created, 0),
     failed: results.filter((result) => result.error).length,
+    anonymized,
+    rateLimitRowsRemoved,
   });
 }

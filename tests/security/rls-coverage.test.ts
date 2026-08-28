@@ -31,6 +31,10 @@ const NON_TENANT_TABLES = new Map<string, string>([
   ['care_organization_users', 'scoped through care_organizations'],
   ['driver_vehicles', 'scoped through drivers'],
   ['tag_scan_attempts', 'rate-limit counters, written only by the check-in function'],
+  [
+    'rate_limit_hits',
+    'rate-limit counters keyed by a hash of an address or account: the limiter has to work on the login form, before any organisation is known',
+  ],
 ]);
 
 describe('schema-level guarantees', () => {

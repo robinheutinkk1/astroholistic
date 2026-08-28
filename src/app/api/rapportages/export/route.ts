@@ -16,6 +16,8 @@ import {
   REPORT_KINDS,
   type ReportKind,
 } from '@/features/reports/schema';
+import { requireUser } from '@/features/rbac/session';
+import { consumeForUser } from '@/lib/security/rate-limit';
 
 /**
  * CSV export of a report.
@@ -55,6 +57,14 @@ export async function GET(request: NextRequest) {
   });
   if (!period.success) {
     return NextResponse.json({ error: 'invalid_period' }, { status: 400 });
+  }
+
+  // An export takes personal data out of the product. A planner making thirty
+  // in an hour is not reporting, and a compromised session should not be able
+  // to walk the whole client base out through this endpoint in a minute.
+  const user = await requireUser();
+  if (!(await consumeForUser('report-export', user.id))) {
+    return NextResponse.json({ error: 'rate_limited' }, { status: 429 });
   }
 
   // getReports checks reports.view and throws an AuthorizationError otherwise;

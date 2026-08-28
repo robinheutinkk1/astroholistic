@@ -46,6 +46,11 @@ Beschermwaardig, in volgorde van ernst bij verlies:
 | T19 | Rapportage lekt over de tenantgrens omdat een aggregaat de RLS omzeilt | Alle rapportagefuncties zijn `security invoker` + expliciete `reports.view`-check; de catalogus wordt in de suite gecontroleerd (S32) |
 | T20 | CSV-export voert code uit op de pc van de planner (formule-injectie) | Cellen die met `=`, `+`, `-`, `@`, tab of CR beginnen krijgen een apostrof; getallen blijven getallen |
 | T21 | Export haalt persoonsgegevens uit het systeem zonder spoor | Elke export schrijft `report.exported` in de append-only audit trail, met periode en aantal rijen |
+| T22 | Chauffeur downloadt een volledig dossier via het exportpunt | `export_client_data()` eist expliciet `clients.view`; RLS alleen was **niet** genoeg (S47) |
+| T23 | Support-toegang wordt permanent of ongemerkt verleend | Grant is tijdgebonden, alleen-lezen, door de tenant zelf verleend en ingetrokken, en staat in de audit trail (S39–S45) |
+| T24 | Erasure vernietigt de vervoersadministratie | Anonimiseren in plaats van verwijderen; ritten en events blijven (S49) |
+| T25 | Nieuwe tabel mist RLS of grants en lekt of blokkeert stil | Coveragetest op `pg_tables`; de grant van 0010 is een momentopname en elke latere tabel krijgt een eigen grant |
+| T26 | Bruteforce op login of wachtwoordreset | `consume_rate_limit()` in de database, per adres én per account; alleen de service role mag hem aanroepen |
 
 ## 3. Authenticatie
 
@@ -223,6 +228,21 @@ test je RLS niet.
 | S36 | `report_by_client` bevat een afwezigheidsreden       | mag niet bestaan (D-25)             |
 | S37 | Portaalrapportage buiten de eigen relatie            | 0 rijen                             |
 | S38 | Export verwijderen uit de audit trail                | geweigerd                           |
+| S39 | Platformbeheerder zonder grant                       | 0 rijen, overal                     |
+| S40 | Operationele grant opent cliëntgegevens              | mag niet; alleen ritten en vloot    |
+| S41 | Persoonlijke grant impliceert de operationele        | ja                                  |
+| S42 | Verlopen of ingetrokken grant                        | 0 rijen                             |
+| S43 | Grant aan iemand die geen platformmedewerker is      | 0 rijen                             |
+| S44 | Support wijzigt iets, of verlengt zijn eigen grant   | geweigerd                           |
+| S45 | Organisatie leest de grants van een andere           | 0 rijen                             |
+| S46 | Chauffeur ziet het voertuig van zijn eigen rit       | ja; andere voertuigen niet          |
+| S47 | Export van een cliënt van een andere organisatie     | leeg                                |
+| S48 | Erasure door chauffeur, ouder of andere organisatie  | geweigerd; twee keer wissen is no-op |
+| S49 | Erasure verwijdert ritten of auditregels             | mag niet; die blijven               |
+| S50 | Erasure laat tag, koppeling of contactgegevens staan | mag niet; alles losgekoppeld        |
+| S51 | Retentiesweep zonder dat de organisatie hem aanzette | 0 gewist                            |
+| S52 | Tenant roept de retentiesweep zelf aan               | geweigerd                           |
+| S53 | Zorgcoördinator leest zijn eigen zorgorganisatie     | ja (regressie op 0025)              |
 
 Aanvullend: een CI-check die faalt op elke tabel in `public` **zonder**
 `rowsecurity = true`. Nieuwe tabellen kunnen dan niet ongemerkt onbeveiligd
@@ -247,12 +267,21 @@ exporteren, wissen en aantonen wie wat wanneer zag.
 alleen als de organisatie het aanzet én de gebruiker toestemming geeft, met een
 zichtbare indicator in de PWA. Geen achtergrondtracking.
 
-**Bewaartermijnen (voorbereiding, Fase 12):** `retention_policies` per
-organisatie; ritten en events worden na de termijn geanonimiseerd, niet
-verwijderd (zie `DATABASE.md` §10).
+**Bewaartermijnen (Fase 12, gebouwd):** `retention_policies` per organisatie met
+`inactive_client_months` en een schakelaar die **standaard uit staat**. Staat hij
+aan, dan anonimiseert de nachtelijke job cliënten zonder recente rit. Ritten en
+events blijven; de persoon verdwijnt eruit (zie `DATABASE.md` §10).
 
-**Rechten van betrokkenen:** export en erasure als serviceoperaties met
-auditlog, uitvoerbaar door de organisatie zelf.
+**Rechten van betrokkenen (Fase 12, gebouwd):** op de cliëntpagina staat een
+kaart Privacy met een volledige export (JSON, AVG art. 15/20) en wissen (art.
+17). Beide schrijven een auditregel. Wissen anonimiseert de cliënt, wist
+contactpersonen die nergens anders aan hangen, koppelt NFC-tags los en
+verwijdert de portaal-login uit `auth.users`.
+
+Wees eerlijk over de grens daarvan: een rit verwijst nog steeds naar een
+cliëntrij. Anonimiseren betekent *dit systeem kan niet meer zeggen wie dit was*,
+niet *dit is nooit gebeurd*. Wie een oude export naast de database legt, kan ze
+alsnog naast elkaar leggen.
 
 **Logging:** geen namen, adressen of e-mailadressen in applicatielogs. We loggen
 id's. Dit is een reviewregel, geen aanbeveling.

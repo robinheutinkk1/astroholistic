@@ -3,9 +3,12 @@ import type { NextConfig } from 'next';
 /**
  * Security headers (docs/SECURITY.md §10).
  *
- * The CSP intentionally omits 'unsafe-inline' for scripts. Styles still need it
- * because Next injects inline <style> for critical CSS and our white-label theme
- * sets CSS custom properties inline per tenant.
+ * The Content-Security-Policy is NOT here. It is set per request in
+ * `src/proxy.ts`, because it carries a nonce that has to be different on every
+ * response — a static CSP in this file would either need `unsafe-inline`
+ * (which is no policy at all) or would break Next's own bootstrap script.
+ *
+ * Everything below is genuinely static and belongs here.
  */
 const securityHeaders = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
@@ -17,9 +20,24 @@ const securityHeaders = [
   },
   {
     // Geolocation is granted only because the driver PWA records a single
-    // position at ride milestones (docs/SECURITY.md §9). Everything else is off.
+    // position at ride milestones (docs/SECURITY.md §9). Camera is granted for
+    // QR scanning on the same screens. Everything else is off.
     key: 'Permissions-Policy',
-    value: 'camera=(self), geolocation=(self), microphone=(), payment=(), usb=()',
+    value:
+      'camera=(self), geolocation=(self), microphone=(), payment=(), usb=(), interest-cohort=()',
+  },
+  {
+    // This product shows personal data on every signed-in page. None of it
+    // belongs in a search index or a link preview, and `robots` metadata in the
+    // page is not enough for a file served by a route handler.
+    key: 'X-Robots-Tag',
+    value: 'noindex, nofollow, noarchive',
+  },
+  {
+    // Isolates the browsing-context group, so a window this app opens (or that
+    // opens it) cannot reach into it via window.opener.
+    key: 'Cross-Origin-Opener-Policy',
+    value: 'same-origin',
   },
 ];
 

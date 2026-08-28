@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import type { Route } from 'next';
 import { revalidatePath } from 'next/cache';
 import { toFormState, type FormState } from '@/lib/errors/form-state';
+import { consumeForAccount } from '@/lib/security/rate-limit';
 import {
   forgotPasswordSchema,
   resetPasswordSchema,
@@ -32,6 +33,18 @@ export async function signInAction(
       status: 'error',
       message: 'Controleer de ingevulde gegevens.',
       fieldErrors: parsed.error.flatten().fieldErrors,
+    };
+  }
+
+  // After validation, before the credentials are checked. Checking first would
+  // let an attacker use the sign-in call itself as an oracle while being
+  // "rate limited"; refusing here means no attempt reaches the auth service.
+  const allowed = await consumeForAccount('login-ip', 'login-account', parsed.data.email);
+  if (!allowed) {
+    return {
+      status: 'error',
+      message:
+        'Te veel inlogpogingen. Probeer het over een kwartier opnieuw, of herstel je wachtwoord.',
     };
   }
 
@@ -67,7 +80,20 @@ export async function forgotPasswordAction(
     };
   }
 
-  await authService.requestPasswordReset(parsed.data);
+  const allowed = await consumeForAccount(
+    'password-reset-ip',
+    'password-reset-account',
+    parsed.data.email,
+  );
+
+  // Note the answer when refused: the SAME sentence as a successful request.
+  // A distinct "you are rate limited" message would tell an attacker that this
+  // address is worth hammering, which is precisely what the identical answer
+  // below exists to hide.
+  if (allowed) {
+    await authService.requestPasswordReset(parsed.data);
+  }
+
   // Deliberately the same answer whether or not the account exists.
   return {
     status: 'success',

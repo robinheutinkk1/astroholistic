@@ -187,7 +187,23 @@ Klik op "Exporteer CSV" en open het bestand in Excel. Let op de kolommen — als
 er iets scheef staat, hoor ik het graag, want de scheiding tussen kolommen is
 per land anders.
 
-**11. Wat mist er in de formulieren?**
+**11. Privacy: inzage en wissen.**
+Open een cliënt en scrol naar de kaart Privacy. "Gegevens downloaden" geeft een
+JSON-bestand met alles wat het systeem over die persoon bewaart — dat is het
+antwoord op een inzageverzoek.
+
+Probeer daarna "Persoonsgegevens wissen" bij een cliënt die u kwijt kunt. De
+naam wordt "Verwijderd Cliënt", het adres en telefoonnummer verdwijnen, de
+NFC-tag wordt losgekoppeld — en de ritten blijven staan. Dat laatste is met
+opzet: dat is uw vervoersadministratie.
+
+**12. Geef uzelf even support-toegang.**
+Instellingen → Privacy en support. Verleen toegang aan de demo-platformbeheerder
+voor twee uur en kijk wat er gebeurt: hij kan de ritten zien, maar met de kleine
+scope niet de namen van cliënten. Trek hem daarna weer in. Alles wat u hier doet
+komt in het logboek van uw organisatie.
+
+**13. Wat mist er in de formulieren?**
 Kijk bij een cliënt of je alle velden mist die Taxi Ontzorgd nodig heeft. Het
 rolstoelveld ontbreekt met opzet (besluit D-03); alles wat je verder mist, hoor
 ik graag.

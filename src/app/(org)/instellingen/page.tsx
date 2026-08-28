@@ -25,6 +25,13 @@ export default async function SettingsPage() {
       permission: 'branding.manage' as const,
     },
     {
+      href: '/instellingen/support' as Route,
+      title: 'Privacy en support',
+      description:
+        'Bewaartermijnen, en tijdelijke toegang voor TagPoint als u hulp nodig heeft.',
+      permission: 'organization.manage' as const,
+    },
+    {
       href: '/instellingen/domeinen' as Route,
       title: 'Domeinnamen',
       description: 'Draai het platform op uw eigen domeinnaam.',

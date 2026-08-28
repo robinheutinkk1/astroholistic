@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
+import { PrivacyCard } from '@/features/gdpr/components/privacy-card';
 import {
   Card,
   CardContent,
@@ -84,6 +85,22 @@ export default async function ClientDetailPage({
               <dd>{client.external_reference ?? '—'}</dd>
             </dl>
           )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Privacy</CardTitle>
+          <CardDescription>
+            Inzage en verwijdering op verzoek van de cliënt of zijn vertegenwoordiger.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <PrivacyCard
+            clientId={client.id}
+            anonymizedAt={client.anonymized_at}
+            canErase={membership.permissions.has('clients.delete')}
+          />
         </CardContent>
       </Card>
     </div>

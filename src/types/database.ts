@@ -1205,6 +1205,62 @@ export interface Database {
           },
         ];
       };
+      rate_limit_hits: {
+        Row: {
+          id: number;
+          bucket: string;
+          subject_hash: string;
+          occurred_at: string;
+        };
+        Insert: {
+          id?: number;
+          bucket: string;
+          subject_hash: string;
+          occurred_at?: string;
+        };
+        Update: {
+          id?: number;
+          bucket?: string;
+          subject_hash?: string;
+          occurred_at?: string;
+        };
+        Relationships: [];
+      };
+      retention_policies: {
+        Row: {
+          organization_id: string;
+          inactive_client_months: number;
+          ride_retention_months: number;
+          auto_anonymize_enabled: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          organization_id: string;
+          inactive_client_months?: number;
+          ride_retention_months?: number;
+          auto_anonymize_enabled?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          organization_id?: string;
+          inactive_client_months?: number;
+          ride_retention_months?: number;
+          auto_anonymize_enabled?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'retention_policies_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: true;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       ride_events: {
         Row: {
           id: string;
@@ -1714,6 +1770,7 @@ export interface Database {
           expires_at: string;
           revoked_at: string | null;
           created_at: string;
+          scope: Database['public']['Enums']['support_access_scope'];
         };
         Insert: {
           id?: string;
@@ -1724,6 +1781,7 @@ export interface Database {
           expires_at: string;
           revoked_at?: string | null;
           created_at?: string;
+          scope?: Database['public']['Enums']['support_access_scope'];
         };
         Update: {
           id?: string;
@@ -1734,6 +1792,7 @@ export interface Database {
           expires_at?: string;
           revoked_at?: string | null;
           created_at?: string;
+          scope?: Database['public']['Enums']['support_access_scope'];
         };
         Relationships: [
           {
@@ -2171,6 +2230,22 @@ export interface Database {
     };
     Views: Record<string, never>;
     Functions: {
+      anonymize_client: {
+        Args: {
+          p_organization_id: string;
+          p_client_id: string;
+        };
+        Returns: {
+          detached_user_id: string | null;
+          contacts_anonymized: number | null;
+        }[];
+      };
+      apply_retention: {
+        Args: {
+          p_organization_id: string;
+        };
+        Returns: number;
+      };
       branding_for_host: {
         Args: {
           p_host: string;
@@ -2195,6 +2270,22 @@ export interface Database {
           client_last_name: string | null;
           occurred_at: string | null;
         }[];
+      };
+      consume_rate_limit: {
+        Args: {
+          p_bucket: string;
+          p_subject: string;
+          p_limit: number;
+          p_window_seconds: number;
+        };
+        Returns: boolean;
+      };
+      export_client_data: {
+        Args: {
+          p_organization_id: string;
+          p_client_id: string;
+        };
+        Returns: Json;
       };
       report_absence_reasons: {
         Args: {
@@ -2290,6 +2381,12 @@ export interface Database {
           cancelled: number | null;
         }[];
       };
+      sweep_rate_limit_hits: {
+        Args: {
+          p_older_than_hours?: number;
+        };
+        Returns: number;
+      };
     };
     Enums: {
       absence_reason: 'NOT_HOME' | 'CANCELLED_BY_CLIENT' | 'ILL' | 'NO_ACCESS' | 'OTHER';
@@ -2358,6 +2455,7 @@ export interface Database {
       ride_template_status: 'ACTIVE' | 'PAUSED' | 'ARCHIVED';
       stop_kind: 'PICKUP' | 'DROPOFF' | 'BOTH';
       subscription_status: 'TRIALING' | 'ACTIVE' | 'PAST_DUE' | 'CANCELLED';
+      support_access_scope: 'OPERATIONAL' | 'PERSONAL';
       tag_status: 'UNASSIGNED' | 'ACTIVE' | 'INACTIVE' | 'LOST' | 'REPLACED';
       transport_requirement:
         | 'WHEELCHAIR'
