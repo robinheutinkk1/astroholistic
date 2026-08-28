@@ -62,10 +62,15 @@ Geverifieerd in deze sessie:
 | Docker | 29.3.1 | Beschikbaar — nodig voor lokale Supabase stack |
 | Supabase CLI | — | **Niet geïnstalleerd** |
 
-De Supabase CLI wordt in Fase 2 als dev-dependency toegevoegd (`npm i -D supabase`)
+De Supabase CLI wordt in Fase 1 als dev-dependency toegevoegd (`npm i -D supabase`)
 in plaats van globaal geïnstalleerd, zodat de versie in Git vastligt en elke
 developer en CI-run dezelfde CLI-versie gebruikt. Dat is nodig om §40
 (reproduceerbare migrations) te kunnen garanderen.
+
+Er bestaat nog **geen Supabase-cloudproject** (bevestigd door de opdrachtgever).
+Dat blokkeert de bouw niet: `supabase start` draait de volledige stack lokaal in
+Docker, en Fase 1 t/m 13 worden daarop ontwikkeld en getest. Het cloudproject is
+pas in Fase 14 nodig, waar dezelfde migrations worden uitgerold.
 
 ## 5. Uitgangspositie
 

@@ -198,12 +198,30 @@ verplaatsen als je ze liever in de root hebt.
 | A-04 | Cliënten zijn niet altijd digitaal vaardig; het cliëntportaal is lichtgewicht en optioneel | Meer investering in dat portaal nodig |
 | A-05 | Ritvolume per organisatie: tientallen tot enkele honderden per dag | Bij duizenden per dag komt partitionering van `ride_events` eerder in beeld |
 | A-06 | Geen koppeling met bestaande planningssoftware in V1 | Een import-/API-laag wordt dan Fase 11-werk |
-| A-07 | Er is nog geen Supabase-project aangemaakt | Wanneer dat er wel is, wil ik weten of het leeg is voordat migrations draaien |
+| A-07 | ~~Er is nog geen Supabase-project aangemaakt~~ — **bevestigd 2026-08-28**: er bestaat er geen | Niet meer van toepassing; zie "Infrastructuur" hieronder |
+
+## Infrastructuur — stand van zaken (bevestigd 2026-08-28)
+
+| Onderdeel | Status | Wanneer nodig |
+|---|---|---|
+| GitHub-repository | **Bestaat**: `robinheutinkk1/astroholistic`, branch `claude/tagpoint-taxi-dispatch-d69dpb` | Nu in gebruik |
+| Supabase-project (cloud) | Bestaat niet | Pas aan het eind van Fase 2 |
+| Vercel-project | Bestaat niet | Fase 14 (of eerder voor previews) |
+| Domein `tagpoint.nl` | Onbekend | Fase 10 |
+
+**Belangrijk: het ontbreken van een Supabase-project blokkeert niets.**
+De Supabase CLI draait een volledige lokale stack in Docker (Postgres, Auth,
+Realtime, Storage). Fase 1 en Fase 2 — inclusief alle migrations, RLS-policies
+en de complete beveiligingstestsuite — worden daar gebouwd en getest. Het
+cloudproject is pas nodig om te deployen, en dan draaien dezelfde migrations
+erop. Dat is ook de veiligste volgorde: de tenant-isolatie is dan al bewezen
+voordat er ooit een database publiek bereikbaar is.
+
+Node 22, npm en Docker zijn in de ontwikkelomgeving aanwezig en geverifieerd.
 
 ## Openstaande vragen aan jou
 
-1. **Bestaat er al een Supabase-project?** Zo ja: is het leeg? Migrations op een
-   database met bestaande data vraagt een ander plan.
+1. ~~Bestaat er al een Supabase-project?~~ **Beantwoord: nee.** Zie hierboven.
 2. **Zijn er echte cliëntgegevens van Taxi Ontzorgd die geïmporteerd moeten
    worden?** Zo ja, dan hoort daar een importplan én een AVG-toets bij.
 3. **Is er een DPO of jurist** die D-03 (gezondheidsgegevens) en D-12
