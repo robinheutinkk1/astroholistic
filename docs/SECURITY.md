@@ -243,6 +243,10 @@ test je RLS niet.
 | S51 | Retentiesweep zonder dat de organisatie hem aanzette | 0 gewist                            |
 | S52 | Tenant roept de retentiesweep zelf aan               | geweigerd                           |
 | S53 | Zorgcoördinator leest zijn eigen zorgorganisatie     | ja (regressie op 0025)              |
+| S54 | Rate limiter telt per subject en per bucket          | ja; boven de limiet geweigerd       |
+| S55 | Pogingen ouder dan het venster tellen mee            | mag niet                            |
+| S56 | Anon of ingelogde gebruiker roept de limiter aan     | geweigerd                           |
+| S57 | Subject leesbaar opgeslagen; tabel groeit oneindig   | gehasht; sweep ruimt op             |
 
 Aanvullend: een CI-check die faalt op elke tabel in `public` **zonder**
 `rowsecurity = true`. Nieuwe tabellen kunnen dan niet ongemerkt onbeveiligd

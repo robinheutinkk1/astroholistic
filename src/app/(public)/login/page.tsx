@@ -25,7 +25,9 @@ export default async function LoginPage({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Inloggen</CardTitle>
+        <CardTitle as="h1" className="text-lg">
+          Inloggen
+        </CardTitle>
         <CardDescription>Log in om verder te gaan naar je planning.</CardDescription>
       </CardHeader>
       <CardContent>

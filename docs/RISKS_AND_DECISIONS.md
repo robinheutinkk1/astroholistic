@@ -584,6 +584,46 @@ databasequery. Bij een echte aanval is dat belasting die je liever eerder
 afvangt — bij de hostingpartij of een WAF. Dit is de laag die je zelf in de hand
 hebt, niet de enige laag die je zou moeten willen.
 
+### D-30 — De volumetest meet één grote tenant, niet honderd kleine
+**Impact: prestaties, testwaarde**
+
+De opdracht vraagt om 100 organisaties, 50.000 ritten en 500.000 events. Bij een
+gelijke verdeling krijgt elke organisatie 500 ritten, en 500 rijen zijn snel hoe
+je ze ook opvraagt — zo'n meting bewijst niets over de indexen.
+
+Echte SaaS-belasting is scheef. Eén klant is een orde van grootte groter dan de
+mediaan, en dat is de klant die de ontbrekende index vindt. Een vervoersbedrijf
+met 40 cliënten die twee keer per dag rijden maakt ongeveer 20.000 ritten per
+jaar. De generator zet daarom standaard 40% van de ritten in één organisatie
+(`PERF_SKEW`), en de rapportagequeries draaien tegen díe organisatie.
+
+*Wat je moet weten over de uitkomst:* alles blijft onder de 20 ms en er is geen
+enkele sequentiële scan op een grote tabel. Dat is gemeten op één machine met
+een warme cache en 161 MB data. Het zegt dat de indexen kloppen; het zegt niets
+over gelijktijdigheid, connectiedruk of een koude cache op productiehardware.
+Dat is een meting voor Fase 14, op de echte infrastructuur.
+
+### D-31 — Overgeslagen E2E-tests in plaats van weggelaten of falende
+**Impact: testcultuur**
+
+De kritieke-padtests (plannen → rijden → inchecken → afronden) hebben een
+ingelogde sessie nodig, en die komt van GoTrue — een container, en
+Docker-images zijn in deze omgeving geblokkeerd.
+
+Drie mogelijkheden, en twee ervan zijn slecht. Ze weglaten betekent dat niemand
+ze schrijft zolang de omgeving niet meewerkt. Ze laten falen betekent dat
+iedereen leert een rode run te negeren, en dan verbergt die run ook de volgende
+échte fout.
+
+Ze staan er dus, en ze slaan zichzelf over met de reden erbij. De controle is
+één echte inlogpoging, niet een poortcheck: een bereikbare GoTrue zonder
+seeddata zou een poortcheck doorstaan en daarna elke test laten falen om een
+reden die niets met de code te maken heeft.
+
+*Consequentie:* het kritieke pad is momenteel gedekt door de securitysuite (op
+databaseniveau) en door unittests (op logicaniveau), niet door een klik-door-de-
+applicatie-test. Dat gat sluit zodra `npm run db:start` ergens draait.
+
 ## Openstaande vragen aan jou
 
 1. ~~Bestaat er al een Supabase-project?~~ **Beantwoord: nee.** Zie hierboven.

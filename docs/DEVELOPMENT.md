@@ -91,12 +91,20 @@ aan. Beide worden door ESLint bewaakt.
 
 ## Tests
 
-| Soort | Locatie | Draait met |
-|---|---|---|
-| Unit / component | naast de code, `*.test.ts(x)` | `npm run test` |
-| RLS / policies | `supabase/tests/` (pgTAP) | `npm run db:test` |
-| Tenant-isolatie | `tests/security/` | vanaf Fase 2 |
-| E2E | `tests/e2e/` | vanaf Fase 6 |
+| Soort            | Locatie                       | Draait met                          |
+| ---------------- | ----------------------------- | ----------------------------------- |
+| Unit / component | naast de code, `*.test.ts(x)` | `npm run test`                      |
+| Tenant-isolatie  | `tests/security/`             | `npm run test:security`             |
+| End-to-end       | `tests/e2e/`                  | `npm run test:e2e`                  |
+| Volume / plannen | `scripts/volume-test.mjs`     | `npm run perf` (**wist de database**) |
+
+`npm run test:e2e:public` draait alleen de specs die geen authenticatiedienst
+nodig hebben. De kritieke-padtests slaan zichzelf over zonder draaiende GoTrue
+(`npm run db:start`) en zeggen dat er ook bij.
+
+Heeft Playwright zijn eigen browser niet kunnen downloaden — een dichtgetimmerde
+CI-image, een sandbox zonder uitgaand verkeer — wijs hem dan naar een bestaande
+met `PLAYWRIGHT_CHROMIUM_PATH=/pad/naar/chrome`.
 
 De tenant-isolatietests zitten bewust **niet** in de standaard `npm run test`:
 ze hebben een draaiende lokale database nodig, en een unit-testrun die faalt

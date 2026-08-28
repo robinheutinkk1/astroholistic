@@ -29,7 +29,10 @@
     "db:rebuild": "bash scripts/db-rebuild.sh",
     "db:types:local": "node scripts/generate-db-types.mjs",
     "db:seed": "psql -h /tmp -p 5433 -U postgres -v ON_ERROR_STOP=1 -q -f supabase/seed/00-auth-users.sql -f supabase/seed/10-demo-data.sql",
-    "test:security": "vitest run --config vitest.security.config.mts"
+    "test:security": "vitest run --config vitest.security.config.mts",
+    "test:e2e": "playwright test",
+    "test:e2e:public": "playwright test tests/e2e/public.spec.ts",
+    "perf": "node scripts/volume-test.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
@@ -51,6 +54,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@next/eslint-plugin-next": "^16.3.3",
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4.3.3",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",

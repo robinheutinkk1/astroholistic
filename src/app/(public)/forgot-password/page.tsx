@@ -14,7 +14,9 @@ export default function ForgotPasswordPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Wachtwoord vergeten</CardTitle>
+        <CardTitle as="h1" className="text-lg">
+          Wachtwoord vergeten
+        </CardTitle>
         <CardDescription>
           Vul je e-mailadres in. Als er een account bestaat, sturen we een herstellink.
         </CardDescription>

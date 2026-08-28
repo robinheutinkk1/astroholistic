@@ -36,6 +36,13 @@ jobs:
       - name: Unit tests
         run: npm run test
 
+      - name: Dependency audit
+        # Advisories are not a reason to block a hotfix, so this reports rather
+        # than fails. `--audit-level=high` still turns a critical into a red
+        # step, which is the level worth stopping for.
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
       - name: Build
         run: npm run build
         env:
@@ -79,7 +86,12 @@ jobs:
           for file in supabase/migrations/*.sql; do
             psql "$DB" -v ON_ERROR_STOP=1 -q -f "$file"
           done
-          psql "$DB" -v ON_ERROR_STOP=1 -q -f supabase/seed/seed.sql
+          # Every seed file, in name order. Naming them individually is how this
+          # step came to reference a `seed.sql` that no longer existed — the job
+          # had been failing on a missing file rather than on a real result.
+          for file in supabase/seed/*.sql; do
+            psql "$DB" -v ON_ERROR_STOP=1 -q -f "$file"
+          done
         env:
           DB: postgresql://postgres@localhost:5433/postgres
 
@@ -88,3 +100,36 @@ jobs:
         env:
           TEST_DATABASE_URL: postgresql://authenticator@localhost:5433/postgres
           TEST_DATABASE_ADMIN_URL: postgresql://postgres@localhost:5433/postgres
+
+  e2e:
+    name: End to end
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install the browser
+        run: npx playwright install --with-deps chromium
+
+      # Only the specs that need no auth service. The critical-path specs skip
+      # themselves without one, and a CI job full of skips reads as a pass; the
+      # honest place for those is a run against a full Supabase stack, which is
+      # Fase 14 work.
+      - name: Public end-to-end suite
+        run: npm run test:e2e:public
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

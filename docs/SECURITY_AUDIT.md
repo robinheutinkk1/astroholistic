@@ -93,7 +93,7 @@ comment verdient waarin staat welke clausules zijn overgenomen.
 | T12 | uuid-pk's, gelijke melding bij niet-gevonden en niet-toegestaan     | `app-error.ts`, S12             |
 | T13 | Platformbeheer zonder tenantrechten                                 | S17, S33, S39                   |
 | T14 | Host bepaalt alleen branding, alleen geverifieerde domeinen         | S29, S30                        |
-| T15 | `consume_rate_limit()` per adres en per account                     | zie hieronder — **gat**         |
+| T15 | `consume_rate_limit()` per adres en per account                     | S54–S57                         |
 | T16 | Kleur- en logovalidatie op drie lagen                               | S23, S24, `image.test.ts`       |
 | T17 | `logo_path` met exacte CHECK-constraint                             | S24                             |
 | T18 | Uniciteit pas bij `VERIFIED`, trigger op zelfverificatie            | S27, S28                        |
@@ -104,19 +104,23 @@ comment verdient waarin staat welke clausules zijn overgenomen.
 | T23 | Tijdgebonden, alleen-lezen, door de tenant verleende grants         | S39–S45                         |
 | T24 | Anonimiseren in plaats van verwijderen                              | S49                             |
 | T25 | Coveragetest op RLS en grants                                       | `rls-coverage.test.ts`, S52     |
-| T26 | Rate limiting in de database                                        | zie hieronder — **gat**         |
+| T26 | Rate limiting in de database                                        | S54–S57, vijf mutatietests      |
 
 ## Wat nog niet af is
 
 Eerlijk over de gaten, want een audit die alleen groene vinkjes oplevert is geen
 audit.
 
-**Rate limiting heeft geen geautomatiseerde test.** De logica zit in
-`consume_rate_limit()` en is handmatig geverifieerd (2 toegestaan, de derde
-geweigerd, ander subject onaangetast), maar er is geen test die faalt als de
-limiter verdwijnt. Reden: de limiter draait via de service-role-client uit
-Next.js, en de securitysuite praat rechtstreeks met PostgreSQL. Hoort bij Fase
-13.
+**~~Rate limiting heeft geen geautomatiseerde test.~~ Opgelost in Fase 13.**
+Die conclusie was te somber: de logica zit in `consume_rate_limit()`, dat is SQL,
+en de suite praat al met PostgreSQL als `service_role`. Alleen de dunne
+TypeScript-wrapper valt buiten bereik, en daar zitten geen beslissingen in — een
+limiettabel en een fail-open catch. Nu afgedekt door S54–S57.
+
+Een van die tests slaagde eerst om de verkeerde reden: hij riep de functie aan
+en las de tabel in één statement, dus de zojuist geschreven rij zat nog niet in
+zijn snapshot. Een mutatie die het e-mailadres leesbaar opsloeg ging er dwars
+doorheen. Gesplitst in twee statements, en toen beet hij wel.
 
 **Geen penetratietest door een derde.** Het masterprompt vraagt om een
 penetratietest van de tenant-isolatiegrens. Wat er ligt is 334 assertions plus
@@ -124,10 +128,12 @@ mutatietesten waarin een maatregel bewust wordt gesloopt om te zien of de test
 bijt. Dat is geen vervanging voor iemand die er van buiten naar kijkt, en het
 zou raar zijn om te doen alsof.
 
-**Security headers zijn niet in productie geverifieerd.** De CSP is lokaal tegen
-een draaiende dev-server gecontroleerd. Of hij overeind blijft achter de
-hostingpartij, met hun eigen headers ernaast, is een controle voor Fase 14 — zie
-ook D-23 over de `Host`-header.
+**Security headers zijn niet in productie geverifieerd.** Sinds Fase 13 draait er
+wel een end-to-end suite tegen een **productiebuild** in een echte browser, die
+de headers controleert én — belangrijker — bewijst dat de applicatie onder haar
+eigen CSP nog hydrateert. Wat nog ontbreekt is de controle achter de
+hostingpartij, met hun headers ernaast. Fase 14; zie ook D-23 over de
+`Host`-header.
 
 **`npm audit`: 0 kwetsbaarheden**, zowel met als zonder devDependencies, op
 2026-08-28. Dat is een momentopname; het hoort in CI en niet in een document.

@@ -566,11 +566,60 @@ de service-role-client, de suite praat rechtstreeks met PostgreSQL), en een
 penetratietest door een derde. Beide staan in `docs/SECURITY_AUDIT.md` onder
 "Wat nog niet af is".
 
-## Fase 13 — Testen en stabilisatie
+## Fase 13 — Testen en stabilisatie ✅ afgerond
 
-Volledige suite; E2E van de kritieke paden (plannen → rijden → inchecken →
-afronden); performancetest met realistisch volume (100 organisaties, 50.000
-ritten, 500.000 events); queryplannen controleren op ontbrekende indexes.
+Opgeleverd:
+
+- End-to-end suite met Playwright (`npm run test:e2e`), op desktop én mobiel,
+  tegen een **productiebuild** — 22 tests die zonder authenticatiedienst draaien
+- Volumetest (`npm run perf`): 100 organisaties, 50.000 ritten, 500.000 events,
+  met `explain (analyze)` op de queries die het product echt doet, als
+  ingelogde gebruiker mét RLS
+- Rate-limitertests (S54–S57), het gat dat Fase 12 openliet
+- CI gerepareerd en uitgebreid met een E2E-job en een dependency-audit
+
+_Verificatie:_ `npm run verify` groen (271 tests), `npm run test:security` groen
+(345 tests, waarvan 11 nieuw), `npm run test:e2e` 22 geslaagd en 12 overgeslagen.
+Vijf mutatietests op de limiter.
+
+**De CI-securityjob was al fasen kapot.** Hij draaide
+`psql -f supabase/seed/seed.sql`, en dat bestand is in fase 6 gesplitst in
+`00-auth-users.sql` en `10-demo-data.sql`. De job faalde dus op een ontbrekend
+bestand in plaats van op een resultaat. Nu draait hij elk seedbestand op naam,
+zodat splitsen of toevoegen hem niet opnieuw breekt. De exacte
+CI-commandoreeks is lokaal nagespeeld: 345 tests groen.
+
+**De E2E-suite vond meteen iets.** De publieke pagina's hadden geen `<h1>`. De
+kaarttitel rendert als `<h3>`, dus login, wachtwoord vergeten en wachtwoord
+herstellen hadden helemaal geen paginakop — een schermlezer kondigt zo'n pagina
+zonder titel aan (§48). `CardTitle` heeft nu een `as`-prop; op die drie
+pagina's is de kaarttitel de `h1`.
+
+**Wat een E2E-test hier toevoegt.** Een unittest bewijst dat de CSP-tekst klopt.
+Alleen een echte browser bewijst dat de applicatie er nog onder werkt — en
+`strict-dynamic` met een nonce is precies het soort policy dat op papier klopt
+en in de praktijk een witte pagina geeft. De suite laadt de loginpagina, vult
+het formulier in, verstuurt een Server Action en controleert dat er geen enkele
+CSP-overtreding en geen scriptfout optreedt.
+
+**De volumetest meet één grote tenant, niet honderd kleine.** Een gelijke
+verdeling geeft elke organisatie 500 ritten, en 500 rijen zijn snel hoe je ze
+ook opvraagt — dat meet niets. Echte SaaS-belasting is scheef: 40% van de ritten
+gaat naar één organisatie (20.300 ritten), want dat is de klant die de
+ontbrekende index vindt. Resultaat: alles onder de 20 ms, geen enkele
+sequentiële scan op `rides`, `ride_events` of `clients`, en de RLS-helpers
+worden zoals bedoeld één keer per statement geëvalueerd (`InitPlan`, en de
+meeste zelfs `never executed` door kortsluiting).
+
+**Geen ontbrekende indexes gevonden.** Dat is een uitkomst, geen overslaan:
+`rides_org_date_idx` uit migratie 0006 doet precies wat de rapportages nodig
+hebben.
+
+**Wat er niet is:** de kritieke-padtests (plannen → rijden → inchecken →
+afronden) staan geschreven maar slaan zichzelf over zonder draaiende GoTrue, en
+Docker-images zijn in deze omgeving geblokkeerd. Ze draaien zodra
+`npm run db:start` werkt. Een overgeslagen test die uitlegt waarom is eerlijk;
+een falende test die iedereen leert negeren is erger dan geen test.
 
 ## Fase 14 — Deployment
 

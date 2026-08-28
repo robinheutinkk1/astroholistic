@@ -23,7 +23,9 @@ export default async function ResetPasswordPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Nieuw wachtwoord instellen</CardTitle>
+        <CardTitle as="h1" className="text-lg">
+          Nieuw wachtwoord instellen
+        </CardTitle>
         <CardDescription>
           Kies een wachtwoord dat je nergens anders gebruikt.
         </CardDescription>
