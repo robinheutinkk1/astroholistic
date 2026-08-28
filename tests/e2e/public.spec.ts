@@ -161,6 +161,14 @@ test.describe('the health endpoint', () => {
 });
 
 test.describe('routing for a signed-out visitor', () => {
+  test('the front door leads to the login page, not a brochure', async ({ page }) => {
+    // The root used to be a phase-1 placeholder that announced which phase the
+    // project was in. Nobody who arrives here wants a product description:
+    // they are a planner, a driver or a parent who wants their own screen.
+    await page.goto('/');
+    await expect(page).toHaveURL(/\/login/);
+  });
+
   test('a protected page redirects to login and remembers where you were going', async ({
     page,
   }) => {
