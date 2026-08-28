@@ -11,23 +11,9 @@
 -- UUIDs are fixed so the security suite can address rows by name.
 -- ---------------------------------------------------------------------------
 
+-- Runs after 00-auth-users.sql, which creates the accounts these profiles
+-- belong to.
 begin;
-
--- --- Accounts --------------------------------------------------------------
-insert into auth.users (id, email) values
-  ('a0000000-0000-4000-8000-000000000001', 'admin@ontzorgd.test'),
-  ('a0000000-0000-4000-8000-000000000002', 'planner@ontzorgd.test'),
-  ('a0000000-0000-4000-8000-000000000003', 'dispatcher@ontzorgd.test'),
-  ('a0000000-0000-4000-8000-000000000004', 'chauffeur1@ontzorgd.test'),
-  ('a0000000-0000-4000-8000-000000000005', 'chauffeur2@ontzorgd.test'),
-  ('a0000000-0000-4000-8000-000000000006', 'ouder@ontzorgd.test'),
-  ('a0000000-0000-4000-8000-000000000007', 'zorginstelling@ontzorgd.test'),
-  ('a0000000-0000-4000-8000-000000000008', 'client@ontzorgd.test'),
-  ('b0000000-0000-4000-8000-000000000001', 'admin@voorbeeldtaxi.test'),
-  ('b0000000-0000-4000-8000-000000000004', 'chauffeur@voorbeeldtaxi.test'),
-  ('c0000000-0000-4000-8000-000000000001', 'platform@tagpoint.test'),
-  ('d0000000-0000-4000-8000-000000000001', 'buitenstaander@example.test')
-on conflict do nothing;
 
 insert into profiles (id, email, full_name) values
   ('a0000000-0000-4000-8000-000000000001', 'admin@ontzorgd.test',        'Anna Admin'),

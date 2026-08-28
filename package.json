@@ -27,7 +27,7 @@
     "db:local:stop": "bash scripts/local-postgres.sh stop",
     "db:local:reset": "bash scripts/local-postgres.sh reset",
     "db:rebuild": "bash scripts/db-rebuild.sh",
-    "db:seed": "psql -h /tmp -p 5433 -U postgres -v ON_ERROR_STOP=1 -q -f supabase/seed/seed.sql",
+    "db:seed": "psql -h /tmp -p 5433 -U postgres -v ON_ERROR_STOP=1 -q -f supabase/seed/00-auth-users.sql -f supabase/seed/10-demo-data.sql",
     "test:security": "vitest run --config vitest.security.config.mts"
   },
   "dependencies": {

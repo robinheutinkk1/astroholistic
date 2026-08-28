@@ -10,6 +10,11 @@
 
 Je hebt **geen** Supabase-cloudproject nodig om te ontwikkelen of te testen.
 
+## Voor het eerst?
+
+Zie [`LOKAAL_DRAAIEN.md`](LOKAAL_DRAAIEN.md) voor de uitgebreide versie,
+inclusief installatie en de demo-inloggegevens.
+
 ## Starten
 
 ```bash

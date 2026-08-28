@@ -39,11 +39,23 @@ grant usage on schema public to anon, authenticated, service_role;
 create schema if not exists auth;
 grant usage on schema auth to anon, authenticated, service_role;
 
--- Minimal stand-in for auth.users. Only the columns migrations reference.
+-- Stand-in for auth.users.
+--
+-- Columns mirror the subset the seed writes, so ONE seed file works against
+-- both this shim and a real Supabase project. If the two diverged, the seed
+-- would be untested on the path that actually matters.
 create table if not exists auth.users (
+  instance_id uuid default '00000000-0000-0000-0000-000000000000',
   id uuid primary key default gen_random_uuid(),
+  aud varchar(255) default 'authenticated',
+  role varchar(255) default 'authenticated',
   email citext unique,
-  created_at timestamptz not null default now()
+  encrypted_password varchar(255),
+  email_confirmed_at timestamptz,
+  raw_app_meta_data jsonb default '{}'::jsonb,
+  raw_user_meta_data jsonb default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
 );
 
 create or replace function auth.uid()

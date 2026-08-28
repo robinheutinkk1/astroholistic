@@ -47,7 +47,10 @@ Supabase (PostgreSQL, Auth, Realtime, Storage) · Vercel · PWA
 
 ## Aan de slag
 
-Node 22 en Docker zijn genoeg. Een Supabase-cloudproject is **niet** nodig om te
+**Voor het eerst? Volg [`docs/LOKAAL_DRAAIEN.md`](docs/LOKAAL_DRAAIEN.md)** —
+stap voor stap, inclusief wat je moet installeren en waarmee je inlogt.
+
+Kort samengevat: Node 22 en Docker zijn genoeg. Een Supabase-cloudproject is **niet** nodig om te
 ontwikkelen of te testen — de CLI draait de hele stack lokaal.
 
 ```bash
