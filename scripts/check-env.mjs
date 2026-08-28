@@ -138,11 +138,23 @@ if (production) {
 
   // Not fatal: a tenant domain can be attached without this, it just has to be
   // done by hand at the hosting provider (see docs/DEPLOYMENT.md).
-  if (!env.VERCEL_API_TOKEN || !env.VERCEL_PROJECT_ID) {
+  const hostingProject = env.HOSTING_PROJECT_ID || env.VERCEL_PROJECT_ID;
+  if (!env.HOSTING_API_TOKEN || !hostingProject) {
     warn(
-      'VERCEL_API_TOKEN / VERCEL_PROJECT_ID are not set: a verified tenant ' +
+      'HOSTING_API_TOKEN / HOSTING_PROJECT_ID are not set: a verified tenant ' +
         'domain will not be attached automatically and needs a manual step.',
     );
+  }
+
+  // Vercel refuses to create an environment variable whose name starts with
+  // VERCEL_, so a value here means somebody is about to be confused.
+  for (const name of Object.keys(env)) {
+    if (name.startsWith('VERCEL_') && name.endsWith('_API_TOKEN')) {
+      fail(
+        `${name} cannot be set on Vercel: the VERCEL_ prefix is reserved. ` +
+          'Use HOSTING_API_TOKEN.',
+      );
+    }
   }
 }
 

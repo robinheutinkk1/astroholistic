@@ -143,8 +143,7 @@ Production):
 | `NEXT_PUBLIC_PLATFORM_HOST`     | `app.tagpoint.nl`                          |
 | `TAG_TOKEN_PEPPER`              | uit stap 5                                 |
 | `CRON_SECRET`                   | uit stap 5                                 |
-| `VERCEL_API_TOKEN`              | optioneel, zie §9                          |
-| `VERCEL_PROJECT_ID`             | optioneel, zie §9                          |
+| `HOSTING_API_TOKEN`             | optioneel, zie §9                          |
 
 **Controle vóór de eerste deploy:**
 
@@ -194,9 +193,14 @@ De applicatiekant is af: een organisatie voegt een domeinnaam toe, publiceert
 een TXT-record, klikt op verifiëren. Wat daarna moet gebeuren is het domein
 aanmelden bij de hostingpartij zodat er een certificaat komt.
 
-**Met `VERCEL_API_TOKEN` en `VERCEL_PROJECT_ID` gezet** gebeurt dat automatisch
-na een geslaagde verificatie. Maak het token met scope *Domains* op het project,
-niet op het account.
+**Met `HOSTING_API_TOKEN` gezet** gebeurt dat automatisch na een geslaagde
+verificatie. Maak het token met scope *Domains* op het project, niet op het
+account. Een project-id hoef je op Vercel niet te zetten: die levert
+`VERCEL_PROJECT_ID` zelf al aan.
+
+> De naam begint met opzet niet met `VERCEL_`. Dat voorvoegsel is bij Vercel
+> gereserveerd, en een eigen variabele met die naam wordt geweigerd met
+> "Environment variable ... is invalid".
 
 **Zonder die variabelen** blijft alles werken, maar krijgt de organisatie de
 melding dat TagPoint het domein aanzet — en dan moet dat met de hand. Dat is

@@ -636,8 +636,8 @@ lekken.
 `verifyDomain()` roept daarom `attachDomain()` aan en weet verder van niets. Er
 is een Vercel-implementatie en een handmatige standaard.
 
-*Het risico dat je moet kennen:* zonder `VERCEL_API_TOKEN` en
-`VERCEL_PROJECT_ID` verifieert een domein wél maar wordt het niet aangezet. Dat
+*Het risico dat je moet kennen:* zonder `HOSTING_API_TOKEN` verifieert een
+domein wél maar wordt het niet aangezet. Dat
 is bewust zichtbaar — de organisatie krijgt te lezen dat TagPoint het domein
 aanzet — maar het is dan wel iemands taak om dat ook te doen. Zet die twee
 variabelen, of maak er een vast onderdeel van je aanmeldproces van.
