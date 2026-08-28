@@ -1,0 +1,8 @@
+.next
+node_modules
+coverage
+supabase/.temp
+supabase/.branches
+package-lock.json
+docs
+*.md

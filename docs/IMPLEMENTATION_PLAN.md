@@ -22,23 +22,46 @@ Een feature is klaar als **alle** punten afgevinkt zijn:
 ---
 
 ## Fase 0 — Audit ✅ afgerond
+
 Repository-audit (`AUDIT_PHASE0.md`), architectuurdocumenten, ER-model,
 permissiemodel, beslispunten (`RISKS_AND_DECISIONS.md`).
 
-**Wacht op bevestiging + besluit D-02 en D-03 voordat Fase 1 begint.**
+Besluiten D-02 en D-03 zijn op 2026-08-28 genomen; zie
+`RISKS_AND_DECISIONS.md`.
 
 ---
 
-## Fase 1 — Projectfundament
-Next.js 15 + TypeScript strict + Tailwind v4 opzetten; mappenstructuur uit
-`ARCHITECTURE.md` §4; ESLint/Prettier; Vitest; Supabase CLI als dev-dependency;
-`.env.example`; CI-workflow (lint, typecheck, build, test); design tokens en de
-eerste UI-primitives (Button, Input, Card, Badge, Dialog, Table).
+## Fase 1 — Projectfundament ✅ afgerond
 
-*Klaar als:* `npm run lint && npm run build && npm test` groen is en er een
-lege, ingelogde shell staat.
+Opgeleverd:
+
+- Next 16 (App Router), React 19, TypeScript 6 strict — inclusief
+  `noUncheckedIndexedAccess` en `exactOptionalPropertyTypes`
+- Tailwind v4 met design tokens als CSS custom properties, zodat white-label
+  kleuren per tenant runtime kunnen wisselen zonder rebuild
+- ESLint met de architectuurregels als **afdwingbare** lintregels: import van de
+  service-role client, import van `repository.ts` vanuit componenten, hardcoded
+  UUID's, `any`, niet-afgehandelde promises — elk geverifieerd met een testprobe
+- Supabase-clients: browser, server (RLS actief) en admin (achter `server-only`,
+  met een `withOrganizationScope`-wrapper die een organisatie-id afdwingt)
+- Foutafhandeling (`AppError`-hiërarchie) en `Result<T, E>`
+- Tijdzonehelpers met DST-correcte conversie (besluit D-07)
+- Ritstatus-state machine (§61) — vooruitgehaald uit Fase 5 omdat het pure,
+  testbare logica is die de latere planningsfase derisked
+- UI-primitives: Button (incl. 56px touch-variant voor chauffeurs), Badge, Card,
+  Input, Field (met ARIA-bedrading), loading/empty/error states, RideStatusBadge
+- CI-workflow, `supabase/`-structuur, `DEVELOPMENT.md`
+
+_Status:_ `npm run verify` (format, lint, typecheck, test, build) groen,
+74 tests.
+
+Twee echte defecten die de tests in deze fase aan het licht brachten: de
+DST-conversie koos bij de dubbele oktobernacht de verkeerde doorgang, en de
+state machine bood `PROBLEM` aan als vervolgstatus op een rit die al `PROBLEM`
+was. Beide zijn in de implementatie gecorrigeerd, niet in de test.
 
 ## Fase 2 — Database en RLS
+
 Migrations in de volgorde uit `DATABASE.md` §11. Alle tabellen, enums,
 constraints, indexes, `app`-helperfuncties, RLS-policies, append-only triggers,
 seed van `permissions` en systeemrollen.
@@ -47,66 +70,78 @@ pgTAP-tests plus de Vitest-suite met echte JWT's per persona. **De volledige
 S1–S21-matrix uit `SECURITY.md` §8 moet groen zijn.** CI-check op tabellen
 zonder RLS.
 
-*Klaar als:* tenant-isolatie aantoonbaar werkt. **Fase 3 begint niet eerder.**
+_Klaar als:_ tenant-isolatie aantoonbaar werkt. **Fase 3 begint niet eerder.**
 
 ## Fase 3 — Auth en RBAC
+
 Login, logout, wachtwoordreset, e-mailverificatie, profiel; organisatiekeuze bij
 meerdere lidmaatschappen; ledenbeheer, uitnodigingen, rollen toewijzen;
 `requirePermission`, `usePermission`; escalatiebeschermingen uit
 `ROLES_AND_PERMISSIONS.md` §8. Seed data (§55) met de vijf persona's.
 
-*Klaar als:* elke rol handmatig én in tests is doorlopen.
+_Klaar als:_ elke rol handmatig én in tests is doorlopen.
 
 ## Fase 4 — Beheer-core
+
 Dashboard met dagcijfers; CRUD voor cliënten, contacten, opdrachtgevers,
 chauffeurs, voertuigen, locaties; server-side paginatie, filtering en sortering
 vanaf het begin (§49); auditlogging op alle mutaties.
 
 ## Fase 5 — Ritten en planning
+
 Ritten-CRUD; terugkerende templates; generatiejob met idempotentie; dag- en
 weekplanning; chauffeur- en voertuigtoewijzing; uitzonderingen, annulering,
 extra ritten; state machine in service én databasetrigger; conflictdetectie
 (dubbel geboekte chauffeur of voertuig).
 
 ## Fase 6 — Chauffeurs-PWA
+
 Mobile-first "Vandaag"-scherm; ritdetail; navigatie-deeplink; grote knoppen voor
 de hele flow (§24); afwezigheid met redenen; notities; probleemmelding;
 optionele GPS-capture; manifest, service worker, installatie.
 
 ## Fase 7 — NFC en QR
+
 Volgens `NFC.md`: tags aanmaken, tokenafgifte, koppelen/ontkoppelen, statussen,
 vervangen, QR-rendering, bulk-PDF; `/t/[token]`-landingspagina; check-in RPC in
 één transactie; duplicaathandling; rate limiting; volledige beveiligingstests.
 
 ## Fase 8 — Realtime dispatch
+
 Dispatchscherm met live statussen; `useRideStream`-hook; gedebouncede
 dashboardtellers; probleemsignalering.
 
 ## Fase 9 — Portalen
+
 Cliënt-, contact- en opdrachtgeverportaal; `change_requests`-workflow met
 beoordeling door planners; per-portaal beveiligingstests.
 
 ## Fase 10 — White label en domeinen
+
 Brandinginstellingen met validatie; logo-upload; CSS-variabelen server-rendered;
 `organization_domains` met verificatie; host-resolutie in middleware; Vercel
 wildcard-configuratie.
 
 ## Fase 11 — Rapportages
+
 Ritten per dag, afgerond/geannuleerd/afwezig, check-in-tijden,
 chauffeurprestaties, cliënthistorie; CSV-export met auditlogging.
 
 ## Fase 12 — Hardening
+
 Volledige beveiligingsaudit langs `SECURITY.md` §2; `support_access_grants`;
 GDPR-export en -erasurepad; bewaartermijnen; security headers en CSP;
 rate limiting overal; dependency-audit; penetratietest van de
 tenant-isolatiegrens.
 
 ## Fase 13 — Testen en stabilisatie
+
 Volledige suite; E2E van de kritieke paden (plannen → rijden → inchecken →
 afronden); performancetest met realistisch volume (100 organisaties, 50.000
 ritten, 500.000 events); queryplannen controleren op ontbrekende indexes.
 
 ## Fase 14 — Deployment
+
 Vercel-productieproject; Supabase-productieproject; migrations; auth-redirect-
 URL's; domeinen; PWA-verificatie op echte toestellen; monitoring en alerting;
 `DEPLOYMENT.md` en `DEVELOPMENT.md`.

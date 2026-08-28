@@ -15,7 +15,7 @@ if (user.role === 'admin') { ... }   // ❌ verboden
 Alle autorisatie loopt via permissiesleutels:
 
 ```ts
-await requirePermission(orgId, 'rides.dispatch');   // ✅
+await requirePermission(orgId, 'rides.dispatch'); // ✅
 ```
 
 Reden: rollen veranderen per klant, permissies niet. Een organisatie die een
@@ -46,12 +46,12 @@ Niet elke gebruiker is een organisatiemedewerker. Cliënten, contactpersonen en
 opdrachtgevers krijgen **geen rol** in `organization_user_roles`. Hun toegang
 komt uit relatietabellen:
 
-| Principal | Bron van toegang | Rechten |
-|---|---|---|
-| Cliënt | `clients.user_id` | Vaste, beperkte set (portaal) |
-| Contactpersoon | `client_contacts` | Per koppeling: `can_view_rides`, `can_report_absence`, `can_request_changes` |
-| Opdrachtgever | `care_organization_users` + `client_care_organizations` | Vaste, beperkte set (portaal) |
-| Platformbeheerder | `platform_admins` | Platformpermissies; **geen** tenant-PII (zie `SECURITY.md` §5) |
+| Principal         | Bron van toegang                                        | Rechten                                                                      |
+| ----------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Cliënt            | `clients.user_id`                                       | Vaste, beperkte set (portaal)                                                |
+| Contactpersoon    | `client_contacts`                                       | Per koppeling: `can_view_rides`, `can_report_absence`, `can_request_changes` |
+| Opdrachtgever     | `care_organization_users` + `client_care_organizations` | Vaste, beperkte set (portaal)                                                |
+| Platformbeheerder | `platform_admins`                                       | Platformpermissies; **geen** tenant-PII (zie `SECURITY.md` §5)               |
 
 Dit is bewust gescheiden. Zou een ouder een "rol" binnen de organisatie krijgen,
 dan is één configuratiefout genoeg om hem toegang tot alle cliënten te geven.
@@ -62,62 +62,69 @@ dan is één configuratiefout genoeg om hem toegang tot alle cliënten te geven.
 gedeprecieerd.
 
 ### Organisatie
-| Sleutel | Betekenis |
-|---|---|
-| `organization.view` | Organisatiegegevens inzien |
-| `organization.manage` | Organisatiegegevens en instellingen wijzigen |
-| `organization.members.view` | Ledenlijst inzien |
-| `organization.members.manage` | Leden uitnodigen, schorsen, verwijderen |
-| `organization.roles.view` | Rollen en permissies inzien |
-| `organization.roles.manage` | Rollen aanmaken/wijzigen en toewijzen |
-| `branding.manage` | Logo, kleuren, favicon, supportgegevens |
-| `domain.manage` | Custom domeinen |
-| `audit.view` | Auditlog inzien |
+
+| Sleutel                       | Betekenis                                    |
+| ----------------------------- | -------------------------------------------- |
+| `organization.view`           | Organisatiegegevens inzien                   |
+| `organization.manage`         | Organisatiegegevens en instellingen wijzigen |
+| `organization.members.view`   | Ledenlijst inzien                            |
+| `organization.members.manage` | Leden uitnodigen, schorsen, verwijderen      |
+| `organization.roles.view`     | Rollen en permissies inzien                  |
+| `organization.roles.manage`   | Rollen aanmaken/wijzigen en toewijzen        |
+| `branding.manage`             | Logo, kleuren, favicon, supportgegevens      |
+| `domain.manage`               | Custom domeinen                              |
+| `audit.view`                  | Auditlog inzien                              |
 
 ### Cliënten en relaties
-| Sleutel | Betekenis |
-|---|---|
-| `clients.view` | Cliëntenlijst en -detail |
-| `clients.create` · `clients.update` · `clients.delete` | Beheer |
-| `contacts.view` · `contacts.manage` | Contactpersonen en koppelingen |
-| `care_organizations.view` · `care_organizations.manage` | Opdrachtgevers |
-| `locations.view` · `locations.manage` | Locaties |
+
+| Sleutel                                                 | Betekenis                      |
+| ------------------------------------------------------- | ------------------------------ |
+| `clients.view`                                          | Cliëntenlijst en -detail       |
+| `clients.create` · `clients.update` · `clients.delete`  | Beheer                         |
+| `contacts.view` · `contacts.manage`                     | Contactpersonen en koppelingen |
+| `care_organizations.view` · `care_organizations.manage` | Opdrachtgevers                 |
+| `locations.view` · `locations.manage`                   | Locaties                       |
 
 ### Vloot
-| Sleutel | Betekenis |
-|---|---|
-| `drivers.view` · `drivers.manage` | Chauffeurs |
+
+| Sleutel                             | Betekenis  |
+| ----------------------------------- | ---------- |
+| `drivers.view` · `drivers.manage`   | Chauffeurs |
 | `vehicles.view` · `vehicles.manage` | Voertuigen |
 
 ### Ritten en planning
-| Sleutel | Betekenis |
-|---|---|
-| `rides.view` | Ritten inzien |
-| `rides.view.assigned` | Alleen eigen toegewezen ritten (chauffeur) |
-| `rides.create` · `rides.update` · `rides.cancel` | Ritbeheer |
-| `rides.assign_driver` · `rides.assign_vehicle` | Toewijzen |
-| `rides.dispatch` | Dispatchscherm en statusinterventies |
-| `rides.checkin` · `rides.checkout` | Cliënt in-/uitchecken |
-| `rides.report_absence` | Afwezigheid registreren |
-| `rides.report_problem` | Probleem melden |
-| `rides.force_status` | Status buiten de state machine zetten (altijd geaudit) |
-| `ride_templates.view` · `ride_templates.manage` | Terugkerende ritten |
-| `planning.view` · `planning.manage` | Planningsschermen |
+
+| Sleutel                                          | Betekenis                                              |
+| ------------------------------------------------ | ------------------------------------------------------ |
+| `rides.view`                                     | Ritten inzien                                          |
+| `rides.view.assigned`                            | Alleen eigen toegewezen ritten (chauffeur)             |
+| `rides.create` · `rides.update` · `rides.cancel` | Ritbeheer                                              |
+| `rides.assign_driver` · `rides.assign_vehicle`   | Toewijzen                                              |
+| `rides.dispatch`                                 | Dispatchscherm en statusinterventies                   |
+| `rides.checkin` · `rides.checkout`               | Cliënt in-/uitchecken                                  |
+| `rides.report_absence`                           | Afwezigheid registreren                                |
+| `rides.report_problem`                           | Probleem melden                                        |
+| `rides.force_status`                             | Status buiten de state machine zetten (altijd geaudit) |
+| `ride_templates.view` · `ride_templates.manage`  | Terugkerende ritten                                    |
+| `planning.view` · `planning.manage`              | Planningsschermen                                      |
 
 ### Tags
-| Sleutel | Betekenis |
-|---|---|
-| `tags.view` | Tags en hun status |
+
+| Sleutel       | Betekenis                                               |
+| ------------- | ------------------------------------------------------- |
+| `tags.view`   | Tags en hun status                                      |
 | `tags.manage` | Aanmaken, koppelen, ontkoppelen, deactiveren, vervangen |
 
 ### Overig
-| Sleutel | Betekenis |
-|---|---|
-| `reports.view` | Rapportages |
+
+| Sleutel                                           | Betekenis                        |
+| ------------------------------------------------- | -------------------------------- |
+| `reports.view`                                    | Rapportages                      |
 | `change_requests.view` · `change_requests.review` | Wijzigingsverzoeken uit portalen |
-| `notifications.view` | In-app notificaties |
+| `notifications.view`                              | In-app notificaties              |
 
 ### Platform (alleen `platform_admins`)
+
 `platform.organizations.view` · `platform.organizations.manage` ·
 `platform.settings.manage` · `platform.logs.view` · `platform.support.request`
 
@@ -128,51 +135,51 @@ de organisatie keurt goed via `support_access_grants`.
 
 Rechten per systeemrol. `●` = toegekend.
 
-| Permissie(groep) | Owner | Admin | Planner | Dispatcher | Driver | Read-only |
-|---|:--:|:--:|:--:|:--:|:--:|:--:|
-| `organization.view` | ● | ● | ● | ● | | ● |
-| `organization.manage` | ● | ● | | | | |
-| `organization.members.*` | ● | ● | | | | |
-| `organization.roles.*` | ● | | | | | |
-| `branding.manage` | ● | ● | | | | |
-| `domain.manage` | ● | | | | | |
-| `audit.view` | ● | ● | | | | |
-| `clients.view` | ● | ● | ● | ● | | ● |
-| `clients.create/update` | ● | ● | ● | | | |
-| `clients.delete` | ● | ● | | | | |
-| `contacts.*` | ● | ● | ● | | | |
-| `care_organizations.*` | ● | ● | ● | | | |
-| `locations.view` | ● | ● | ● | ● | ●¹ | ● |
-| `locations.manage` | ● | ● | ● | | | |
-| `drivers.view` | ● | ● | ● | ● | | ● |
-| `drivers.manage` | ● | ● | | | | |
-| `vehicles.view` | ● | ● | ● | ● | | ● |
-| `vehicles.manage` | ● | ● | | | | |
-| `rides.view` | ● | ● | ● | ● | | ● |
-| `rides.view.assigned` | | | | | ● | |
-| `rides.create/update/cancel` | ● | ● | ● | ● | | |
-| `rides.assign_driver/vehicle` | ● | ● | ● | ● | | |
-| `rides.dispatch` | ● | ● | | ● | | |
-| `rides.checkin` | ● | ● | | ● | ● | |
-| `rides.checkout` | ● | ● | | ● | ● | |
-| `rides.report_absence` | ● | ● | | ● | ● | |
-| `rides.report_problem` | ● | ● | ● | ● | ● | |
-| `rides.force_status` | ● | ● | | ● | | |
-| `ride_templates.*` | ● | ● | ● | | | |
-| `planning.view` | ● | ● | ● | ● | | ● |
-| `planning.manage` | ● | ● | ● | ● | | |
-| `tags.view` | ● | ● | ● | ● | | |
-| `tags.manage` | ● | ● | ● | | | |
-| `reports.view` | ● | ● | ● | ● | | ● |
-| `change_requests.view` | ● | ● | ● | ● | | ● |
-| `change_requests.review` | ● | ● | ● | ● | | |
-| `notifications.view` | ● | ● | ● | ● | ● | ● |
+| Permissie(groep)              | Owner | Admin | Planner | Dispatcher | Driver | Read-only |
+| ----------------------------- | :---: | :---: | :-----: | :--------: | :----: | :-------: |
+| `organization.view`           |   ●   |   ●   |    ●    |     ●      |        |     ●     |
+| `organization.manage`         |   ●   |   ●   |         |            |        |           |
+| `organization.members.*`      |   ●   |   ●   |         |            |        |           |
+| `organization.roles.*`        |   ●   |       |         |            |        |           |
+| `branding.manage`             |   ●   |   ●   |         |            |        |           |
+| `domain.manage`               |   ●   |       |         |            |        |           |
+| `audit.view`                  |   ●   |   ●   |         |            |        |           |
+| `clients.view`                |   ●   |   ●   |    ●    |     ●      |        |     ●     |
+| `clients.create/update`       |   ●   |   ●   |    ●    |            |        |           |
+| `clients.delete`              |   ●   |   ●   |         |            |        |           |
+| `contacts.*`                  |   ●   |   ●   |    ●    |            |        |           |
+| `care_organizations.*`        |   ●   |   ●   |    ●    |            |        |           |
+| `locations.view`              |   ●   |   ●   |    ●    |     ●      |   ●¹   |     ●     |
+| `locations.manage`            |   ●   |   ●   |    ●    |            |        |           |
+| `drivers.view`                |   ●   |   ●   |    ●    |     ●      |        |     ●     |
+| `drivers.manage`              |   ●   |   ●   |         |            |        |           |
+| `vehicles.view`               |   ●   |   ●   |    ●    |     ●      |        |     ●     |
+| `vehicles.manage`             |   ●   |   ●   |         |            |        |           |
+| `rides.view`                  |   ●   |   ●   |    ●    |     ●      |        |     ●     |
+| `rides.view.assigned`         |       |       |         |            |   ●    |           |
+| `rides.create/update/cancel`  |   ●   |   ●   |    ●    |     ●      |        |           |
+| `rides.assign_driver/vehicle` |   ●   |   ●   |    ●    |     ●      |        |           |
+| `rides.dispatch`              |   ●   |   ●   |         |     ●      |        |           |
+| `rides.checkin`               |   ●   |   ●   |         |     ●      |   ●    |           |
+| `rides.checkout`              |   ●   |   ●   |         |     ●      |   ●    |           |
+| `rides.report_absence`        |   ●   |   ●   |         |     ●      |   ●    |           |
+| `rides.report_problem`        |   ●   |   ●   |    ●    |     ●      |   ●    |           |
+| `rides.force_status`          |   ●   |   ●   |         |     ●      |        |           |
+| `ride_templates.*`            |   ●   |   ●   |    ●    |            |        |           |
+| `planning.view`               |   ●   |   ●   |    ●    |     ●      |        |     ●     |
+| `planning.manage`             |   ●   |   ●   |    ●    |     ●      |        |           |
+| `tags.view`                   |   ●   |   ●   |    ●    |     ●      |        |           |
+| `tags.manage`                 |   ●   |   ●   |    ●    |            |        |           |
+| `reports.view`                |   ●   |   ●   |    ●    |     ●      |        |     ●     |
+| `change_requests.view`        |   ●   |   ●   |    ●    |     ●      |        |     ●     |
+| `change_requests.review`      |   ●   |   ●   |    ●    |     ●      |        |           |
+| `notifications.view`          |   ●   |   ●   |    ●    |     ●      |   ●    |     ●     |
 
 ¹ **Belangrijk:** een chauffeur heeft `clients.view` **niet**. Hij heeft
 `rides.view.assigned`, en RLS geeft hem daarmee alleen de cliënten die aan een
 van zijn ritten hangen, binnen het datumvenster. Dat is de letterlijke eis uit
-§4: *"Een chauffeur mag NOOIT zomaar alle cliënten van de organisatie kunnen
-bekijken."* Hetzelfde geldt voor locaties: zichtbaar in de context van een
+§4: _"Een chauffeur mag NOOIT zomaar alle cliënten van de organisatie kunnen
+bekijken."_ Hetzelfde geldt voor locaties: zichtbaar in de context van een
 toegewezen rit, niet als doorzoekbare lijst.
 
 Vervoersbehoeften staan op de rit (besluit D-03) en zijn dus zichtbaar voor
@@ -188,17 +195,20 @@ een speciaal geval in de code.
 ## 6. Portaalrechten (geen rollen)
 
 ### Cliëntportaal
+
 Eigen profiel inzien · eigen komende en afgelopen ritten · wijzigingsverzoek
 indienen · afmelden als de organisatie dat toestaat.
 Nooit: andere cliënten, chauffeursgegevens, rechtstreekse ritwijzigingen.
 
 ### Contact-/ouderportaal
+
 Gekoppelde cliënten waarvoor `can_view_rides` geldt · ritten en status ·
 afmelden bij `can_report_absence` · wijzigingsverzoek bij `can_request_changes`.
 Nooit: rechtstreeks in `rides` schrijven. Alles loopt via `change_requests`
 (§32).
 
 ### Opdrachtgeverportaal
+
 Cliënten met een **geldige** koppeling (`valid_from`/`valid_to`) · planning en
 ritstatus van die cliënten · afwezigheidsoverzicht · rapportages over de eigen
 cliënten. Nooit: cliënten van andere opdrachtgevers, chauffeursbeheer,
@@ -206,11 +216,11 @@ organisatie-instellingen.
 
 ## 7. Handhaving
 
-| Laag | Wat |
-|---|---|
-| Database | `app.has_permission(org, key)` in RLS-policies |
-| Service | `requirePermission()` als eerste regel van elke mutatie |
-| UI | `usePermission()` verbergt knoppen — puur cosmetisch |
+| Laag     | Wat                                                     |
+| -------- | ------------------------------------------------------- |
+| Database | `app.has_permission(org, key)` in RLS-policies          |
+| Service  | `requirePermission()` als eerste regel van elke mutatie |
+| UI       | `usePermission()` verbergt knoppen — puur cosmetisch    |
 
 De UI-laag is nooit een beveiligingsmaatregel. Een verborgen knop houdt niemand
 tegen die de Server Action rechtstreeks aanroept; de service en RLS doen dat wel.

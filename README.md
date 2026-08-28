@@ -4,24 +4,23 @@ Multi-tenant SaaS-platform voor vervoersbedrijven: cliëntenbeheer, terugkerende
 ritplanning, dispatching, een chauffeurs-PWA met NFC/QR check-in, en portalen
 voor cliënten, contactpersonen en opdrachtgevers.
 
-> **Status: architectuurfase.** Er staat nog geen applicatiecode in deze
-> repository. De documenten hieronder zijn het ontwerp waarop gebouwd gaat
-> worden.
+> **Status: Fase 1 afgerond** — projectfundament staat, database volgt in Fase 2.
+> `npm run verify` is groen (format, lint, typecheck, 74 tests, build).
 
 ## Documentatie
 
-| Document | Inhoud |
-|---|---|
-| [`docs/AUDIT_PHASE0.md`](docs/AUDIT_PHASE0.md) | Repository-audit — uitgangssituatie |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Systeemarchitectuur, mappenstructuur, technologiekeuzes |
-| [`docs/DATABASE.md`](docs/DATABASE.md) | ER-model, tabellen, constraints, indexes |
-| [`docs/SECURITY.md`](docs/SECURITY.md) | Dreigingsmodel, RLS-strategie, GDPR, testmatrix |
-| [`docs/ROLES_AND_PERMISSIONS.md`](docs/ROLES_AND_PERMISSIONS.md) | RBAC-model en permissiecatalogus |
-| [`docs/NFC.md`](docs/NFC.md) | TagPoint tag/QR-ontwerp en check-in flow |
-| [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md) | Fasering en Definition of Done |
-| [`docs/RISKS_AND_DECISIONS.md`](docs/RISKS_AND_DECISIONS.md) | **Openstaande beslispunten en aannames** |
+| Document                                                         | Inhoud                                                  |
+| ---------------------------------------------------------------- | ------------------------------------------------------- |
+| [`docs/AUDIT_PHASE0.md`](docs/AUDIT_PHASE0.md)                   | Repository-audit — uitgangssituatie                     |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)                   | Systeemarchitectuur, mappenstructuur, technologiekeuzes |
+| [`docs/DATABASE.md`](docs/DATABASE.md)                           | ER-model, tabellen, constraints, indexes                |
+| [`docs/SECURITY.md`](docs/SECURITY.md)                           | Dreigingsmodel, RLS-strategie, GDPR, testmatrix         |
+| [`docs/ROLES_AND_PERMISSIONS.md`](docs/ROLES_AND_PERMISSIONS.md) | RBAC-model en permissiecatalogus                        |
+| [`docs/NFC.md`](docs/NFC.md)                                     | TagPoint tag/QR-ontwerp en check-in flow                |
+| [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md)     | Fasering en Definition of Done                          |
+| [`docs/RISKS_AND_DECISIONS.md`](docs/RISKS_AND_DECISIONS.md)     | **Openstaande beslispunten en aannames**                |
 
-`DEPLOYMENT.md` en `DEVELOPMENT.md` volgen in Fase 14 respectievelijk Fase 1.
+`DEPLOYMENT.md` volgt in Fase 14.
 
 ## Kernpunten
 
@@ -37,13 +36,22 @@ voor cliënten, contactpersonen en opdrachtgevers.
 
 ## Techniek
 
-Next.js 15 · React 19 · TypeScript (strict) · Tailwind CSS v4 ·
+Next.js 16 · React 19 · TypeScript 6 (strict) · Tailwind CSS v4 ·
 Supabase (PostgreSQL, Auth, Realtime, Storage) · Vercel · PWA
 
 ## Aan de slag
 
-Nog niet van toepassing — er is nog geen applicatiecode. Zie
-[`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md) voor de fasering.
+Node 22 en Docker zijn genoeg. Een Supabase-cloudproject is **niet** nodig om te
+ontwikkelen of te testen — de CLI draait de hele stack lokaal.
+
+```bash
+npm install
+cp .env.example .env.local
+npm run dev        # http://localhost:3000
+npm run verify     # format, lint, typecheck, test, build — hetzelfde als CI
+```
+
+Zie [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) voor de rest.
 
 ## Licentie
 

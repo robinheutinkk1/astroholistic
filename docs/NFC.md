@@ -20,13 +20,13 @@ inbouwt. De QR-code is een gerenderd plaatje van de tag-URL. Zie
 
 Elke tag heeft er twee, met verschillende doelen:
 
-| | `public_code` | `token` |
-|---|---|---|
-| Voorbeeld | `TP-TAXI-8F3A21` | `k7q2mx4f9b3n8v6c1s5r0t` |
-| Doel | Mensen: opdruk, inventaris, support | Machines: de URL |
-| Entropie | Laag (leesbaar) | 128 bit random |
-| In de URL? | **Nee** | Ja |
-| Opslag in DB | Platte tekst | Alleen `sha256(token ‖ pepper)` |
+|              | `public_code`                       | `token`                         |
+| ------------ | ----------------------------------- | ------------------------------- |
+| Voorbeeld    | `TP-TAXI-8F3A21`                    | `k7q2mx4f9b3n8v6c1s5r0t`        |
+| Doel         | Mensen: opdruk, inventaris, support | Machines: de URL                |
+| Entropie     | Laag (leesbaar)                     | 128 bit random                  |
+| In de URL?   | **Nee**                             | Ja                              |
+| Opslag in DB | Platte tekst                        | Alleen `sha256(token ‖ pepper)` |
 
 De URL is `https://<host>/t/<token>`.
 
@@ -162,12 +162,12 @@ zien hoe vaak de tag daadwerkelijk werd gebruikt.
 
 ## 9. Platformverschillen
 
-| Platform | Gedrag |
-|---|---|
-| iOS 14+ | Achtergrond-NFC-lezen: tag tappen opent de URL zonder app. Werkt. |
-| Android (Chrome) | Idem via het besturingssysteem; daarnaast is Web NFC beschikbaar voor in-app scannen |
-| Web NFC API | Alleen Chrome/Android. Wordt als *progressive enhancement* gebruikt: scannen zonder de app te verlaten. Nooit als vereiste. |
-| Geen NFC | QR via de camera, of handmatig |
+| Platform         | Gedrag                                                                                                                      |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| iOS 14+          | Achtergrond-NFC-lezen: tag tappen opent de URL zonder app. Werkt.                                                           |
+| Android (Chrome) | Idem via het besturingssysteem; daarnaast is Web NFC beschikbaar voor in-app scannen                                        |
+| Web NFC API      | Alleen Chrome/Android. Wordt als _progressive enhancement_ gebruikt: scannen zonder de app te verlaten. Nooit als vereiste. |
+| Geen NFC         | QR via de camera, of handmatig                                                                                              |
 
 De PWA gaat er nooit van uit dat Web NFC bestaat. De URL-flow is het
 gegarandeerde pad; Web NFC maakt het alleen prettiger waar het beschikbaar is.

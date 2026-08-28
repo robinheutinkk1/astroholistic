@@ -24,7 +24,7 @@ eerst wijzigen.
 
 1. **De database is de beveiligingsgrens.** Tenant-isolatie wordt afgedwongen
    met PostgreSQL Row Level Security. De frontend en de service-laag zijn
-   *aanvullende* lagen, nooit de enige laag. Als iemand met een geldig
+   _aanvullende_ lagen, nooit de enige laag. Als iemand met een geldig
    gebruikers-JWT rechtstreeks de Supabase REST API aanroept, moet hij nog
    steeds niets van een andere organisatie kunnen zien.
 2. **Autorisatie leidt af uit expliciete relaties, nooit uit afwezigheid van
@@ -43,21 +43,36 @@ eerst wijzigen.
 
 ## 3. Technologiekeuzes
 
-| Laag | Keuze | Waarom |
-|---|---|---|
-| Framework | Next.js 15, App Router | Server Components houden PII server-side; Server Actions geven getypeerde mutaties zonder losse API-laag |
-| UI | React 19, TypeScript strict | Voorgeschreven |
-| Styling | Tailwind CSS v4 + CSS custom properties | White-label kleuren moeten runtime per tenant wisselen — dat kan met CSS-variabelen, niet met build-time Tailwind-config |
+| Laag        | Keuze                                                                                                | Waarom                                                                                                                                                      |
+| ----------- | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Framework   | Next.js 15, App Router                                                                               | Server Components houden PII server-side; Server Actions geven getypeerde mutaties zonder losse API-laag                                                    |
+| UI          | React 19, TypeScript strict                                                                          | Voorgeschreven                                                                                                                                              |
+| Styling     | Tailwind CSS v4 + CSS custom properties                                                              | White-label kleuren moeten runtime per tenant wisselen — dat kan met CSS-variabelen, niet met build-time Tailwind-config                                    |
 | Componenten | Eigen design system, opgezet in de stijl van shadcn/ui (gekopieerde, aanpasbare primitives op Radix) | Radix levert de toegankelijkheid (focus trap, ARIA, keyboard) die §48 vereist; we houden de code in de repo zodat white-label styling geen fork nodig heeft |
-| Database | PostgreSQL 15+ via Supabase | Voorgeschreven |
-| Auth | Supabase Auth (`@supabase/ssr`) | Voorgeschreven; cookie-based sessies werken met Server Components |
-| Realtime | Supabase Realtime | Voorgeschreven — met beperkingen, zie §9 |
-| Hosting | Vercel | Voorgeschreven; wildcard-domeinen voor white-label |
-| Tests | Vitest (unit + integratie), pgTAP (`supabase test db`) voor RLS | pgTAP test policies in de database; Vitest test het écht gebruikte pad (PostgREST met een echt gebruikers-JWT) |
-| E2E | Playwright | Al aanwezig in de omgeving; nodig voor de chauffeursflow |
+| Database    | PostgreSQL 15+ via Supabase                                                                          | Voorgeschreven                                                                                                                                              |
+| Auth        | Supabase Auth (`@supabase/ssr`)                                                                      | Voorgeschreven; cookie-based sessies werken met Server Components                                                                                           |
+| Realtime    | Supabase Realtime                                                                                    | Voorgeschreven — met beperkingen, zie §9                                                                                                                    |
+| Hosting     | Vercel                                                                                               | Voorgeschreven; wildcard-domeinen voor white-label                                                                                                          |
+| Tests       | Vitest (unit + integratie), pgTAP (`supabase test db`) voor RLS                                      | pgTAP test policies in de database; Vitest test het écht gebruikte pad (PostgREST met een echt gebruikers-JWT)                                              |
+| E2E         | Playwright                                                                                           | Al aanwezig in de omgeving; nodig voor de chauffeursflow                                                                                                    |
 
 **Nieuwe dependencies** worden per stuk verantwoord in de PR-omschrijving (§67.14).
 De lijst hierboven is de volledige toegestane basis voor Fase 1–6.
+
+**Geïnstalleerd in Fase 1, met reden:**
+
+| Package | Reden |
+|---|---|
+| `@radix-ui/react-dialog`, `-dropdown-menu`, `-label`, `-slot` | Toegankelijke primitives (focus trap, ARIA, toetsenbord). Zelf bouwen is de bekendste manier om §48 te verliezen |
+| `class-variance-authority` | Getypeerde componentvarianten zonder handmatige klassenlogica |
+| `clsx` + `tailwind-merge` | `cn()` — latere Tailwind-utilities winnen van eerdere |
+| `lucide-react` | Iconenset |
+| `server-only` | Maakt een client-import van servercode een buildfout in plaats van een productielek |
+| `zod` | Validatie aan de rand, en het enige schema waar zowel types als runtime-checks uit komen |
+
+**TypeScript 6, niet 7.** TypeScript 7 is beschikbaar, maar `typescript-eslint`
+ondersteunt hem nog niet. Upgraden kost de type-aware lintregels die §67.9
+("geen `any`") afdwingen. Zie `docs/DEVELOPMENT.md`.
 
 ## 4. Applicatiestructuur
 
@@ -120,7 +135,7 @@ tagpoint-taxi-dispatch/
 │   ├── types/
 │   │   ├── database.ts            # GEGENEREERD — niet handmatig bewerken
 │   │   └── ...
-│   └── middleware.ts
+│   └── proxy.ts                   # sessie + routing (Next 16 naam voor middleware)
 └── tests/
     ├── security/                  # tenant-isolatie (§54) — verplicht groen
     └── e2e/
@@ -149,11 +164,11 @@ over tientallen React components") afdwingbaar in code review.
 ```
 Browser
   │
-  ├─ middleware.ts
+  ├─ proxy.ts  (heette middleware.ts vóór Next 16)
   │    • ververst de Supabase-sessie (cookies)
   │    • resolvet host → organisatie (white-label/custom domain)
   │    • redirect naar /login als er geen sessie is
-  │    ⚠ middleware is UX-routing, GEEN autorisatie (§58)
+  │    ⚠ dit is UX-routing, GEEN autorisatie (§58)
   │
   ├─ Server Component / Server Action
   │    • createServerClient() → gebruikers-JWT, RLS actief
@@ -166,11 +181,11 @@ Browser
 
 Er zijn dus **drie** lagen, en alleen de onderste is vertrouwd:
 
-| Laag | Doel | Vertrouwd? |
-|---|---|---|
-| Middleware | Routing en redirects | Nee |
+| Laag         | Doel                                               | Vertrouwd?             |
+| ------------ | -------------------------------------------------- | ---------------------- |
+| Middleware   | Routing en redirects                               | Nee                    |
 | Service-laag | Duidelijke foutmeldingen, businessregels, auditlog | Nee (defense in depth) |
-| RLS | Tenant-isolatie en scoping | **Ja** |
+| RLS          | Tenant-isolatie en scoping                         | **Ja**                 |
 
 Als de service-laag een permissiecheck vergeet, mag dat hooguit een lelijke
 lege lijst opleveren — nooit datalek naar een andere organisatie.
@@ -181,11 +196,11 @@ lege lijst opleveren — nooit datalek naar een andere organisatie.
 
 Alternatieven die zijn afgewogen:
 
-| Model | Isolatie | Kosten bij 500 tenants | Migraties | Oordeel |
-|---|---|---|---|---|
-| Database per tenant | Sterkst | Onbetaalbaar op Supabase | 500× uitvoeren | Afgevallen |
-| Schema per tenant | Sterk | Duizenden tabellen, trage `pg_dump`, connection-pool druk | 500× uitvoeren, foutgevoelig | Afgevallen |
-| **Gedeeld + RLS** | Sterk mits correct | Lineair, één schema | Eén keer | **Gekozen** |
+| Model               | Isolatie           | Kosten bij 500 tenants                                    | Migraties                    | Oordeel     |
+| ------------------- | ------------------ | --------------------------------------------------------- | ---------------------------- | ----------- |
+| Database per tenant | Sterkst            | Onbetaalbaar op Supabase                                  | 500× uitvoeren               | Afgevallen  |
+| Schema per tenant   | Sterk              | Duizenden tabellen, trage `pg_dump`, connection-pool druk | 500× uitvoeren, foutgevoelig | Afgevallen  |
+| **Gedeeld + RLS**   | Sterk mits correct | Lineair, één schema                                       | Eén keer                     | **Gekozen** |
 
 De prijs van deze keuze is dat isolatie afhangt van correct geschreven policies.
 Daarom is §54 (tenant-isolatietests) geen optionele extra maar een
@@ -196,13 +211,13 @@ merge-blokkerende testsuite.
 Alle helpers staan in een apart `app`-schema, zijn `SECURITY DEFINER`, `STABLE`,
 en draaien met `SET search_path = ''`:
 
-| Functie | Levert |
-|---|---|
-| `app.member_org_ids()` | `uuid[]` van organisaties waar de gebruiker actief lid is |
-| `app.has_permission(org, perm)` | `boolean` — permissie via toegewezen rollen |
-| `app.is_platform_admin()` | `boolean` — uit `platform_admins`, niet uit een JWT-claim |
-| `app.driver_ride_ids()` | ritten toegewezen aan de ingelogde chauffeur |
-| `app.visible_client_ids()` | cliënten zichtbaar voor de huidige principal |
+| Functie                         | Levert                                                    |
+| ------------------------------- | --------------------------------------------------------- |
+| `app.member_org_ids()`          | `uuid[]` van organisaties waar de gebruiker actief lid is |
+| `app.has_permission(org, perm)` | `boolean` — permissie via toegewezen rollen               |
+| `app.is_platform_admin()`       | `boolean` — uit `platform_admins`, niet uit een JWT-claim |
+| `app.driver_ride_ids()`         | ritten toegewezen aan de ingelogde chauffeur              |
+| `app.visible_client_ids()`      | cliënten zichtbaar voor de huidige principal              |
 
 **Bewust géén organisatie-claim in het JWT.** Een JWT-claim is snel, maar blijft
 tot een uur geldig nadat iemand uit een organisatie is verwijderd. Voor een
@@ -231,7 +246,7 @@ organisatie kan later eigen rollen maken zonder schemawijziging. Zie
 ## 8. Tijd en tijdzones
 
 **Dit is een correctheidsvraagstuk, geen detail.** Een terugkerende rit is
-gedefinieerd in *lokale wandkloktijd*: "elke werkdag om 08:00". Als je dat als
+gedefinieerd in _lokale wandkloktijd_: "elke werkdag om 08:00". Als je dat als
 UTC-timestamp opslaat, vertrekt de bus na de zomertijdovergang om 09:00.
 
 Daarom:
@@ -250,12 +265,12 @@ Daarom:
 Supabase Realtime wordt **beperkt** ingezet (§30: "voorkom onnodige realtime
 subscriptions"):
 
-| Scherm | Realtime? |
-|---|---|
-| Dispatch (live ritten van vandaag) | Ja |
-| Dashboard-tellers vandaag | Ja, gedebounced |
-| Cliënten-, chauffeurs-, voertuigenlijsten | Nee |
-| Portalen (cliënt/ouder/opdrachtgever) | Nee — polling bij focus |
+| Scherm                                    | Realtime?               |
+| ----------------------------------------- | ----------------------- |
+| Dispatch (live ritten van vandaag)        | Ja                      |
+| Dashboard-tellers vandaag                 | Ja, gedebounced         |
+| Cliënten-, chauffeurs-, voertuigenlijsten | Nee                     |
+| Portalen (cliënt/ouder/opdrachtgever)     | Nee — polling bij focus |
 
 **Schaalwaarschuwing:** `postgres_changes` respecteert RLS, maar Supabase
 evalueert de policies per abonnee per wijziging. Bij honderden organisaties met

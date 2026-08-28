@@ -10,13 +10,13 @@
 
 De audit is uitgevoerd op de daadwerkelijke checkout. Resultaat:
 
-| Controle | Commando | Resultaat |
-|---|---|---|
-| Werkdirectory | `ls -la` | Alleen `.git/` — geen enkel bestand |
-| Commits | `git log` | `fatal: does not have any commits yet` |
-| Git objecten | `git count-objects -v` | `count: 0`, `in-pack: 0` |
-| Remote branches | `git ls-remote --heads origin` | Leeg — geen enkele branch op GitHub |
-| Remote refs (incl. tags) | `git ls-remote origin` | Leeg |
+| Controle                 | Commando                       | Resultaat                              |
+| ------------------------ | ------------------------------ | -------------------------------------- |
+| Werkdirectory            | `ls -la`                       | Alleen `.git/` — geen enkel bestand    |
+| Commits                  | `git log`                      | `fatal: does not have any commits yet` |
+| Git objecten             | `git count-objects -v`         | `count: 0`, `in-pack: 0`               |
+| Remote branches          | `git ls-remote --heads origin` | Leeg — geen enkele branch op GitHub    |
+| Remote refs (incl. tags) | `git ls-remote origin`         | Leeg                                   |
 
 **Conclusie: er is geen bestaande codebase.** Dit is een greenfield project.
 
@@ -24,16 +24,16 @@ De audit is uitgevoerd op de daadwerkelijke checkout. Resultaat:
 
 Het masterprompt (§66, Fase 0) vroeg om analyse van:
 
-| Gevraagd | Aangetroffen |
-|---|---|
-| `package.json` | Bestaat niet |
-| Next.js versie | Niet aanwezig |
-| Bestaande componenten | Niet aanwezig |
-| Supabase configuratie | Niet aanwezig |
-| Environment variables | Niet aanwezig (geen `.env*`) |
-| Huidige database | Geen migrations, geen `supabase/` map |
-| Bestaande routes | Niet aanwezig |
-| Bestaande TagPoint functionaliteit | Niet aanwezig |
+| Gevraagd                           | Aangetroffen                          |
+| ---------------------------------- | ------------------------------------- |
+| `package.json`                     | Bestaat niet                          |
+| Next.js versie                     | Niet aanwezig                         |
+| Bestaande componenten              | Niet aanwezig                         |
+| Supabase configuratie              | Niet aanwezig                         |
+| Environment variables              | Niet aanwezig (geen `.env*`)          |
+| Huidige database                   | Geen migrations, geen `supabase/` map |
+| Bestaande routes                   | Niet aanwezig                         |
+| Bestaande TagPoint functionaliteit | Niet aanwezig                         |
 
 Regel §67.1 ("breek geen bestaande functionaliteit") is daarmee niet van toepassing:
 er is niets om te breken en niets om te behouden. Dat is gunstig — we kunnen de
@@ -55,12 +55,12 @@ in een repo met een niet-gerelateerde naam. Zie ook `docs/RISKS_AND_DECISIONS.md
 
 Geverifieerd in deze sessie:
 
-| Tool | Versie | Status |
-|---|---|---|
-| Node.js | v22.22.2 | Beschikbaar — voldoet aan Next.js 15 |
-| npm | 10.9.7 | Beschikbaar |
-| Docker | 29.3.1 | Beschikbaar — nodig voor lokale Supabase stack |
-| Supabase CLI | — | **Niet geïnstalleerd** |
+| Tool         | Versie   | Status                                         |
+| ------------ | -------- | ---------------------------------------------- |
+| Node.js      | v22.22.2 | Beschikbaar — voldoet aan Next.js 15           |
+| npm          | 10.9.7   | Beschikbaar                                    |
+| Docker       | 29.3.1   | Beschikbaar — nodig voor lokale Supabase stack |
+| Supabase CLI | —        | **Niet geïnstalleerd**                         |
 
 De Supabase CLI wordt in Fase 1 als dev-dependency toegevoegd (`npm i -D supabase`)
 in plaats van globaal geïnstalleerd, zodat de versie in Git vastligt en elke

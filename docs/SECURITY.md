@@ -23,24 +23,24 @@ Beschermwaardig, in volgorde van ernst bij verlies:
 
 ## 2. Dreigingsmodel
 
-| # | Dreiging | Beheersmaatregel |
-|---|---|---|
-| T1 | Organisatie A leest/wijzigt data van organisatie B | RLS op elke tenant-tabel; verplichte isolatietests (§8) |
-| T2 | Ingelogde gebruiker roept de Supabase REST API rechtstreeks aan en omzeilt de UI | RLS is de grens, niet de frontend; anon key is publiek en dat is by design |
-| T3 | Chauffeur bekijkt cliënten waar hij geen rit voor heeft | RLS-policy op `clients` scopet op toegewezen ritten binnen een datumvenster |
-| T4 | Ouder bekijkt een ander kind | RLS via `client_contacts`; rechten staan op de koppeling |
-| T5 | Opdrachtgever ziet cliënten die hij niet financiert | RLS via `client_care_organizations` inclusief geldigheidsperiode |
-| T6 | Privilege-escalatie: lid kent zichzelf een hogere rol toe | `organization.members.manage`-recht + trigger die rolwissel naar een rol met meer rechten dan de actor blokkeert |
-| T7 | Rolinjectie over tenants heen | Trigger: een toegewezen rol moet systeemrol zijn of tot dezelfde organisatie behoren |
-| T8 | NFC/QR-URL lekt persoonsgegevens aan een vinder | Publieke landingspagina toont **nooit** PII; identificatie gebeurt pas na authenticatie |
-| T9 | Tag-enumeratie (`/t/TP-TAXI-000001` … `000002`) | 128-bit random token in de URL, gehasht opgeslagen; het leesbare `public_code` staat niet in de URL |
-| T10 | Manipulatie van de audit trail | `ride_events`/`audit_logs` append-only op drie lagen (RLS, grants, trigger) |
-| T11 | Service role key lekt naar de client | Key alleen in `lib/supabase/admin.ts` met `import 'server-only'`; CI-check op de bundle |
-| T12 | IDOR via geraden id's | uuid v4 pk's + RLS; niet-geautoriseerd en niet-bestaand geven dezelfde melding |
-| T13 | Platformbeheerder-account gecompromitteerd = alle tenants gelekt | Platformbeheerders krijgen géén standaard toegang tot tenant-PII (§5) |
-| T14 | Host-header spoofing om een andere tenantcontext te krijgen | De host bepaalt alleen branding; autorisatie gaat via lidmaatschap |
-| T15 | Bruteforce op login / massale tag-scans | Rate limiting op auth-endpoints en op de check-in route |
-| T16 | XSS via white-label branding | Kleuren gevalideerd met regex, logo's alleen via geverifieerde upload, geen vrije CSS/HTML |
+| #   | Dreiging                                                                         | Beheersmaatregel                                                                                                 |
+| --- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| T1  | Organisatie A leest/wijzigt data van organisatie B                               | RLS op elke tenant-tabel; verplichte isolatietests (§8)                                                          |
+| T2  | Ingelogde gebruiker roept de Supabase REST API rechtstreeks aan en omzeilt de UI | RLS is de grens, niet de frontend; anon key is publiek en dat is by design                                       |
+| T3  | Chauffeur bekijkt cliënten waar hij geen rit voor heeft                          | RLS-policy op `clients` scopet op toegewezen ritten binnen een datumvenster                                      |
+| T4  | Ouder bekijkt een ander kind                                                     | RLS via `client_contacts`; rechten staan op de koppeling                                                         |
+| T5  | Opdrachtgever ziet cliënten die hij niet financiert                              | RLS via `client_care_organizations` inclusief geldigheidsperiode                                                 |
+| T6  | Privilege-escalatie: lid kent zichzelf een hogere rol toe                        | `organization.members.manage`-recht + trigger die rolwissel naar een rol met meer rechten dan de actor blokkeert |
+| T7  | Rolinjectie over tenants heen                                                    | Trigger: een toegewezen rol moet systeemrol zijn of tot dezelfde organisatie behoren                             |
+| T8  | NFC/QR-URL lekt persoonsgegevens aan een vinder                                  | Publieke landingspagina toont **nooit** PII; identificatie gebeurt pas na authenticatie                          |
+| T9  | Tag-enumeratie (`/t/TP-TAXI-000001` … `000002`)                                  | 128-bit random token in de URL, gehasht opgeslagen; het leesbare `public_code` staat niet in de URL              |
+| T10 | Manipulatie van de audit trail                                                   | `ride_events`/`audit_logs` append-only op drie lagen (RLS, grants, trigger)                                      |
+| T11 | Service role key lekt naar de client                                             | Key alleen in `lib/supabase/admin.ts` met `import 'server-only'`; CI-check op de bundle                          |
+| T12 | IDOR via geraden id's                                                            | uuid v4 pk's + RLS; niet-geautoriseerd en niet-bestaand geven dezelfde melding                                   |
+| T13 | Platformbeheerder-account gecompromitteerd = alle tenants gelekt                 | Platformbeheerders krijgen géén standaard toegang tot tenant-PII (§5)                                            |
+| T14 | Host-header spoofing om een andere tenantcontext te krijgen                      | De host bepaalt alleen branding; autorisatie gaat via lidmaatschap                                               |
+| T15 | Bruteforce op login / massale tag-scans                                          | Rate limiting op auth-endpoints en op de check-in route                                                          |
+| T16 | XSS via white-label branding                                                     | Kleuren gevalideerd met regex, logo's alleen via geverifieerde upload, geen vrije CSS/HTML                       |
 
 ## 3. Authenticatie
 
@@ -92,7 +92,7 @@ Drie regels die in review worden afgedwongen:
    van die één keer per statement draait in plaats van één keer per rij. Zonder
    de haakjes is een lijst van 10.000 ritten 10.000 functieaanroepen.
 2. **`with check` op elke INSERT en UPDATE.** Een `using`-clausule alleen laat
-   toe dat je een rij *naar* een andere organisatie schrijft.
+   toe dat je een rij _naar_ een andere organisatie schrijft.
 3. **Aparte policies per commando.** `for all` verbergt te makkelijk een gat.
 
 Helperfuncties staan in schema `app`, zijn `security definer`, `stable`, en
@@ -101,13 +101,13 @@ draaien met `set search_path = ''` (anders is search-path-hijacking mogelijk).
 
 ### Scoping per principal
 
-| Principal | Ziet cliënten | Ziet ritten |
-|---|---|---|
-| Org-medewerker met `clients.view` | Alle binnen de organisatie | Volgens permissies |
-| Chauffeur | Alleen cliënten met een aan hem toegewezen rit binnen het venster (gisteren t/m +7 dagen) | Eigen toegewezen ritten |
-| Cliënt | Alleen zichzelf | Eigen ritten |
-| Contactpersoon | Alleen gekoppelde cliënten met `can_view_rides` | Ritten van die cliënten |
-| Opdrachtgever | Cliënten met een geldige koppeling | Ritten van die cliënten |
+| Principal                         | Ziet cliënten                                                                             | Ziet ritten             |
+| --------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------- |
+| Org-medewerker met `clients.view` | Alle binnen de organisatie                                                                | Volgens permissies      |
+| Chauffeur                         | Alleen cliënten met een aan hem toegewezen rit binnen het venster (gisteren t/m +7 dagen) | Eigen toegewezen ritten |
+| Cliënt                            | Alleen zichzelf                                                                           | Eigen ritten            |
+| Contactpersoon                    | Alleen gekoppelde cliënten met `can_view_rides`                                           | Ritten van die cliënten |
+| Opdrachtgever                     | Cliënten met een geldige koppeling                                                        | Ritten van die cliënten |
 
 Het datumvenster voor chauffeurs is bewust: een chauffeur die vorig jaar één rit
 reed hoort niet permanent het adres van die cliënt te kunnen opvragen.
@@ -152,13 +152,13 @@ Zie `NFC.md` voor het volledige ontwerp. De kern:
 
 ## 7. Secrets en configuratie
 
-| Variabele | Zichtbaarheid | Opmerking |
-|---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Publiek | |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Publiek | Veilig omdat RLS aanstaat — dat is de hele aanname |
-| `SUPABASE_SERVICE_ROLE_KEY` | **Server-only** | Alleen in `lib/supabase/admin.ts` |
-| `CRON_SECRET` | Server-only | Beveiligt de ritgeneratie-endpoint |
-| `TAG_TOKEN_PEPPER` | Server-only | Extra pepper bij het hashen van tag-tokens |
+| Variabele                       | Zichtbaarheid   | Opmerking                                          |
+| ------------------------------- | --------------- | -------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Publiek         |                                                    |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Publiek         | Veilig omdat RLS aanstaat — dat is de hele aanname |
+| `SUPABASE_SERVICE_ROLE_KEY`     | **Server-only** | Alleen in `lib/supabase/admin.ts`                  |
+| `CRON_SECRET`                   | Server-only     | Beveiligt de ritgeneratie-endpoint                 |
+| `TAG_TOKEN_PEPPER`              | Server-only     | Extra pepper bij het hashen van tag-tokens         |
 
 Regels:
 
@@ -178,28 +178,28 @@ Deze suite blokkeert de merge. Elke test draait tegen een echte lokale Supabase
 met **echte gebruikers-JWT's per persona** — niet met de service role, want dan
 test je RLS niet.
 
-| # | Scenario | Verwacht |
-|---|---|---|
-| S1 | Org A leest rit van Org B | 0 rijen |
-| S2 | Org A update cliënt van Org B | 0 rijen geraakt |
-| S3 | Org A insert rit met `organization_id` van B | geweigerd door `with check` |
-| S4 | Org A delete cliënt van Org B | 0 rijen geraakt |
-| S5 | Chauffeur leest cliënt zonder toegewezen rit | 0 rijen |
-| S6 | Chauffeur leest rit van een collega | 0 rijen |
-| S7 | Chauffeur wijzigt rit-status buiten de state machine | geweigerd |
-| S8 | Ouder A leest cliënt B | 0 rijen |
-| S9 | Ouder wijzigt rechtstreeks een rit | geweigerd; alleen `change_requests` |
-| S10 | Opdrachtgever leest cliënt buiten geldige koppeling | 0 rijen |
-| S11 | Cliëntportaal leest andere cliënt | 0 rijen |
-| S12 | Lid zonder `clients.create` maakt cliënt | geweigerd |
-| S13 | Lid kent zichzelf de owner-rol toe | geweigerd |
-| S14 | Rol van Org B toewijzen binnen Org A | geweigerd |
-| S15 | Update van `ride_events` | geweigerd (3 lagen) |
-| S16 | Delete van `audit_logs` | geweigerd |
-| S17 | Platformbeheerder leest `clients` | 0 rijen (bewust) |
-| S18 | Anonieme gebruiker leest willekeurige tabel | 0 rijen |
-| S19 | Tweede NFC-scan op dezelfde rit | geen tweede event; nette melding |
-| S20 | Tag-token van Org B gebruiken binnen Org A | geweigerd |
+| #   | Scenario                                             | Verwacht                            |
+| --- | ---------------------------------------------------- | ----------------------------------- |
+| S1  | Org A leest rit van Org B                            | 0 rijen                             |
+| S2  | Org A update cliënt van Org B                        | 0 rijen geraakt                     |
+| S3  | Org A insert rit met `organization_id` van B         | geweigerd door `with check`         |
+| S4  | Org A delete cliënt van Org B                        | 0 rijen geraakt                     |
+| S5  | Chauffeur leest cliënt zonder toegewezen rit         | 0 rijen                             |
+| S6  | Chauffeur leest rit van een collega                  | 0 rijen                             |
+| S7  | Chauffeur wijzigt rit-status buiten de state machine | geweigerd                           |
+| S8  | Ouder A leest cliënt B                               | 0 rijen                             |
+| S9  | Ouder wijzigt rechtstreeks een rit                   | geweigerd; alleen `change_requests` |
+| S10 | Opdrachtgever leest cliënt buiten geldige koppeling  | 0 rijen                             |
+| S11 | Cliëntportaal leest andere cliënt                    | 0 rijen                             |
+| S12 | Lid zonder `clients.create` maakt cliënt             | geweigerd                           |
+| S13 | Lid kent zichzelf de owner-rol toe                   | geweigerd                           |
+| S14 | Rol van Org B toewijzen binnen Org A                 | geweigerd                           |
+| S15 | Update van `ride_events`                             | geweigerd (3 lagen)                 |
+| S16 | Delete van `audit_logs`                              | geweigerd                           |
+| S17 | Platformbeheerder leest `clients`                    | 0 rijen (bewust)                    |
+| S18 | Anonieme gebruiker leest willekeurige tabel          | 0 rijen                             |
+| S19 | Tweede NFC-scan op dezelfde rit                      | geen tweede event; nette melding    |
+| S20 | Tag-token van Org B gebruiken binnen Org A           | geweigerd                           |
 | S21 | Verwijderd/gesuspendeerd lid bevraagt de organisatie | direct 0 rijen, geen JWT-vertraging |
 
 Aanvullend: een CI-check die faalt op elke tabel in `public` **zonder**
@@ -213,6 +213,7 @@ TagPoint is verwerker. Het platform moet daarom per organisatie kunnen
 exporteren, wissen en aantonen wie wat wanneer zag.
 
 **Data-minimalisatie — wat we bewust NIET opslaan:**
+
 - geen BSN
 - geen geboortedatum (niet nodig om iemand te vervoeren)
 - geen medische diagnoses, medicatie of zorgindicaties

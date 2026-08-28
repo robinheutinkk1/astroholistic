@@ -1,0 +1,106 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens.
+ *
+ * Brand colours are CSS custom properties rather than Tailwind config values
+ * because white-label theming has to change them per request, at runtime
+ * (docs/ARCHITECTURE.md §11). A build-time Tailwind palette cannot do that
+ * without a rebuild per tenant.
+ *
+ * The neutral scale, spacing and typography are NOT tenant-configurable. A
+ * customer picks their brand colours; they do not get to break the contrast
+ * ratios or the layout rhythm.
+ */
+@theme {
+  --font-sans:
+    var(--font-inter), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Brand — overridden per tenant at runtime. Defaults are TagPoint's own. */
+  --color-brand-50: #eef4ff;
+  --color-brand-100: #d9e6ff;
+  --color-brand-200: #bcd3ff;
+  --color-brand-300: #8eb6ff;
+  --color-brand-400: #598eff;
+  --color-brand-500: #3366f2;
+  --color-brand-600: #1f47d6;
+  --color-brand-700: #1a37ab;
+  --color-brand-800: #1b3187;
+  --color-brand-900: #1c2e6b;
+
+  /* Ride status colours. Deliberately not tenant-configurable: a dispatcher
+     reading a different customer's board must not have to relearn what red
+     means. */
+  --color-status-scheduled: #64748b;
+  --color-status-assigned: #6366f1;
+  --color-status-enroute: #0891b2;
+  --color-status-arrived: #7c3aed;
+  --color-status-checkedin: #0d9488;
+  --color-status-started: #2563eb;
+  --color-status-completed: #16a34a;
+  --color-status-absent: #ea580c;
+  --color-status-cancelled: #6b7280;
+  --color-status-problem: #dc2626;
+}
+
+:root {
+  --tp-primary: var(--color-brand-600);
+  --tp-primary-foreground: #ffffff;
+  --tp-secondary: var(--color-brand-100);
+  --tp-secondary-foreground: var(--color-brand-900);
+
+  --tp-background: #ffffff;
+  --tp-surface: #ffffff;
+  --tp-surface-muted: #f8fafc;
+  --tp-foreground: #0f172a;
+  --tp-muted-foreground: #64748b;
+  --tp-border: #e2e8f0;
+  --tp-ring: var(--tp-primary);
+
+  --tp-danger: #dc2626;
+  --tp-danger-foreground: #ffffff;
+  --tp-warning: #ea580c;
+  --tp-success: #16a34a;
+
+  --tp-radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    border-color: var(--tp-border);
+  }
+
+  body {
+    background-color: var(--tp-background);
+    color: var(--tp-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* §48 — a visible focus ring on every interactive element, always. Removing
+     it is an accessibility regression, not a design choice. */
+  :focus-visible {
+    outline: 2px solid var(--tp-ring);
+    outline-offset: 2px;
+  }
+
+  /* §48 — 44px minimum touch targets on the driver PWA, where the user is
+     often standing next to a vehicle in the rain. */
+  @media (pointer: coarse) {
+    button,
+    a[role='button'],
+    [role='button'] {
+      min-height: 44px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
