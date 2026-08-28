@@ -74,9 +74,17 @@ export function CheckinPanel({ token }: { token: string }) {
           </p>
 
           <div className="flex flex-col gap-2">
-            <Button asChild size="touch">
-              <Link href="/driver">Naar mijn ritten</Link>
-            </Button>
+            {/* Een planner die een tag scant heeft niets aan een knop naar de
+                chauffeursapp: daar staat voor hem niets. */}
+            {state.outcome === 'NO_ACCESS' ? (
+              <Button asChild size="touch">
+                <Link href="/planning">Naar de planning</Link>
+              </Button>
+            ) : (
+              <Button asChild size="touch">
+                <Link href="/driver">Naar mijn ritten</Link>
+              </Button>
+            )}
           </div>
         </>
       )}

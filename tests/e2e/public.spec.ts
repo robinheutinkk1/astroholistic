@@ -143,6 +143,50 @@ test.describe('the NFC landing page tells an anonymous visitor nothing', () => {
   });
 });
 
+test.describe('nothing scrolls sideways on a phone', () => {
+  // The single most common mobile defect, and the one a desktop browser never
+  // shows you: something a few pixels too wide makes the whole page pan, and
+  // every tap lands in the wrong place. Checked on the pages that are reachable
+  // without signing in.
+  const PAGES = ['/login', '/forgot-password', '/t/TP0123456789ABCDEFGHJKMNPQ'];
+
+  for (const path of PAGES) {
+    test(`${path} fits the viewport`, async ({ page }) => {
+      await page.setViewportSize({ width: 320, height: 640 });
+      await page.goto(path);
+
+      const overflow = await page.evaluate(() => {
+        const doc = document.documentElement;
+        // One pixel of slack: sub-pixel rounding is not a layout bug.
+        if (doc.scrollWidth <= doc.clientWidth + 1) return null;
+        // Name the widest element, so a failure says which one to fix.
+        const guilty = Array.from(document.querySelectorAll('*'))
+          .map((el) => ({ el, right: el.getBoundingClientRect().right }))
+          .filter((entry) => entry.right > doc.clientWidth + 1)
+          .sort((a, b) => b.right - a.right)[0];
+        return {
+          scrollWidth: doc.scrollWidth,
+          clientWidth: doc.clientWidth,
+          widest: guilty ? guilty.el.outerHTML.slice(0, 120) : 'unknown',
+        };
+      });
+
+      expect(overflow).toBeNull();
+    });
+  }
+
+  test('the touch targets on the tag page are big enough', async ({ page }) => {
+    // 44px is the smallest target a thumb hits reliably (§48). A driver uses
+    // this one-handed, next to a running vehicle.
+    await page.setViewportSize({ width: 320, height: 640 });
+    await page.goto('/t/TP0123456789ABCDEFGHJKMNPQ');
+
+    const link = page.getByRole('link').first();
+    const box = await link.boundingBox();
+    expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+  });
+});
+
 test.describe('the health endpoint', () => {
   test('answers without leaking anything', async ({ request }) => {
     const response = await request.get('/api/health');

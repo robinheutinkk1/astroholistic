@@ -88,6 +88,26 @@ beheerder, rol `owner`, lidmaatschap `ACTIVE`.
 
 Dezelfde stap herhaal je voor elke nieuwe klant die je aanneemt.
 
+## 2c. Iets om te laten zien (optioneel)
+
+Een verse installatie is leeg, en een leeg systeem valt niet te demonstreren:
+elke lijst is leeg, het dashboard staat op nul, de rapportages tonen niets. Dat
+ziet eruit alsof het product niet werkt terwijl er alleen nog geen gegevens in
+staan.
+
+`supabase/production/demo-organization.sql` vult één organisatie met verzonnen
+maar realistisch vervoer: zes weken historie, ritten van vandaag in
+verschillende stadia, terugkerende afspraken, een groepsrit met vier passagiers
+en een ouder in het portaal. Vul bovenin je e-mailadres in en draai hem in de
+SQL Editor.
+
+Je eigen account wordt eigenaar van de demo-organisatie; met de
+organisatiekiezer bovenin schakel je heen en weer. Er komen **geen extra
+inlogaccounts** bij — demo-accounts met een bekend wachtwoord op een
+productiesysteem zijn een risico dat een demo niet waard is.
+
+Weghalen doe je met één regel, onderaan dat bestand.
+
 ## 3. Storage
 
 Migratie 0021 maakt de bucket `organization-logos` aan met zijn policies. Wat je

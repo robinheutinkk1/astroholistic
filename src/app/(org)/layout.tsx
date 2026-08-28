@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { Sidebar, type NavItem } from '@/components/layout/sidebar';
+import { MobileNav } from '@/components/layout/mobile-nav';
 import { UserMenu } from '@/components/layout/user-menu';
 import { OrganizationSwitcher } from '@/features/organizations/components/organization-switcher';
 import { getActiveMembership } from '@/features/organizations/active-organization';
@@ -133,18 +134,27 @@ export default async function OrganizationLayout({
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-14 items-center justify-between gap-4 border-b border-[var(--tp-border)] px-4">
-          <OrganizationSwitcher
-            activeId={membership.organizationId}
-            options={user.memberships.map((m) => ({
-              id: m.organizationId,
-              name: m.organizationName,
-            }))}
+        <header className="flex h-14 items-center gap-2 border-b border-[var(--tp-border)] px-2 md:gap-4 md:px-4">
+          {/* Alleen zichtbaar zolang de zijbalk dat niet is. */}
+          <MobileNav
+            items={navItems}
+            title={brandName(branding, membership.organizationName)}
           />
+
+          <div className="min-w-0 flex-1">
+            <OrganizationSwitcher
+              activeId={membership.organizationId}
+              options={user.memberships.map((m) => ({
+                id: m.organizationId,
+                name: m.organizationName,
+              }))}
+            />
+          </div>
+
           <UserMenu fullName={user.fullName} email={user.email} roleLabels={roleLabels} />
         </header>
 
-        <main className="min-w-0 flex-1 p-6">{children}</main>
+        <main className="min-w-0 flex-1 p-4 md:p-6">{children}</main>
       </div>
     </div>
   );

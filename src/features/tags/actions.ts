@@ -197,14 +197,25 @@ function toState(result: tagService.CheckinResult): Omit<CheckinState, 'status'>
       }).format(new Date(result.occurredAt))
     : null;
 
+  // Elke melding zegt wat er aan de hand is én wat je nu kunt doen. "Geen
+  // toegang" is waar maar waardeloos: de chauffeur staat naast een auto en
+  // heeft een volgende stap nodig, geen diagnose.
+  //
+  // Wat NIET verschilt: het antwoord op een onbekende tag, een tag van een
+  // andere organisatie en een tag die niet is toegewezen. Die drie zijn met
+  // opzet identiek, anders is deze pagina een manier om echte tags te
+  // herkennen (docs/NFC.md §5).
   const messages: Record<tagService.CheckinOutcome, string> = {
     CHECKED_IN: `${result.clientName ?? 'Cliënt'} ingecheckt om ${time}.`,
-    ALREADY_CHECKED_IN: `${result.clientName ?? 'Cliënt'} is al ingecheckt om ${time}.`,
-    NO_ACTIVE_RIDE: 'Geen actieve rit gevonden voor deze tag vandaag.',
-    NO_ACCESS: 'Geen toegang.',
-    UNKNOWN_TAG: 'Deze tag is niet bekend.',
+    ALREADY_CHECKED_IN: `${result.clientName ?? 'Cliënt'} is al ingecheckt om ${time}. Je hoeft niets meer te doen.`,
+    NO_ACTIVE_RIDE:
+      'Er staat vandaag geen rit open voor deze tag. Zet de rit eerst op "onderweg" of "aangekomen" in je rittenlijst; daarna werkt de tag.',
+    NO_ACCESS:
+      'Inchecken met een tag kan alleen als chauffeur. Ben je planner? Vink de cliënt dan af bij de rit zelf.',
+    UNKNOWN_TAG:
+      'Deze tag is niet bekend. Check de cliënt handmatig in via je rittenlijst.',
     NOT_ALLOWED: 'Log in om verder te gaan.',
-    RATE_LIMITED: 'Te veel pogingen. Wacht even en probeer opnieuw.',
+    RATE_LIMITED: 'Te veel pogingen achter elkaar. Wacht een minuut en probeer opnieuw.',
   };
 
   return {

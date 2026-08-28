@@ -70,7 +70,7 @@ export default async function ClientDetailPage({
           {canEdit ? (
             <ClientForm client={client} />
           ) : (
-            <dl className="grid max-w-lg grid-cols-2 gap-3 text-sm">
+            <dl className="grid max-w-lg gap-3 text-sm sm:grid-cols-2">
               <dt className="text-[var(--tp-muted-foreground)]">Telefoon</dt>
               <dd>{client.phone ?? '—'}</dd>
               <dt className="text-[var(--tp-muted-foreground)]">E-mailadres</dt>
