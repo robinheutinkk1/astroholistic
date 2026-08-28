@@ -133,7 +133,16 @@ Ga naar Terugkerend → Nieuwe afspraak. Kies een cliënt, maandag t/m vrijdag,
 losse rit aan en verzet de tijd: die rit krijgt het label "afwijkend" en wordt
 bij een volgende generatie niet meer overschreven.
 
-**5. Wat mist er in de formulieren?**
+**5. Bekijk de chauffeursapp op je telefoon.**
+Log in als `chauffeur2@ontzorgd.test` en ga naar `/driver`. Je ziet de groepsrit
+van 16:00 met vier cliënten. Open hem: bij dagbesteding De Es druk je één keer
+op "ik ben aangekomen", en vink je daarna de vier cliënten los van elkaar af.
+
+Wil je het op je telefoon proberen, start dan met `npm run dev -- -H 0.0.0.0` en
+open het IP-adres van je pc op je telefoon (zelfde wifi). In Chrome of Safari
+kun je hem daarna aan je beginscherm toevoegen.
+
+**6. Wat mist er in de formulieren?**
 Kijk bij een cliënt of je alle velden mist die Taxi Ontzorgd nodig heeft. Het
 rolstoelveld ontbreekt met opzet (besluit D-03); alles wat je verder mist, hoor
 ik graag.

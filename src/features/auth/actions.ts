@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation';
 import type { Route } from 'next';
 import { revalidatePath } from 'next/cache';
-import { IDLE, toFormState, type FormState } from '@/lib/errors/form-state';
+import { toFormState, type FormState } from '@/lib/errors/form-state';
 import {
   forgotPasswordSchema,
   resetPasswordSchema,
@@ -16,8 +16,6 @@ import * as authService from './service';
  * Server Actions: a thin layer. Parse, call the service, shape the result for
  * the form. No business logic lives here (docs/ARCHITECTURE.md §4).
  */
-
-export { IDLE, type FormState };
 
 export async function signInAction(
   _previous: FormState,

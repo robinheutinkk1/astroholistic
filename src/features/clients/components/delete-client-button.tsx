@@ -4,7 +4,7 @@ import { useActionState, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Button } from '@/components/ui/button';
-import { IDLE, type FormState } from '@/features/auth/actions';
+import { IDLE, type FormState } from '@/lib/errors/form-state';
 import { FormStatus } from '@/features/auth/components/form-status';
 import { deleteClientAction } from '../actions';
 

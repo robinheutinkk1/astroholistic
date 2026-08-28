@@ -1,4 +1,4 @@
-import { type FormState } from '../actions';
+import { type FormState } from '@/lib/errors/form-state';
 
 /**
  * Renders the outcome of a Server Action.

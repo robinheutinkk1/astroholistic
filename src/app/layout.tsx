@@ -9,9 +9,17 @@ export const metadata: Metadata = {
   description: 'Planning, dispatch en ritregistratie voor vervoersbedrijven.',
   // Personal data must never reach a search index or a link preview.
   robots: { index: false, follow: false },
+  appleWebApp: {
+    capable: true,
+    title: 'TagPoint',
+    statusBarStyle: 'default',
+  },
 };
 
 export const viewport: Viewport = {
+  // viewportFit lets the driver screen use the full height on notched phones,
+  // with safe-area padding handled in CSS.
+  viewportFit: 'cover',
   width: 'device-width',
   initialScale: 1,
   // Not maximumScale: 1 — locking zoom breaks accessibility for users who

@@ -5,7 +5,7 @@ import { useFormStatus } from 'react-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/states';
-import { IDLE, type FormState } from '@/features/auth/actions';
+import { IDLE, type FormState } from '@/lib/errors/form-state';
 import { ROLE_LABELS, type SystemRoleKey } from '@/features/rbac/permissions';
 import { FormStatus } from '@/features/auth/components/form-status';
 import { setMemberStatusAction, updateMemberRolesAction } from '../actions';

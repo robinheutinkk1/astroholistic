@@ -4,10 +4,10 @@ Multi-tenant SaaS-platform voor vervoersbedrijven: cliëntenbeheer, terugkerende
 ritplanning, dispatching, een chauffeurs-PWA met NFC/QR check-in, en portalen
 voor cliënten, contactpersonen en opdrachtgevers.
 
-> **Status: Fase 5 afgerond** — ritplanning werkt: terugkerende ritten,
-> automatische generatie, dagplanning en toewijzing.
-> `npm run verify` groen (130 tests), `npm run test:security` groen (142 tests).
-> De chauffeurs-app volgt in Fase 6, NFC in Fase 7.
+> **Status: Fase 6 afgerond** — de chauffeurs-app werkt: vandaag-scherm,
+> ritworkflow, groepsritten en afwezigheid, installeerbaar als PWA.
+> `npm run verify` groen (130 tests), `npm run test:security` groen (166 tests).
+> NFC en QR volgen in Fase 7.
 
 ## Documentatie
 

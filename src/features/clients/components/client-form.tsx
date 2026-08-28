@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { IDLE, type FormState } from '@/features/auth/actions';
+import { IDLE, type FormState } from '@/lib/errors/form-state';
 import { FormStatus } from '@/features/auth/components/form-status';
 import { createClientAction, updateClientAction } from '../actions';
 import { type Tables } from '@/types/database';

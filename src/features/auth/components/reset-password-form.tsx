@@ -5,7 +5,8 @@ import { useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { IDLE, resetPasswordAction, type FormState } from '../actions';
+import { resetPasswordAction } from '../actions';
+import { IDLE, type FormState } from '@/lib/errors/form-state';
 import { FormStatus } from './form-status';
 
 function SubmitButton() {

@@ -251,11 +251,45 @@ leren om het systeem te omzeilen.
 ritgeneratie weigerde te draaien omdat `TAG_TOKEN_PEPPER` — een Fase 7-geheim
 dat hij nooit gebruikt — niet ingesteld was.
 
-## Fase 6 — Chauffeurs-PWA
+## Fase 6 — Chauffeurs-PWA ✅ afgerond
 
-Mobile-first "Vandaag"-scherm; ritdetail; navigatie-deeplink; grote knoppen voor
-de hele flow (§24); afwezigheid met redenen; notities; probleemmelding;
-optionele GPS-capture; manifest, service worker, installatie.
+Opgeleverd:
+
+- "Vandaag": losse ritten en groepsritten in één lijst, op tijd gesorteerd
+- Ritdetail met één grote knop per stap, navigatie-deeplink, belknop en de
+  toelichting van de locatie
+- Groepsritscherm: stops in volgorde, per stop wie instapt en wie uitstapt, en
+  **één keer "ik ben aangekomen"** voor de hele stop
+- Afwezigheid met vaste redenen, probleemmelding, optionele GPS
+- PWA: manifest, iconen, `standalone`, startpunt op `/driver`
+
+_Verificatie:_ `npm run verify` groen (130 tests), `npm run test:security` groen
+(166 tests, waarvan 23 nieuw voor de chauffeursflow).
+
+**Autorisatie komt uit de toewijzing, niet uit een rol.** Een chauffeur heeft
+noch `rides.dispatch` noch `rides.update` — die geven zouden hem elke rit in de
+organisatie laten wijzigen. In plaats daarvan mag de chauffeur van een rit díe
+rit door de workflow bewegen, en verder niets. Een aparte service, met RLS die
+dezelfde grens onafhankelijk bewaakt.
+
+**Wat de mutatietest hier liet zien.** Het verzwakken van alleen de
+update-policy werd niet gevangen — omdat de select-policy het al blokkeert: de
+chauffeur kan de rit van een collega niet eens vínden. Pas toen ik beide lagen
+tegelijk verzwakte, vielen acht tests om. Dat is defence in depth die in de
+praktijk werkt, maar het is ook een les over mutatietesten: een test kan om de
+juiste reden slagen en toch de verkeerde laag pinnen.
+
+**Eén knop tegelijk.** De hele workflow tegelijk tonen is hoe een chauffeur de
+verkeerde knop raakt terwijl hij een deur openhoudt. Het scherm toont precies de
+volgende stap; een test bewaakt dat er per status nooit twee kandidaten zijn.
+
+**GPS blokkeert nooit.** Locatie wordt meegestuurd als de organisatie het
+aanzet én het apparaat het geeft, met een harde time-out van vier seconden. Een
+geweigerde of trage fix mag een chauffeur die naast de bus staat niet ophouden.
+
+**Probleem melden verandert de status niet.** Een chauffeur die "de lift klemt"
+meldt terwijl hij onderweg is, moet niet zijn rit uit de workflow getrokken
+zien; de dispatcher beslist wat er gebeurt.
 
 ## Fase 7 — NFC en QR
 

@@ -6,7 +6,8 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { forgotPasswordAction, IDLE, type FormState } from '../actions';
+import { forgotPasswordAction } from '../actions';
+import { IDLE, type FormState } from '@/lib/errors/form-state';
 import { FormStatus } from './form-status';
 
 function SubmitButton() {
