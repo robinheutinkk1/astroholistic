@@ -4,15 +4,16 @@
 > grote gevolgen heeft voor schaalbaarheid, security, GDPR, multi-tenancy of
 > toekomstige SaaS-functionaliteit, STOP dan en benoem het."*
 >
-> Dit document is dat moment. **D-02 en D-03 vragen een besluit vóór Fase 2**;
-> de rest is genomen met de genoemde onderbouwing en kan worden teruggedraaid
-> als je het er niet mee eens bent.
+> Dit document is dat moment. **D-02 en D-03 zijn op 2026-08-28 besloten**
+> (zie hieronder). Openstaand is nog **D-03a**. De overige besluiten zijn
+> genomen met de genoemde onderbouwing en kunnen worden teruggedraaid.
 
 ---
 
-## Vraagt jouw besluit vóór Fase 2
+## Besloten op 2026-08-28
 
 ### D-02 — Platformbeheerders krijgen géén toegang tot cliëntgegevens
+**✅ BESLOTEN: optie (a) — geen toegang, `support_access_grants` in Fase 12.**
 **Impact: security, GDPR, supportproces**
 
 Ik heb ervoor gekozen dat een TagPoint-platformbeheerder via RLS **geen** rijen
@@ -33,17 +34,24 @@ betreft.
 verleent zelf tijdelijke inzage (bijv. 4 uur, met reden), automatisch
 verlopend, volledig geaudit, zichtbaar voor de klant. Dat is in Fase 12 gepland.
 
-**Keuze aan jou:**
-- **(a)** Zoals voorgesteld: geen toegang, `support_access_grants` in Fase 12.
-- **(b)** Idem, maar `support_access_grants` naar voren halen (Fase 4).
-- **(c)** Platformbeheerders krijgen wél leesrechten op tenantdata. Dan wil ik
-  dat schriftelijk vastleggen inclusief de gevolgen voor je
-  verwerkersovereenkomst, want dit is niet meer terug te draaien zodra klanten
-  erop rekenen.
+**Consequenties die je moet kennen:**
+
+1. Tot Fase 12 is er **geen** manier om als platformbeheerder in klantdata te
+   kijken — ook niet bij een dringende supportvraag. De klant zal in die periode
+   zelf moeten meekijken (schermdeling of een screenshot).
+2. Debuggen van een datagerelateerde bug bij één klant gaat via logs met
+   id's, niet met namen. Dat is trager maar werkbaar.
+3. Dit is een sterk commercieel argument richting zorginstellingen en gemeenten:
+   je kunt zwart op wit zeggen dat je leverancier niet in de cliëntgegevens kan.
+   Zet het in je verwerkersovereenkomst.
+4. Er komt onvermijdelijk een moment dat dit onhandig voelt. Het besluit
+   terugdraaien mag, maar dan als expliciete wijziging van dit document — niet
+   als "even een uitzondering".
 
 ---
 
 ### D-03 — Vervoersbehoeften en het AVG artikel 9-vraagstuk
+**✅ BESLOTEN: optie (c) — per rit, niet per cliënt.**
 **Impact: GDPR, productscope, datamodel**
 
 §8 zegt "vermijd onnodige medische gegevens" en "maak hier geen medisch
@@ -71,17 +79,61 @@ waarschuwing in de UI ("geen medische informatie invullen"), maximaal 500
 tekens, wijzigingen in de auditlog, en het veld verplicht meenemen in het
 erasurepad.
 
-**Keuze aan jou:**
-- **(a)** Zoals voorgesteld: enum + `transport_notes` met de mitigaties.
-- **(b)** Alleen de enum, geen vrij tekstveld. Veiligste optie, maar planners
-  zullen de informatie ergens anders kwijt willen — waarschijnlijk in
-  `rides.notes`, en dan heb je hetzelfde probleem op een slechtere plek.
-- **(c)** Ook de enum weglaten en rolstoelvervoer per rit vastleggen in plaats
-  van per cliënt. Minst gegevens over de persoon, maar planners moeten het bij
-  elke rit opnieuw invoeren.
+**Wat er nu in het model staat:**
 
-Ik adviseer **(a)**, en aanraden om dit met je jurist/DPO te toetsen vóór de
-eerste echte klantdata het systeem in gaat.
+- `clients` bevat **geen** `transport_requirements` en **geen** vrij
+  notitieveld. Alleen identificatie en contactgegevens.
+- `rides.transport_requirements` is een gesloten enum-array: `WHEELCHAIR`,
+  `WALKER`, `ASSISTANCE_TO_DOOR`, `SEATBELT_SUPPORT`, `COMPANION_SEAT`.
+- Er is nergens een vrij tekstveld voor vervoersinstructies.
+
+**Consequenties die je moet kennen:**
+
+1. Het cliëntformulier krijgt geen veld voor "gebruikt rolstoel". Planners zullen
+   daarnaar vragen. Dat verzoek hoort langs dit besluit te lopen, niet als
+   "kleine toevoeging" in een formulier te belanden.
+2. Bij het inplannen van een nieuwe rit weet het systeem niet uit zichzelf dat
+   deze cliënt een rolstoelbus nodig heeft. De planner moet het aanvinken. Er is
+   geen waarschuwing mogelijk bij vergeten, want het systeem heeft de
+   informatie niet.
+3. **Eerlijke kanttekening over de privacywinst.** Een rit is gekoppeld aan een
+   genoemde cliënt. "Deze rit vereist een rolstoelbus" blijft dus herleidbaar
+   tot die persoon. De winst is reëel maar bescheiden: het gegeven is geen
+   doorzoekbaar of filterbaar kenmerk van de persoon, staat niet in de
+   cliëntexport, en verdwijnt met de rit volgens de bewaartermijn in plaats van
+   permanent aan het dossier te hangen. Optie (c) is dus geen ontsnapping aan
+   AVG art. 9 — het beperkt de omvang en de vindbaarheid, niet het bestaan.
+   Toets dit alsnog met een DPO voordat er echte klantdata in gaat.
+4. Dit besluit maakt D-03a hieronder noodzakelijk.
+
+---
+
+## Vraagt nog jouw besluit
+
+### D-03a — Erven gegenereerde ritten de vervoersbehoefte van hun template?
+**Impact: bruikbaarheid van terugkerende ritten, GDPR**
+
+Volgt rechtstreeks uit D-03. Een cliënt met twee ritten per werkdag levert ruim
+**500 ritten per jaar** op. Als de vervoersbehoefte alleen op de losse rit staat
+en nergens vandaan komt, moet een planner bij elk van die 500 ritten opnieuw
+"rolstoel" aanvinken. Dat gebeurt niet — en het gevolg is een rit waar een
+gewone bus op wordt gepland terwijl er een rolstoelbus nodig is. Dat is een
+operationeel risico voor de cliënt, niet alleen een ergernis.
+
+**Mijn voorstel:** het veld staat óók op `ride_templates` en wordt bij generatie
+gekopieerd naar elke rit. De planner kan het per rit overschrijven (een
+uitzondering blijft een uitzondering). De vervoersbehoefte hangt daarmee aan de
+*vervoersafspraak*, niet aan de *persoon*.
+
+**Wat het niet oplost:** een template hoort bij één cliënt, dus het gegeven
+blijft herleidbaar. Zie de kanttekening bij D-03 punt 3 — dezelfde afweging.
+
+**Keuze aan jou:**
+- **(a)** Overerving via de template, per rit overschrijfbaar. *Mijn advies.*
+- **(b)** Geen overerving; strikt per losse rit invoeren. Maximaal
+  data-minimaal, maar met het reële risico uit de eerste alinea.
+- **(c)** Handmatige ritten per rit, terugkerende ritten via de template — dat
+  is functioneel gelijk aan (a).
 
 ---
 

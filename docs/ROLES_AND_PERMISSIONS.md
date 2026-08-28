@@ -79,7 +79,6 @@ gedeprecieerd.
 |---|---|
 | `clients.view` | Cliëntenlijst en -detail |
 | `clients.create` · `clients.update` · `clients.delete` | Beheer |
-| `clients.transport_notes.view` | Vervoersnotities inzien (apart recht — zie `SECURITY.md` §9) |
 | `contacts.view` · `contacts.manage` | Contactpersonen en koppelingen |
 | `care_organizations.view` · `care_organizations.manage` | Opdrachtgevers |
 | `locations.view` · `locations.manage` | Locaties |
@@ -141,7 +140,6 @@ Rechten per systeemrol. `●` = toegekend.
 | `clients.view` | ● | ● | ● | ● | | ● |
 | `clients.create/update` | ● | ● | ● | | | |
 | `clients.delete` | ● | ● | | | | |
-| `clients.transport_notes.view` | ● | ● | ● | ● | ●¹ | |
 | `contacts.*` | ● | ● | ● | | | |
 | `care_organizations.*` | ● | ● | ● | | | |
 | `locations.view` | ● | ● | ● | ● | ●¹ | ● |
@@ -174,8 +172,13 @@ Rechten per systeemrol. `●` = toegekend.
 `rides.view.assigned`, en RLS geeft hem daarmee alleen de cliënten die aan een
 van zijn ritten hangen, binnen het datumvenster. Dat is de letterlijke eis uit
 §4: *"Een chauffeur mag NOOIT zomaar alle cliënten van de organisatie kunnen
-bekijken."* Hetzelfde geldt voor locaties en vervoersnotities: zichtbaar in de
-context van een toegewezen rit, niet als doorzoekbare lijst.
+bekijken."* Hetzelfde geldt voor locaties: zichtbaar in de context van een
+toegewezen rit, niet als doorzoekbare lijst.
+
+Vervoersbehoeften staan op de rit (besluit D-03) en zijn dus zichtbaar voor
+iedereen die de rit mag zien — de chauffeur die hem rijdt en de planner die hem
+inplant. Er is geen apart recht voor nodig, en er is geen cliëntveld dat
+afgeschermd moet worden.
 
 **Owner is niet automatisch almachtig.** De owner is de enige rol met
 `organization.roles.manage` en `domain.manage`; verder heeft admin dezelfde set.

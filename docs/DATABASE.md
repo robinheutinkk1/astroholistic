@@ -170,23 +170,22 @@ toewijzen — een privilege-escalatiepad.
 | `address_line1`, `postal_code`, `city`, `country` | text | |
 | `home_location_id` | uuid → locations | thuisadres als herbruikbare locatie |
 | `external_reference` | text | klantnummer bij de opdrachtgever |
-| `transport_requirements` | enum[] `transport_requirement` | zie waarschuwing hieronder |
-| `transport_notes` | text | **operationeel**, geen medisch dossier |
 | `status` | enum (`ACTIVE`\|`INACTIVE`) | |
 | `user_id` | uuid → profiles, nullable | cliëntportaal-account |
 | timestamps + `deleted_at` | | |
 
 `unique (organization_id, external_reference) where external_reference is not null`
 
-> **⚠ Aandachtspunt — GDPR artikel 9.**
-> `transport_requirements` (bijv. `WHEELCHAIR`, `WALKER`, `ASSISTANCE_TO_DOOR`,
-> `SEATBELT_SUPPORT`) is operationeel noodzakelijk: je kunt geen rolstoelbus
-> plannen zonder te weten dat er een rolstoel is. Tegelijk is dit in de praktijk
-> af te leiden gezondheidsinformatie. Zie `RISKS_AND_DECISIONS.md` D-03 — dit
-> vraagt een expliciet besluit vóór implementatie.
-> `transport_notes` is een vrij tekstveld en wordt daarmee onvermijdelijk een
-> opslagplaats voor medische opmerkingen. Mitigatie: UI-waarschuwing, beperkte
-> lengte, apart `clients.transport_notes.view`-recht, en wijzigingen in de auditlog.
+> **Besluit D-03 (2026-08-28): de `clients`-tabel bevat géén vervoersbehoeften.**
+> Geen `transport_requirements`, geen `transport_notes`, geen vrij notitieveld.
+> De cliëntrij bevat uitsluitend identificatie- en contactgegevens.
+> Rolstoel- en begeleidingsbehoefte staat op de **rit** (`rides`), niet op de
+> persoon. Zie §7 en `RISKS_AND_DECISIONS.md` D-03.
+>
+> Gevolg voor de UI: het cliëntformulier heeft geen veld waar een planner
+> "gebruikt rolstoel" of een medische opmerking kwijt kan. Dat is opzet, niet
+> een omissie — het formulier mag zo'n veld ook later niet terugkrijgen zonder
+> dit besluit te herzien.
 
 ### `contacts`
 `id` · `organization_id` · `first_name`, `last_name` · `phone`, `email` ·
@@ -260,10 +259,25 @@ mappingprovider zit achter een interface in `lib/`, niet in het schema (§13).
 | `starts_on` | date not null | |
 | `ends_on` | date null | check `ends_on >= starts_on` |
 | `default_driver_id`, `default_vehicle_id` | uuid null | |
+| `transport_requirements` | `transport_requirement[]` default `'{}'` | Zie D-03a hieronder — **nog te bevestigen** |
 | `status` | enum (`ACTIVE`\|`PAUSED`\|`ARCHIVED`) | |
 | timestamps | | |
 
-### `rides`
+> **Openstaand: D-03a — erft een gegenereerde rit de vervoersbehoefte?**
+> Besluit D-03 legt de vervoersbehoefte op de rit, niet op de cliënt. Bij
+> terugkerende ritten levert dat een praktisch probleem op: een cliënt met
+> twee ritten per werkdag genereert ruim 500 ritten per jaar. Zonder overerving
+> moet een planner bij elk daarvan opnieuw "rolstoel" aanvinken — onwerkbaar, en
+> in de praktijk gaat dat fout, met een verkeerd voertuig als gevolg.
+>
+> Voorstel: het veld staat óók op de template en wordt bij generatie
+> gekopieerd naar de rit; de planner kan het per rit overschrijven.
+> **Eerlijke kanttekening:** een template hangt aan één cliënt, dus "template van
+> Jan bevat WHEELCHAIR" is in de praktijk nog steeds herleidbaar tot "Jan gebruikt
+> een rolstoel". De privacywinst ten opzichte van opslag op de cliënt is dus
+> reëel maar bescheiden: het gegeven is niet doorzoekbaar of filterbaar op
+> persoonsniveau, staat niet in de cliëntexport, en verdwijnt zodra de template
+> wordt gearchiveerd. Zie `RISKS_AND_DECISIONS.md` D-03a.
 | Kolom | Type | Opmerking |
 |---|---|---|
 | `id`, `organization_id`, `client_id` | uuid | |
@@ -276,6 +290,7 @@ mappingprovider zit achter een interface in `lib/`, niet in het schema (§13).
 | `status` | enum `ride_status` | zie §7.1 |
 | `source` | enum (`TEMPLATE`\|`MANUAL`) | |
 | `is_modified` | boolean default false | uitzondering — generatie raakt deze rij nooit aan |
+| `transport_requirements` | `transport_requirement[]` default `'{}'` | Vervoersbehoefte **van deze rit** (D-03): `WHEELCHAIR`, `WALKER`, `ASSISTANCE_TO_DOOR`, `SEATBELT_SUPPORT`, `COMPANION_SEAT`. Gesloten enum — geen vrij tekstveld |
 | `absence_reason` | enum null | `NOT_HOME`\|`CANCELLED_BY_CLIENT`\|`ILL`\|`NO_ACCESS`\|`OTHER` |
 | `cancellation_reason` | text null | |
 | `notes` | text null | |

@@ -234,9 +234,22 @@ auditlog, uitvoerbaar door de organisatie zelf.
 **Logging:** geen namen, adressen of e-mailadressen in applicatielogs. We loggen
 id's. Dit is een reviewregel, geen aanbeveling.
 
-**Openstaand punt:** `clients.transport_requirements` en `transport_notes`
-kunnen als gezondheidsgegevens (AVG art. 9) worden aangemerkt. Zie
-`RISKS_AND_DECISIONS.md` D-03 — dit vraagt een besluit vóór Fase 2.
+**Besloten (D-03, 2026-08-28):** vervoersbehoeften staan **niet** op de cliënt.
+De `clients`-tabel bevat geen `transport_requirements` en geen vrij
+notitieveld. De behoefte (rolstoel, rollator, begeleiding) staat als gesloten
+enum op de **rit**, waar hij operationeel thuishoort: het bepaalt welk voertuig
+nodig is.
+
+Dat is de meest data-minimale invulling die het product nog laat werken. Wees
+wel eerlijk over wat het niet oplost: een rit is gekoppeld aan een genoemde
+cliënt, dus "deze rit vereist een rolstoelbus" blijft herleidbaar tot een
+persoon. De winst zit erin dat het gegeven geen doorzoekbaar kenmerk van de
+persoon is, niet in de cliëntexport zit, en met de rit verdwijnt volgens de
+bewaartermijn in plaats van permanent aan het dossier te blijven hangen.
+
+Er is bewust **geen vrij tekstveld** voor vervoersinstructies. Verwacht dat
+planners daar om zullen vragen; dat verzoek hoort langs dit besluit te lopen en
+niet stilletjes als "kleine toevoeging" in een formulier te belanden.
 
 ## 10. Webbeveiliging
 
