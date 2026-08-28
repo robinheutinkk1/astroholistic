@@ -45,6 +45,12 @@ npx supabase db push
 Dit voert `supabase/migrations/*.sql` op volgorde uit. Er is bewust geen
 seedstap: `supabase/seed/` bevat demogegevens en die horen niet in productie.
 
+**Zonder terminal.** `npm run sql:bundle` schrijft de 26 migraties naar vier
+bestanden in `dist-sql/`, die je op volgorde in de SQL Editor van Supabase
+plakt. De volgorde is heilig — deel 2 werkt niet zonder deel 1. Gaat er iets
+mis, ga dan niet door: een half schema is lastiger te repareren dan opnieuw
+beginnen met `drop schema public cascade; create schema public;`.
+
 **Controle.** In de SQL editor:
 
 ```sql
@@ -62,6 +68,25 @@ having count(p.policyname) = 0;
 
 Geeft de eerste query rijen terug, **stop dan**. Een tabel zonder RLS is een
 tabel waar elke ingelogde gebruiker van elke organisatie in kan kijken.
+
+## 2b. De eerste organisatie en de eerste beheerder
+
+Na de migraties is de database **leeg**: geen gebruiker, geen organisatie. En er
+is met opzet geen registratiepagina — `organizations` heeft geen INSERT-policy
+voor tenants, want een organisatie wordt door het platform aangemaakt en niet
+door zichzelf. Zonder deze stap heb je dus een werkende site waar niemand in kan.
+
+1. **Supabase → Authentication → Users → Add user → Create new user.** Vul
+   e-mailadres en wachtwoord in en vink **Auto Confirm User** aan; zonder dat
+   vinkje kan er niet worden ingelogd.
+2. Open `supabase/production/first-organization.sql`, vul bovenin de vier regels
+   in (e-mailadres, naam, organisatienaam, slug) en draai hem in de SQL Editor.
+
+Het script is veilig om twee keer te draaien en weigert netjes als het account
+nog niet bestaat. Onderaan toont hij één regel ter controle: organisatie,
+beheerder, rol `owner`, lidmaatschap `ACTIVE`.
+
+Dezelfde stap herhaal je voor elke nieuwe klant die je aanneemt.
 
 ## 3. Storage
 
