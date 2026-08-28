@@ -423,6 +423,46 @@ Bewust uitgesteld en niet vergeten: de plangrenzen zelf zijn nog een skelet, en
 wekken dat die controle bestaat. Hoort bij de fase waarin abonnementen echt
 worden.
 
+### D-23 — De DNS van het platform staat bij Strato; de keuze die telt komt later
+**Impact: deployment, SaaS**
+
+`tagpoint.nl` is in eigen bezit met de DNS bij Strato. Overstappen naar
+Cloudflare is overwogen. Wat daarvan afhangt is minder dan het lijkt, en het
+valt uiteen in drie losse dingen.
+
+**1. Domeinverificatie hangt er niet van af.** Het TXT-record
+`_tagpoint-verify.<hostname>` publiceert de *klant* bij zijn eigen provider. Waar
+onze DNS staat, doet daar niets toe. Die kant is af (Fase 10).
+
+**2. De DNS van `tagpoint.nl` zelf.** Strato volstaat: een A-record voor de apex
+en een CNAME voor de platform-host is gewoon standaard DNS. Eén ding is het
+nagaan waard vóórdat erop gebouwd wordt: **ondersteunt het Strato-paneel een
+wildcard (`*.tagpoint.nl`)?** Dat is nodig zodra klanten een subdomein van het
+platform krijgen (`klant.tagpoint.nl`). De code houdt daar al rekening mee —
+`checkHostname()` weigert een claim op een subdomein van de platform-host, juist
+omdat die door het platform worden uitgedeeld — maar het uitdelen zelf is nog
+niet gebouwd.
+
+**3. Wie het certificaat uitgeeft voor `vervoer.klant.nl`.** Dit is de enige
+echte keuze, en hij gaat niet over de DNS-provider maar over de hostingpartij:
+
+- **Hostingpartij regelt het** (bij Vercel: de Domains API). De klant CNAME't
+  naar de hostingpartij, die het certificaat uitgeeft. Onze DNS-provider doet
+  niet mee, en `tagpoint.nl` kan bij Strato blijven staan.
+- **Cloudflare for SaaS.** Dan moet `tagpoint.nl` als zone *wel* bij Cloudflare
+  staan. De klant CNAME't naar een fallback-origin en Cloudflare geeft het
+  certificaat uit.
+
+**Besluit: nu niets verhuizen.** Een DNS-verhuizing is een half uur werk en kan
+op elk moment; nu overstappen levert nog niets op omdat de hostingkeuze nog niet
+gemaakt is. Beslissen bij Fase 14, in die volgorde: eerst hosting, dan DNS.
+
+*Het risico dat je moet kennen:* welke route het ook wordt, de applicatie moet de
+hostname van de **bezoeker** in de `Host`-header zien. Zit er een proxy tussen
+die de header naar de origin-host herschrijft, dan vindt `branding_for_host()`
+niets en vallen alle tenants stil terug op platformstyling. Dat faalt zonder
+foutmelding, dus het hoort in de opleveringscontrole van Fase 14.
+
 ## Openstaande vragen aan jou
 
 1. ~~Bestaat er al een Supabase-project?~~ **Beantwoord: nee.** Zie hierboven.
@@ -430,11 +470,9 @@ worden.
    worden?** Zo ja, dan hoort daar een importplan én een AVG-toets bij.
 3. **Is er een DPO of jurist** die D-03 (gezondheidsgegevens) en D-12
    (anonimisering vs. verwijdering) kan toetsen?
-4. **Domeinen:** is `tagpoint.nl` in bezit en waar staat de DNS? De
-   applicatiekant van custom domains is af (Fase 10): een organisatie voegt een
-   domeinnaam toe, publiceert een TXT-record en verifieert. Wat nog ontbreekt is
-   de platformkant — het wildcard-domein en de automatische certificaten bij de
-   hostingpartij — en daarvoor is dit antwoord nodig.
+4. ~~**Domeinen:** is `tagpoint.nl` in bezit en waar staat de DNS?~~
+   **Beantwoord: in eigen bezit, DNS bij Strato.** Zie D-23 hieronder voor wat
+   dat wel en niet bepaalt.
 5. **Moeten chauffeurs offline kunnen werken?** Het datamodel (`occurred_at`
    los van `recorded_at`) ondersteunt het al, maar een offline-queue in de PWA
    is substantieel extra werk en hoort dan nu in de planning.

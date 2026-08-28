@@ -464,8 +464,11 @@ bevat nu een opslagpad dat een CHECK-constraint exact vastpint; de URL wordt in
 code samengesteld. Zie docs/DATABASE.md voor waarom een prefixtest niet volstaat.
 
 **Niet gebouwd, bewust:** automatische TLS-certificaten en de DNS-/CDN-koppeling
-zelf. Dat is platformconfiguratie (bij Vercel: een wildcard-domein plus de
-Domains API) en geen applicatiecode; het staat in docs/DEPLOYMENT bij Fase 14.
+zelf. Dat is platformconfiguratie en geen applicatiecode, en het hangt af van de
+hostingpartij — hoort daarom bij Fase 14 (deployment). Wat de applicatie moet
+doen zodra die keuze gemaakt is, is één ding: na een geslaagde verificatie de
+hostname aanmelden bij de hostingpartij, zodat die een certificaat uitgeeft. Dat
+haakje zit logisch in `verifyDomain()`, direct na `markVerified()`.
 
 **Niet lokaal te testen:** de daadwerkelijke upload naar Supabase Storage en het
 opvragen van een echt TXT-record. Storage draait als losse dienst en Docker-images
