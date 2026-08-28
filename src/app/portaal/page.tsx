@@ -33,6 +33,13 @@ export default async function PortalHomePage() {
     );
   }
 
+  // Only an opdrachtgever gets the aggregate view: they fund the transport and
+  // need totals. A parent gets their child's actual rides, which is a better
+  // answer to the question they are asking.
+  const isCareOrganization = access.clients.some((client) =>
+    client.relationships.includes('CARE_ORG'),
+  );
+
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-xl font-semibold tracking-tight">Mijn vervoer</h1>
@@ -67,6 +74,12 @@ export default async function PortalHomePage() {
           </li>
         ))}
       </ul>
+
+      {isCareOrganization ? (
+        <Link href="/portaal/rapportage" className="text-sm underline">
+          Overzicht per periode bekijken
+        </Link>
+      ) : null}
     </div>
   );
 }

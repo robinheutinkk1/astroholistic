@@ -12,7 +12,15 @@ import { Input } from './input';
  * State lives in the URL rather than in React: a planner can bookmark or share
  * "all clients in Hengelo, page 3", and the back button behaves.
  */
-function useUpdateParams() {
+/**
+ * Rewrites the current URL's query string.
+ *
+ * Exported because more than one screen needs it (lists, reports). The `as
+ * never` below is the one concession to Next's typed routes: they cannot type a
+ * path assembled at runtime, and the alternative is a route union that has to
+ * be widened every time a screen gains a filter.
+ */
+export function useUpdateParams() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

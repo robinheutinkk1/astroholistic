@@ -68,6 +68,12 @@ const ALL_NAV_ITEMS: readonly NavItem[] = [
   },
   { href: '/tags', label: 'NFC-tags', icon: 'tags', permission: 'tags.view' },
   {
+    href: '/rapportages',
+    label: 'Rapportages',
+    icon: 'reports',
+    permission: 'reports.view',
+  },
+  {
     href: '/instellingen',
     label: 'Instellingen',
     icon: 'settings',

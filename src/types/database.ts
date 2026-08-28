@@ -2196,6 +2196,100 @@ export interface Database {
           occurred_at: string | null;
         }[];
       };
+      report_absence_reasons: {
+        Args: {
+          p_organization_id: string;
+          p_from: string;
+          p_to: string;
+        };
+        Returns: {
+          reason: Database['public']['Enums']['absence_reason'] | null;
+          total: number | null;
+        }[];
+      };
+      report_by_client: {
+        Args: {
+          p_organization_id: string;
+          p_from: string;
+          p_to: string;
+        };
+        Returns: {
+          client_id: string | null;
+          client_name: string | null;
+          total: number | null;
+          completed: number | null;
+          absent: number | null;
+          cancelled: number | null;
+          last_ride_date: string | null;
+        }[];
+      };
+      report_by_driver: {
+        Args: {
+          p_organization_id: string;
+          p_from: string;
+          p_to: string;
+        };
+        Returns: {
+          driver_id: string | null;
+          driver_name: string | null;
+          total: number | null;
+          completed: number | null;
+          absent: number | null;
+          measured: number | null;
+          on_time: number | null;
+          avg_delay_seconds: number | null;
+        }[];
+      };
+      report_portal_client_summary: {
+        Args: {
+          p_from: string;
+          p_to: string;
+        };
+        Returns: {
+          client_id: string | null;
+          client_name: string | null;
+          total: number | null;
+          completed: number | null;
+          absent: number | null;
+          cancelled: number | null;
+        }[];
+      };
+      report_ride_summary: {
+        Args: {
+          p_organization_id: string;
+          p_from: string;
+          p_to: string;
+        };
+        Returns: {
+          total: number | null;
+          completed: number | null;
+          cancelled: number | null;
+          absent: number | null;
+          problem: number | null;
+          open: number | null;
+          checkin_nfc: number | null;
+          checkin_qr: number | null;
+          checkin_manual: number | null;
+          measured: number | null;
+          on_time: number | null;
+          late: number | null;
+          avg_delay_seconds: number | null;
+        }[];
+      };
+      report_rides_per_day: {
+        Args: {
+          p_organization_id: string;
+          p_from: string;
+          p_to: string;
+        };
+        Returns: {
+          day: string | null;
+          total: number | null;
+          completed: number | null;
+          absent: number | null;
+          cancelled: number | null;
+        }[];
+      };
     };
     Enums: {
       absence_reason: 'NOT_HOME' | 'CANCELLED_BY_CLIENT' | 'ILL' | 'NO_ACCESS' | 'OTHER';

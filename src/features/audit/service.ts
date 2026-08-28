@@ -56,7 +56,8 @@ export type AuditAction =
   | 'domain.verified'
   | 'domain.verification_failed'
   | 'domain.removed'
-  | 'domain.primary_changed';
+  | 'domain.primary_changed'
+  | 'report.exported';
 
 export interface AuditEntry {
   readonly organizationId: string;
@@ -65,6 +66,12 @@ export interface AuditEntry {
   readonly entityType: string;
   readonly entityId: string | null;
   readonly changedFields?: readonly string[];
+  /**
+   * Extra facts about the event. Identifiers, counts and dates only — never a
+   * name, an address or anything else that would turn the audit trail into a
+   * second copy of the personal data it is supposed to watch over (§38, §45).
+   */
+  readonly metadata?: Readonly<Record<string, string | number | boolean>>;
 }
 
 export async function recordAudit(entry: AuditEntry): Promise<void> {
@@ -77,7 +84,10 @@ export async function recordAudit(entry: AuditEntry): Promise<void> {
     action: entry.action,
     entity_type: entry.entityType,
     entity_id: entry.entityId,
-    metadata: entry.changedFields ? { changed_fields: [...entry.changedFields] } : {},
+    metadata: {
+      ...(entry.changedFields ? { changed_fields: [...entry.changedFields] } : {}),
+      ...(entry.metadata ?? {}),
+    },
   });
 
   if (error) {

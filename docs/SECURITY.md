@@ -43,6 +43,9 @@ Beschermwaardig, in volgorde van ernst bij verlies:
 | T16 | XSS via white-label branding                                                     | Kleuren gevalideerd met regex in formulier, service én CHECK-constraint; logo's alleen via magic-byte-validatie, SVG volledig geweigerd; geen vrije CSS/HTML |
 | T17 | Tenant zet `logo_path`/`logo_url` naar een externe URL of een pad buiten de eigen map (tracking pixel op portaalpagina's die ouders zien) | Kolom bevat een pad, geen URL; CHECK-constraint pint het exact op `<organization_id>/logo.<ext>`; de URL wordt in code samengesteld |
 | T18 | Organisatie claimt de domeinnaam van een concurrent en gebruikt of blokkeert die | Uniciteit geldt pas bij `VERIFIED`; verificatie via DNS TXT wordt server-side gedaan en met de service role weggeschreven; een trigger blokkeert de tenant zelf |
+| T19 | Rapportage lekt over de tenantgrens omdat een aggregaat de RLS omzeilt | Alle rapportagefuncties zijn `security invoker` + expliciete `reports.view`-check; de catalogus wordt in de suite gecontroleerd (S32) |
+| T20 | CSV-export voert code uit op de pc van de planner (formule-injectie) | Cellen die met `=`, `+`, `-`, `@`, tab of CR beginnen krijgen een apostrof; getallen blijven getallen |
+| T21 | Export haalt persoonsgegevens uit het systeem zonder spoor | Elke export schrijft `report.exported` in de append-only audit trail, met periode en aantal rijen |
 
 ## 3. Authenticatie
 
@@ -212,6 +215,14 @@ test je RLS niet.
 | S28 | Twee organisaties verifiëren dezelfde hostname        | tweede faalt op partial unique index |
 | S29 | `branding_for_host` op een niet-geverifieerd domein   | 0 rijen; geen supportgegevens       |
 | S30 | `branding_for_host` voor een gesuspendeerde organisatie | 0 rijen                           |
+| S31 | Rapportage van organisatie A opvragen als lid van B  | 0 rijen                             |
+| S32 | Rapportagefuncties zijn `security invoker`           | `prosecdef = false` in de catalogus |
+| S33 | Chauffeur of ouder vraagt een organisatierapportage  | 0 rijen (`reports.view` ontbreekt)   |
+| S34 | Platformbeheerder vraagt een rapportage              | 0 rijen (bewust, D-02)              |
+| S35 | Deelsommen tellen op tot het totaal                  | per dag = per chauffeur = per cliënt |
+| S36 | `report_by_client` bevat een afwezigheidsreden       | mag niet bestaan (D-25)             |
+| S37 | Portaalrapportage buiten de eigen relatie            | 0 rijen                             |
+| S38 | Export verwijderen uit de audit trail                | geweigerd                           |
 
 Aanvullend: een CI-check die faalt op elke tabel in `public` **zonder**
 `rowsecurity = true`. Nieuwe tabellen kunnen dan niet ongemerkt onbeveiligd
@@ -283,6 +294,12 @@ niet stilletjes als "kleine toevoeging" in een formulier te belanden.
   altijd `<organization_id>/logo.<ext>`, wat tegelijk de tenantgrens in de
   storage-policy is.
 - **Rate limiting:** login, wachtwoordreset, tag check-in en portaalacties.
+- **CSV-export:** het exporteerpunt accepteert alleen een rapportagesoort uit een
+  vaste lijst en een periode. Geen kolomkeuze, geen filter, geen query uit de
+  URL — een exportendpoint dat een query samenstelt uit invoer van de gebruiker
+  is hoe een rapportagefunctie verandert in een exfiltratiekanaal met een nette
+  naam. Antwoorden gaan met `cache-control: no-store, private` en
+  `x-robots-tag: noindex`.
 
 ## 11. Auditlogging
 

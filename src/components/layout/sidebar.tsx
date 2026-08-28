@@ -6,6 +6,7 @@ import {
   CalendarDays,
   Car,
   Building2,
+  ChartColumn,
   LayoutDashboard,
   MapPin,
   Radio,
@@ -34,6 +35,7 @@ const ICONS = {
   locations: MapPin,
   care: Building2,
   tags: Tag,
+  reports: ChartColumn,
   settings: Settings,
 } as const;
 

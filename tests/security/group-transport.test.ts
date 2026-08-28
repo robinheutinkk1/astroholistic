@@ -26,16 +26,25 @@ afterAll(async () => {
   await disconnect();
 });
 
+/** Captured when this file is loaded, before any test has run. */
+const SUITE_START = new Date().toISOString();
+
 describe('the suite leaves no residue', () => {
-  it('sees exactly the seeded number of rides', async () => {
+  it('has created no rides of its own', async () => {
     // A suite that only passes on a freshly seeded database is unreliable: the
     // second CI run fails for reasons unrelated to the change under review.
     // This assertion catches a test that commits instead of rolling back.
+    //
+    // Stated as "nothing created since the suite started" rather than as a
+    // fixed total. A hardcoded count answers the same question but breaks every
+    // time the seed grows a row, which sends the reader looking for a leak that
+    // is not there.
     const db = await adminConnect();
     const result = await db.query<{ count: string }>(
-      'select count(*)::text as count from rides',
+      'select count(*)::text as count from rides where created_at > $1',
+      [SUITE_START],
     );
-    expect(result.rows[0]?.count).toBe('8');
+    expect(result.rows[0]?.count).toBe('0');
   });
 });
 

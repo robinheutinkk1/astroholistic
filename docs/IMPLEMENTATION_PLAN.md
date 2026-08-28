@@ -477,10 +477,45 @@ injecteerbare resolver gezet zodat elke uitkomst wél getest is. De regels die d
 tenantgrens bewaken — de storage-policies, de CHECK-constraint, de trigger en de
 RPC — draaien in de database en zijn volledig getest.
 
-## Fase 11 — Rapportages
+## Fase 11 — Rapportages ✅ afgerond
 
-Ritten per dag, afgerond/geannuleerd/afwezig, check-in-tijden,
-chauffeurprestaties, cliënthistorie; CSV-export met auditlogging.
+Opgeleverd:
+
+- `/rapportages`: samenvatting over een periode (afgerond, niet gereden, op
+  tijd), verdeling van check-inmethodes, redenen waarom ritten niet doorgingen,
+  en tabellen per dag, per chauffeur en per cliënt
+- CSV-export per tabel, met formule-neutralisatie en een auditregel per export
+- `/portaal/rapportage`: aantallen per persoon voor een opdrachtgever, zoals
+  docs/ROLES_AND_PERMISSIONS.md §6 belooft
+- Migratie 0022: zes aggregatiefuncties in SQL, allemaal `security invoker`
+- Seeddata uitgebreid met 132 afgeronde ritten over 60 dagen, deterministisch,
+  zodat de schermen én de tests iets te rekenen hebben
+
+_Verificatie:_ `npm run verify` groen (262 tests), `npm run test:security` groen
+(291 tests, waarvan 26 nieuw). Vijf mutatietests uitgevoerd.
+
+**Aggregeren gebeurt in de database, met de rechten van de aanroeper.** Elke
+andere helper in het `app`-schema is `security definer`, want die moet een vraag
+beantwoorden die de aanroeper zelf niet mag stellen. Rapportages zijn het
+omgekeerde: ze tellen de eigen ritten van de aanroeper, dus moeten ze onder RLS
+draaien. Eén ontbrekende `where`-regel in een `security definer`-rapportage is
+een gat dwars door de tenantgrens.
+
+**Twee mutatietests vonden een test die om de verkeerde reden slaagde.** Een
+rapportagefunctie op `security definer` zetten brak geen enkele test: de
+expliciete `reports.view`-controle in de functie leest de JWT van de aanroeper
+en blijft de verkeerde organisatie weigeren, terwijl RLS op `rides` stilletjes
+niet meer meedoet. Daarom wordt die eigenschap nu rechtstreeks uit de
+`pg_proc`-catalogus geverifieerd (S32). Hetzelfde gold voor de `LEFT JOIN` in de
+chauffeursrapportage: de seed had geen enkele rit zonder chauffeur, dus een
+`INNER JOIN` viel niet op. De seed heeft nu geannuleerde ritten zonder
+chauffeur, en de deelsommen worden vergeleken met het totaal (S35).
+
+**Bewust niet gebouwd:** een uitsplitsing van afwezigheidsredenen per cliënt.
+Zie D-25 — dat is een gezondheidsdossier via de achterdeur.
+
+**Niet lokaal te testen:** niets van deze fase. Alles draait tegen de lokale
+database, inclusief de export.
 
 ## Fase 12 — Hardening
 

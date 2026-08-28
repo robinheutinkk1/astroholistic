@@ -262,4 +262,83 @@ values
    'DRIVER_ASSIGNED', 'MANUAL',
    'a1000000-0000-4000-8000-00000000000a', 'a2000000-0000-4000-8000-000000000001', 'a2000000-0000-4000-8000-000000000004');
 
+-- --- Afgeronde historie, zodat de rapportages iets te tonen hebben ---------
+--
+-- Deterministisch, niet willekeurig: de uitkomst hangt af van het dagnummer, zo
+-- levert dezelfde seed altijd dezelfde cijfers op. Een securitytest die
+-- `random()` moet uitrekenen, test niets.
+--
+-- 40 werkdagen terug, twee cliënten bij organisatie A en één bij B. De
+-- verdeling is met opzet niet mooi: er zitten te late ritten, afwezigheden en
+-- annuleringen in, want een rapportage waarin alles altijd goed gaat laat niet
+-- zien of hij werkt.
+insert into rides (organization_id, client_id, scheduled_date, scheduled_pickup_time,
+                   scheduled_pickup_at, pickup_location_id, destination_location_id,
+                   driver_id, vehicle_id, status, source,
+                   checked_in_at, checked_in_method, completed_at, absence_reason)
+select
+  h.org,
+  h.client,
+  h.day,
+  '08:00'::time,
+  h.pickup_at,
+  h.pickup_location,
+  h.destination_location,
+  -- Een geannuleerde rit die nooit een chauffeur kreeg. Realistisch, en het
+  -- zorgt ervoor dat de rapportage per chauffeur een groep zonder chauffeur
+  -- heeft — precies het geval waarin een INNER JOIN stilletjes ritten laat
+  -- verdwijnen en de totalen niet meer kloppen.
+  case when h.status = 'CANCELLED' then null else h.driver end,
+  case when h.status = 'CANCELLED' then null else h.vehicle end,
+  h.status,
+  'TEMPLATE',
+  case when h.status = 'COMPLETED' then h.pickup_at + make_interval(mins => h.delay_minutes::int) end,
+  case when h.status = 'COMPLETED' then h.method end,
+  case when h.status = 'COMPLETED' then h.pickup_at + interval '35 minutes' end,
+  case when h.status = 'CLIENT_ABSENT' then h.reason end
+from (
+  select
+    b.org,
+    b.client,
+    b.pickup_location,
+    b.destination_location,
+    b.driver,
+    b.vehicle,
+    d.day,
+    (d.day + time '08:00') at time zone 'Europe/Amsterdam' as pickup_at,
+    case (d.n + b.variant) % 10
+      when 0 then 'CLIENT_ABSENT'
+      when 3 then 'CLIENT_ABSENT'
+      when 7 then 'CANCELLED'
+      else 'COMPLETED'
+    end::ride_status as status,
+    case (d.n + b.variant) % 10
+      when 0 then 'ILL'
+      else 'NOT_HOME'
+    end::absence_reason as reason,
+    case (d.n + b.variant) % 3
+      when 0 then 'NFC'
+      when 1 then 'QR'
+      else 'MANUAL'
+    end::event_source as method,
+    -- Van twee minuten te vroeg tot acht te laat; de grens ligt op vijf.
+    ((d.n + b.variant) % 11) - 2 as delay_minutes
+  from (
+    select day, row_number() over (order by day) as n
+    from generate_series(current_date - 60, current_date - 1, interval '1 day') as g(day)
+    where extract(isodow from g.day) < 6
+  ) d
+  cross join (values
+    ('0a000000-0000-4000-8000-000000000000'::uuid, '30000000-0000-4000-8000-00000000000a'::uuid,
+     '10000000-0000-4000-8000-00000000000a'::uuid, '10000000-0000-4000-8000-00000000000b'::uuid,
+     '50000000-0000-4000-8000-00000000000a'::uuid, '60000000-0000-4000-8000-00000000000a'::uuid, 0),
+    ('0a000000-0000-4000-8000-000000000000'::uuid, '30000000-0000-4000-8000-00000000000b'::uuid,
+     '10000000-0000-4000-8000-00000000000c'::uuid, '10000000-0000-4000-8000-00000000000d'::uuid,
+     '50000000-0000-4000-8000-00000000000b'::uuid, '60000000-0000-4000-8000-00000000000b'::uuid, 4),
+    ('0b000000-0000-4000-8000-000000000000'::uuid, '30000000-0000-4000-8000-00000000001a'::uuid,
+     '10000000-0000-4000-8000-00000000001a'::uuid, '10000000-0000-4000-8000-00000000001b'::uuid,
+     '50000000-0000-4000-8000-00000000001a'::uuid, '60000000-0000-4000-8000-00000000001a'::uuid, 2)
+  ) as b(org, client, pickup_location, destination_location, driver, vehicle, variant)
+) h;
+
 commit;

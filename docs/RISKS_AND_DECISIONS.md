@@ -463,6 +463,65 @@ die de header naar de origin-host herschrijft, dan vindt `branding_for_host()`
 niets en vallen alle tenants stil terug op platformstyling. Dat faalt zonder
 foutmelding, dus het hoort in de opleveringscontrole van Fase 14.
 
+### D-24 — Chauffeurscijfers zijn operationeel, geen beoordeling
+**Impact: privacy van medewerkers, arbeidsrecht**
+
+Het masterprompt vraagt om "chauffeurprestaties". Dat is een legitieme
+operationele vraag — welke routes lopen structureel uit, waar is de planning te
+krap — en tegelijk de bouwsteen van een beoordelingssysteem.
+
+Wat er gebouwd is: aantallen en punctualiteit per chauffeur, gesorteerd op
+volume, met de noemer erbij ("7 van 9 gemeten"). Wat er *niet* gebouwd is: een
+score, een ranglijst, een sortering op punctualiteit, of een signaalkleur bij
+een slechte week.
+
+*Het risico dat je moet kennen:* zodra deze cijfers in een
+beoordelingsgesprek belanden, is het monitoring van werknemers. Dan gelden
+andere regels: de ondernemingsraad heeft instemmingsrecht op een
+personeelsvolgsysteem (WOR art. 27), en er hoort een grondslag en een
+transparante uitleg aan de chauffeurs bij. Dat is een keuze van de
+organisatie, niet van dit product — maar het product moet die keuze niet
+ongemerkt vóór hen maken, en daarom staat er geen score in.
+
+Wil je toch een ranglijst, zeg het: het is een klein stukje werk, maar dan
+hoort de AVG-toets erbij.
+
+### D-25 — Geen afwezigheidsredenen per cliënt in rapportages
+**Impact: AVG, gezondheidsgegevens**
+
+`absence_reason` kent de waarde `ILL`. Per rit is dat operationeel: de planner
+moet weten waarom een rit niet doorging. Een *rapportage* die per cliënt telt
+hoe vaak "ziek" voorkwam, is iets anders — dat is een gezondheidsdossier,
+opgebouwd uit losse feiten die elk op zichzelf onschuldig leken.
+
+Gezondheidsgegevens zijn een bijzondere categorie (AVG art. 9) en dit product
+houdt ze bewust niet bij (§8, §38, D-03). `report_by_client()` heeft daarom geen
+redenkolom, en de securitysuite controleert dat de kolom er niet is (S36) — niet
+alleen dat hij nu leeg is.
+
+De organisatiebrede uitsplitsing bestaat wél: `report_absence_reasons()`
+beantwoordt "waarom vallen ritten uit?" zonder iemand te profileren.
+
+*Consequentie die je moet kennen:* wie wil weten waarom één specifieke cliënt
+vaak uitvalt, moet de ritten zelf bekijken. Dat is trager, en dat is het punt.
+
+### D-26 — De grens voor "op tijd" ligt op vijf minuten
+**Impact: rapportage, verwachtingen**
+
+Punctualiteit wordt gemeten als het verschil tussen de geplande ophaaltijd en de
+daadwerkelijke check-in, met een marge van vijf minuten. Vijf is een oordeel,
+geen feit. Het staat op één plek (`app.punctuality_grace()`), zodat het één
+wijziging is als jullie er anders over denken.
+
+Twee dingen die de cijfers beïnvloeden en die je moet weten:
+
+- Alleen ritten mét een check-in tellen mee. Een geannuleerde rit is niet "op
+  tijd"; die meerekenen zou elk percentage mooier maken dan het is.
+- De meting hangt aan de check-in, dus aan het moment waarop de chauffeur scant
+  of afvinkt. Vinkt een chauffeur pas bij het wegrijden af, dan lijkt hij te
+  laat. Dat is een reden te meer om geen beoordeling aan deze cijfers te hangen
+  (D-24).
+
 ## Openstaande vragen aan jou
 
 1. ~~Bestaat er al een Supabase-project?~~ **Beantwoord: nee.** Zie hierboven.

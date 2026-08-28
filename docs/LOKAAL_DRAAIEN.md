@@ -176,7 +176,18 @@ domeinnaam die naar je pc wijst — en dat is de verwachte uitkomst: "we vonden
 nog geen TXT-record". In de seeddata staat wél een geverifieerd demodomein, zodat
 je kunt zien hoe een geverifieerde rij eruitziet.
 
-**10. Wat mist er in de formulieren?**
+**10. Bekijk de rapportages.**
+Log in als planner en ga naar Rapportages. De seeddata bevat 60 dagen historie,
+dus u ziet meteen echte cijfers: hoeveel ritten zijn afgerond, hoe vaak iemand
+niet thuis was, en hoe vaak er met een NFC-tag is ingecheckt in plaats van
+handmatig afgevinkt. Die laatste is de belangrijkste: loopt hij terug, dan
+worden de tags in de praktijk niet gebruikt.
+
+Klik op "Exporteer CSV" en open het bestand in Excel. Let op de kolommen — als
+er iets scheef staat, hoor ik het graag, want de scheiding tussen kolommen is
+per land anders.
+
+**11. Wat mist er in de formulieren?**
 Kijk bij een cliënt of je alle velden mist die Taxi Ontzorgd nodig heeft. Het
 rolstoelveld ontbreekt met opzet (besluit D-03); alles wat je verder mist, hoor
 ik graag.

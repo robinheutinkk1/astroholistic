@@ -116,12 +116,18 @@ describe('the boundary Realtime relies on', () => {
   });
 
   it('a driver would receive only their own rides', async () => {
-    const result = await asUser<{ count: number }>(
+    // The property is "nothing but my own", not a particular number. Asserting
+    // a count would make this test a report on the size of the seed rather than
+    // on the boundary Realtime depends on.
+    const result = await asUser<{ mine: number; others: number }>(
       USERS.driverA1,
-      'select count(*)::int as count from rides',
+      `select count(*) filter (where driver_id = $1)::int as mine,
+              count(*) filter (where driver_id is distinct from $1)::int as others
+         from rides`,
+      [DRIVERS.keesA],
     );
-    // One assigned ride, not the whole organisation's day.
-    expect(result.rows[0]?.count).toBe(1);
+    expect(result.rows[0]?.others).toBe(0);
+    expect(result.rows[0]?.mine).toBeGreaterThan(0);
   });
 });
 
