@@ -794,8 +794,6 @@ export interface Database {
         Row: {
           organization_id: string;
           display_name: string | null;
-          logo_url: string | null;
-          favicon_url: string | null;
           primary_color: string | null;
           secondary_color: string | null;
           support_email: string | null;
@@ -803,12 +801,12 @@ export interface Database {
           hide_platform_branding: boolean;
           created_at: string;
           updated_at: string;
+          logo_path: string | null;
+          favicon_path: string | null;
         };
         Insert: {
           organization_id: string;
           display_name?: string | null;
-          logo_url?: string | null;
-          favicon_url?: string | null;
           primary_color?: string | null;
           secondary_color?: string | null;
           support_email?: string | null;
@@ -816,12 +814,12 @@ export interface Database {
           hide_platform_branding?: boolean;
           created_at?: string;
           updated_at?: string;
+          logo_path?: string | null;
+          favicon_path?: string | null;
         };
         Update: {
           organization_id?: string;
           display_name?: string | null;
-          logo_url?: string | null;
-          favicon_url?: string | null;
           primary_color?: string | null;
           secondary_color?: string | null;
           support_email?: string | null;
@@ -829,6 +827,8 @@ export interface Database {
           hide_platform_branding?: boolean;
           created_at?: string;
           updated_at?: string;
+          logo_path?: string | null;
+          favicon_path?: string | null;
         };
         Relationships: [
           {
@@ -846,7 +846,7 @@ export interface Database {
           organization_id: string;
           hostname: string;
           is_primary: boolean;
-          verification_token: string | null;
+          verification_token: string;
           verification_status: Database['public']['Enums']['domain_verification_status'];
           verified_at: string | null;
           created_at: string;
@@ -857,7 +857,7 @@ export interface Database {
           organization_id: string;
           hostname: string;
           is_primary?: boolean;
-          verification_token?: string | null;
+          verification_token?: string;
           verification_status?: Database['public']['Enums']['domain_verification_status'];
           verified_at?: string | null;
           created_at?: string;
@@ -868,7 +868,7 @@ export interface Database {
           organization_id?: string;
           hostname?: string;
           is_primary?: boolean;
-          verification_token?: string | null;
+          verification_token?: string;
           verification_status?: Database['public']['Enums']['domain_verification_status'];
           verified_at?: string | null;
           created_at?: string;
@@ -2171,6 +2171,18 @@ export interface Database {
     };
     Views: Record<string, never>;
     Functions: {
+      branding_for_host: {
+        Args: {
+          p_host: string;
+        };
+        Returns: {
+          display_name: string | null;
+          logo_path: string | null;
+          primary_color: string | null;
+          secondary_color: string | null;
+          hide_platform_branding: boolean | null;
+        }[];
+      };
       checkin_by_tag_token: {
         Args: {
           p_token_hash: string;

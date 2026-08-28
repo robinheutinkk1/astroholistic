@@ -2,13 +2,7 @@ import type { Metadata } from 'next';
 import type { Route } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getActiveMembership } from '@/features/organizations/active-organization';
 
 export const metadata: Metadata = { title: 'Instellingen' };
@@ -24,6 +18,18 @@ export default async function SettingsPage() {
       description: 'Medewerkers, rollen en toegang.',
       permission: 'organization.members.view' as const,
     },
+    {
+      href: '/instellingen/branding' as Route,
+      title: 'Huisstijl',
+      description: 'Weergavenaam, logo, kleuren en supportgegevens.',
+      permission: 'branding.manage' as const,
+    },
+    {
+      href: '/instellingen/domeinen' as Route,
+      title: 'Domeinnamen',
+      description: 'Draai het platform op uw eigen domeinnaam.',
+      permission: 'domain.manage' as const,
+    },
   ].filter((section) => membership.permissions.has(section.permission));
 
   return (
@@ -38,9 +44,6 @@ export default async function SettingsPage() {
                 <CardTitle>{section.title}</CardTitle>
                 <CardDescription>{section.description}</CardDescription>
               </CardHeader>
-              <CardContent className="text-xs text-[var(--tp-muted-foreground)]">
-                Branding, domeinen en organisatiegegevens volgen in Fase 10.
-              </CardContent>
             </Card>
           </Link>
         ))}

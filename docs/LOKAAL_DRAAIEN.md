@@ -160,7 +160,23 @@ log daarna in als planner en beoordeel hem via Verzoeken.
 Probeer als ouder de URL van een andere cliënt te plakken: je krijgt "niet
 gevonden".
 
-**8. Wat mist er in de formulieren?**
+**8. Zet je eigen huisstijl erop.**
+Log in als `admin@ontzorgd.test` en ga naar Instellingen → Huisstijl. Verander de
+primaire kleur en upload een logo (PNG, JPG of WebP, maximaal 512 kB). Het logo
+verschijnt in de zijbalk, in de chauffeursapp en in het ouderportaal.
+
+Probeer bewust een SVG te uploaden — dat wordt geweigerd. Hernoem die SVG naar
+`.png` en probeer het nog eens: dat wordt óók geweigerd, want er wordt naar de
+inhoud van het bestand gekeken en niet naar de naam.
+
+**9. Voeg een eigen domeinnaam toe.**
+Instellingen → Domeinnamen. Je krijgt een TXT-record te zien dat je bij je
+domeinprovider moet zetten. Verifiëren lukt lokaal niet — er is geen echte
+domeinnaam die naar je pc wijst — en dat is de verwachte uitkomst: "we vonden
+nog geen TXT-record". In de seeddata staat wél een geverifieerd demodomein, zodat
+je kunt zien hoe een geverifieerde rij eruitziet.
+
+**10. Wat mist er in de formulieren?**
 Kijk bij een cliënt of je alle velden mist die Taxi Ontzorgd nodig heeft. Het
 rolstoelveld ontbreekt met opzet (besluit D-03); alles wat je verder mist, hoor
 ik graag.
@@ -217,6 +233,19 @@ npm run test:security  # 128 tests: kan bedrijf A bij bedrijf B?
 ```
 
 Beide horen groen te zijn. `test:security` heeft een draaiende database nodig.
+
+## Wat lokaal niet werkt
+
+Twee dingen uit Fase 10 kun je op je pc niet volledig proberen, en dat is geen
+fout in de installatie:
+
+- **Verificatie van een domeinnaam** vraagt een echte DNS-lookup. `localhost`
+  heeft geen TXT-record, dus verificatie mislukt altijd — precies zoals bedoeld.
+- **Logo-uploads** gaan naar Supabase Storage. Draai je de volledige
+  Supabase-stack (`npm run db:start`), dan werkt dit gewoon. Draai je alleen de
+  kale database (`npm run db:local`), dan is er geen opslagdienst en krijg je een
+  foutmelding bij het uploaden. De regels die de scheiding tussen bedrijven
+  bewaken zitten in de database en worden wél getest, met `npm run test:security`.
 
 ## Waarschuwing
 

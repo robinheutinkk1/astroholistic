@@ -36,6 +36,14 @@ $$;
 grant anon, authenticated, service_role to authenticator;
 grant usage on schema public to anon, authenticated, service_role;
 
+-- Supabase grants the service role full table access through default
+-- privileges at project creation; the migrations therefore never grant to it
+-- and simply assume it. Without this the verification-write path — the one
+-- place the application deliberately steps outside RLS — would be untestable
+-- here for the wrong reason.
+alter default privileges in schema public grant all on tables to service_role;
+alter default privileges in schema public grant all on sequences to service_role;
+
 create schema if not exists auth;
 grant usage on schema auth to anon, authenticated, service_role;
 
@@ -81,3 +89,44 @@ as $$
 $$;
 
 grant execute on function auth.uid(), auth.role() to anon, authenticated, service_role;
+
+-- --- Storage -------------------------------------------------------------
+-- Supabase Storage keeps its metadata in ordinary PostgreSQL tables and
+-- enforces access with RLS on storage.objects, exactly like any other table.
+-- Migration 0021 writes policies against those tables, so the local database
+-- needs them or the migration set is not reproducible here (§40).
+--
+-- Only the columns the migrations and the security suite touch are mirrored.
+-- The bytes themselves live in object storage, which has no local equivalent;
+-- uploads therefore cannot be exercised here (docs/DEVELOPMENT.md).
+create schema if not exists storage;
+grant usage on schema storage to anon, authenticated, service_role;
+
+create table if not exists storage.buckets (
+  id text primary key,
+  name text not null,
+  owner uuid,
+  public boolean not null default false,
+  avif_autodetection boolean not null default false,
+  file_size_limit bigint,
+  allowed_mime_types text[],
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists storage.objects (
+  id uuid primary key default gen_random_uuid(),
+  bucket_id text references storage.buckets (id),
+  name text,
+  owner uuid,
+  metadata jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (bucket_id, name)
+);
+alter table storage.objects enable row level security;
+
+grant select, insert, update, delete on storage.objects to authenticated, service_role;
+grant select on storage.objects to anon;
+grant select on storage.buckets to anon, authenticated;
+grant insert, update, delete on storage.buckets to service_role;

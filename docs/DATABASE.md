@@ -93,18 +93,66 @@ badge tonen.
 
 ### `organization_branding` (1:1)
 
-`display_name` · `logo_url` · `favicon_url` · `primary_color` · `secondary_color`
+`display_name` · `logo_path` · `favicon_path` · `primary_color` · `secondary_color`
 · `support_email` · `support_phone` · `hide_platform_branding` bool
 
 Kleuren: `text` met check op `^#[0-9a-fA-F]{6}$`. Geen vrije CSS — dat zou een
 CSS-injectievector zijn in een white-label product.
 
+**Een pad, geen URL** (migratie 0021, was `logo_url`/`favicon_url`). Een
+beheerder heeft `branding.manage` en kan die kolom dus schrijven — niet alleen
+via het formulier, maar ook met een eigen token rechtstreeks tegen PostgREST.
+Een vrij invulbare URL die in een `<img src>` terechtkomt op een portaalpagina
+die *andermans* ouders bekijken, is op zijn best een tracking pixel. De kolom
+bevat daarom een opslagpad dat een CHECK-constraint exact vastpint op
+`^<organization_id>/logo\.(png|jpeg|webp)$`; de URL wordt in code samengesteld.
+
+Een prefixtest (`like organization_id || '/%'`) is bewust *niet* genoeg: een
+browser lost `..` op vóór het versturen, dus `<eigen id>/../<ander id>/logo.png`
+begint met het goede voorvoegsel en wijst ergens anders heen. De securitysuite
+test die exacte casus (S24).
+
+Logo's staan in de publieke storage-bucket `organization-logos`. Schrijven mag
+alleen binnen de eigen map: de policy vergelijkt `split_part(name, '/', 1)` met
+`app.permitted_org_id_texts('branding.manage')` — tekst met tekst, zodat een
+onzinnige mapnaam een weigering oplevert en geen fout.
+
+**Leesbaar voor niet-leden.** Sinds 0021 mag ook een portaalgebruiker deze rij
+lezen voor de organisaties waar hij cliënten in bereikt (`app.portal_org_ids()`).
+Zonder dat zou een ouder — precies de persoon voor wie white label bestaat —
+platformstyling zien.
+
 ### `organization_domains`
 
-`hostname citext unique not null` · `is_primary` bool · `verification_token` ·
-`verification_status` enum (`PENDING`\|`VERIFIED`\|`FAILED`) · `verified_at`
+`hostname citext not null` · `is_primary` bool · `verification_token` (not null,
+random default) · `verification_status` enum (`PENDING`\|`VERIFIED`\|`FAILED`) ·
+`verified_at`
 
-Unique index `(organization_id) where is_primary` — maximaal één primair domein.
+- Unique index `(organization_id) where is_primary` — maximaal één primair domein.
+- Unique index `(organization_id, hostname)` — geen dubbele claims binnen een organisatie.
+- Unique index `(hostname) where verification_status = 'VERIFIED'`.
+
+**Uniciteit pas na bewijs** (migratie 0021). Met een globaal unieke `hostname`
+kon één organisatie de domeinnaam van een concurrent onbruikbaar maken door hem
+simpelweg in te typen: de rij bleef eeuwig `PENDING` en de echte eigenaar kon
+hem nooit meer toevoegen. Twee organisaties mogen dezelfde hostname nu
+*claimen*; verificatie is het moment waarop exclusiviteit begint, want dat is
+het eerste moment waarop iemand zeggenschap over de DNS heeft aangetoond.
+
+De trigger `app.guard_domain_verification()` blokkeert dat een tenant zelf
+`verification_status`, `verified_at` of `verification_token` wijzigt. Alleen de
+service role schrijft de uitkomst weg, nadat de server het TXT-record
+`_tagpoint-verify.<hostname>` met waarde
+`tagpoint-domain-verification=<token>` heeft opgehaald.
+
+### `public.branding_for_host(text)`
+
+SECURITY DEFINER, uitvoerbaar voor `anon`. Geeft `display_name`, `logo_path` en
+de twee kleuren voor een **geverifieerde** hostname van een niet-verwijderde,
+niet-gesuspendeerde organisatie. Normaliseert poort, hoofdletters en de
+DNS-punt, en valt van `www.x.nl` terug op `x.nl` (dezelfde eigenaar heeft beide
+bewezen). Geen supportgegevens, geen id's: alleen wat er toch al op de pagina
+staat.
 
 ### `plans`, `subscriptions`, `usage_metrics`
 

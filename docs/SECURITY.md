@@ -38,9 +38,11 @@ Beschermwaardig, in volgorde van ernst bij verlies:
 | T11 | Service role key lekt naar de client                                             | Key alleen in `lib/supabase/admin.ts` met `import 'server-only'`; CI-check op de bundle                          |
 | T12 | IDOR via geraden id's                                                            | uuid v4 pk's + RLS; niet-geautoriseerd en niet-bestaand geven dezelfde melding                                   |
 | T13 | Platformbeheerder-account gecompromitteerd = alle tenants gelekt                 | Platformbeheerders krijgen géén standaard toegang tot tenant-PII (§5)                                            |
-| T14 | Host-header spoofing om een andere tenantcontext te krijgen                      | De host bepaalt alleen branding; autorisatie gaat via lidmaatschap                                               |
+| T14 | Host-header spoofing om een andere tenantcontext te krijgen                      | De host bepaalt alleen branding, en alleen via `branding_for_host` dat uitsluitend **geverifieerde** domeinen matcht; autorisatie gaat via lidmaatschap en RLS |
 | T15 | Bruteforce op login / massale tag-scans                                          | Rate limiting op auth-endpoints en op de check-in route                                                          |
-| T16 | XSS via white-label branding                                                     | Kleuren gevalideerd met regex, logo's alleen via geverifieerde upload, geen vrije CSS/HTML                       |
+| T16 | XSS via white-label branding                                                     | Kleuren gevalideerd met regex in formulier, service én CHECK-constraint; logo's alleen via magic-byte-validatie, SVG volledig geweigerd; geen vrije CSS/HTML |
+| T17 | Tenant zet `logo_path`/`logo_url` naar een externe URL of een pad buiten de eigen map (tracking pixel op portaalpagina's die ouders zien) | Kolom bevat een pad, geen URL; CHECK-constraint pint het exact op `<organization_id>/logo.<ext>`; de URL wordt in code samengesteld |
+| T18 | Organisatie claimt de domeinnaam van een concurrent en gebruikt of blokkeert die | Uniciteit geldt pas bij `VERIFIED`; verificatie via DNS TXT wordt server-side gedaan en met de service role weggeschreven; een trigger blokkeert de tenant zelf |
 
 ## 3. Authenticatie
 
@@ -201,6 +203,15 @@ test je RLS niet.
 | S19 | Tweede NFC-scan op dezelfde rit                      | geen tweede event; nette melding    |
 | S20 | Tag-token van Org B gebruiken binnen Org A           | geweigerd                           |
 | S21 | Verwijderd/gesuspendeerd lid bevraagt de organisatie | direct 0 rijen, geen JWT-vertraging |
+| S22 | Ouder (geen lid) leest branding van de vervoerder     | toegestaan; andere organisatie 0 rijen |
+| S23 | Chauffeur wijzigt de huisstijl                        | geweigerd (`branding.manage`)       |
+| S24 | `logo_path` naar een andere organisatie of met `..`   | geweigerd door CHECK-constraint     |
+| S25 | Upload buiten de eigen map in de logo-bucket          | geweigerd door storage-policy       |
+| S26 | Domein toevoegen of verwijderen bij een andere tenant | geweigerd                           |
+| S27 | Tenant zet zelf `verification_status = 'VERIFIED'`    | geweigerd door trigger              |
+| S28 | Twee organisaties verifiëren dezelfde hostname        | tweede faalt op partial unique index |
+| S29 | `branding_for_host` op een niet-geverifieerd domein   | 0 rijen; geen supportgegevens       |
+| S30 | `branding_for_host` voor een gesuspendeerde organisatie | 0 rijen                           |
 
 Aanvullend: een CI-check die faalt op elke tabel in `public` **zonder**
 `rowsecurity = true`. Nieuwe tabellen kunnen dan niet ongemerkt onbeveiligd
@@ -264,8 +275,13 @@ niet stilletjes als "kleine toevoeging" in een formulier te belanden.
   regex-gevalideerde CSS-variabelen.
 - **SQL-injectie:** alleen geparametriseerde queries via PostgREST/RPC; geen
   stringconcatenatie in SQL, ook niet in migrations met dynamische SQL.
-- **Uploads:** logo's naar Supabase Storage met MIME- en groottevalidatie
-  server-side, hernoemd naar een uuid, geen SVG (SVG kan script bevatten).
+- **Uploads:** logo's naar Supabase Storage. Het bestandstype wordt bepaald uit
+  de **magic bytes**, niet uit de opgegeven Content-Type of de extensie; SVG
+  wordt volledig geweigerd (een SVG is een document dat script kan bevatten en
+  zou als logo op elke pagina van die tenant stored XSS opleveren). Maximaal
+  512 kB. De bestandsnaam van de gebruiker wordt weggegooid: het object heet
+  altijd `<organization_id>/logo.<ext>`, wat tegelijk de tenantgrens in de
+  storage-policy is.
 - **Rate limiting:** login, wachtwoordreset, tag check-in en portaalacties.
 
 ## 11. Auditlogging

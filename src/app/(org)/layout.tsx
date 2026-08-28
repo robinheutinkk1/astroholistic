@@ -5,7 +5,10 @@ import { OrganizationSwitcher } from '@/features/organizations/components/organi
 import { getActiveMembership } from '@/features/organizations/active-organization';
 import { getCurrentUser } from '@/features/rbac/session';
 import { ROLE_LABELS, type SystemRoleKey } from '@/features/rbac/permissions';
-import { createClient } from '@/lib/supabase/server';
+import { BrandMark } from '@/features/branding/components/brand-mark';
+import { readBrandingForViewer } from '@/features/branding/service';
+import { brandName, brandStyle } from '@/features/branding/theme';
+import { logoUrl } from '@/features/branding/url';
 
 /**
  * Shell for the organisation-facing application. Desktop-first: planners and
@@ -100,12 +103,7 @@ export default async function OrganizationLayout({
   // Branding is loaded server-side and applied as CSS custom properties on the
   // shell, so there is no flash of platform colours before the tenant's own
   // (docs/ARCHITECTURE.md §11).
-  const supabase = await createClient();
-  const { data: branding } = await supabase
-    .from('organization_branding')
-    .select('display_name, primary_color, secondary_color')
-    .eq('organization_id', membership.organizationId)
-    .maybeSingle();
+  const branding = await readBrandingForViewer(membership.organizationId);
 
   const navItems = ALL_NAV_ITEMS.filter((item) =>
     membership.permissions.has(item.permission),
@@ -115,18 +113,15 @@ export default async function OrganizationLayout({
     (key) => ROLE_LABELS[key as SystemRoleKey] ?? key,
   );
 
-  const brandStyle = {
-    ...(branding?.primary_color ? { '--tp-primary': branding.primary_color } : {}),
-    ...(branding?.secondary_color ? { '--tp-secondary': branding.secondary_color } : {}),
-  } as React.CSSProperties;
-
   return (
-    <div style={brandStyle} className="flex min-h-dvh">
+    <div style={brandStyle(branding)} className="flex min-h-dvh">
       <aside className="hidden w-60 shrink-0 border-r border-[var(--tp-border)] bg-[var(--tp-surface-muted)] md:block">
         <div className="flex h-14 items-center border-b border-[var(--tp-border)] px-4">
-          <span className="truncate text-sm font-semibold">
-            {branding?.display_name ?? membership.organizationName}
-          </span>
+          <BrandMark
+            name={brandName(branding, membership.organizationName)}
+            logoUrl={logoUrl(branding?.logo_path, branding?.updated_at)}
+            className="truncate text-sm font-semibold"
+          />
         </div>
         <Sidebar items={navItems} />
       </aside>

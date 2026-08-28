@@ -3,6 +3,10 @@ import Link from 'next/link';
 import { getCurrentUser } from '@/features/rbac/session';
 import { getPortalAccess } from '@/features/portals/access';
 import { signOutAction } from '@/features/auth/actions';
+import { BrandMark } from '@/features/branding/components/brand-mark';
+import { readBrandingForViewer } from '@/features/branding/service';
+import { brandName, brandStyle } from '@/features/branding/theme';
+import { logoUrl } from '@/features/branding/url';
 
 /**
  * Shell for the client, contact and care-organisation portal.
@@ -32,11 +36,28 @@ export default async function PortalLayout({ children }: { children: React.React
     );
   }
 
+  // Only brand when every client this viewer reaches belongs to the same
+  // organisation. A contact linked to two transport companies has no single
+  // "their" company, and picking one would tell them, wrongly, whose site this
+  // is. In that case the platform's own presentation is the honest answer.
+  const organizationIds = new Set(access.clients.map((client) => client.organizationId));
+  const soleOrganizationId =
+    organizationIds.size === 1 ? [...organizationIds][0] : undefined;
+  const branding = soleOrganizationId
+    ? await readBrandingForViewer(soleOrganizationId)
+    : null;
+
   return (
-    <div className="flex min-h-dvh flex-col bg-[var(--tp-surface-muted)]">
-      <header className="flex items-center justify-between border-b border-[var(--tp-border)] bg-[var(--tp-surface)] px-4 py-3">
-        <Link href="/portaal" className="text-base font-semibold">
-          Mijn vervoer
+    <div
+      style={brandStyle(branding)}
+      className="flex min-h-dvh flex-col bg-[var(--tp-surface-muted)]"
+    >
+      <header className="flex items-center justify-between gap-3 border-b border-[var(--tp-border)] bg-[var(--tp-surface)] px-4 py-3">
+        <Link href="/portaal" className="flex min-w-0 items-center gap-2">
+          <BrandMark
+            name={brandName(branding, 'Mijn vervoer')}
+            logoUrl={logoUrl(branding?.logo_path, branding?.updated_at)}
+          />
         </Link>
         <form action={signOutAction}>
           <button

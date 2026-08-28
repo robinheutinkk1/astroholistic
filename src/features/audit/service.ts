@@ -48,7 +48,15 @@ export type AuditAction =
   | 'change_request.reviewed'
   | 'member.roles_changed'
   | 'member.suspended'
-  | 'member.reactivated';
+  | 'member.reactivated'
+  | 'branding.updated'
+  | 'branding.logo_replaced'
+  | 'branding.logo_removed'
+  | 'domain.added'
+  | 'domain.verified'
+  | 'domain.verification_failed'
+  | 'domain.removed'
+  | 'domain.primary_changed';
 
 export interface AuditEntry {
   readonly organizationId: string;

@@ -371,6 +371,58 @@ voordat er ooit een database publiek bereikbaar is.
 
 Node 22, npm en Docker zijn in de ontwikkelomgeving aanwezig en geverifieerd.
 
+### D-20 — Branding bewaart een pad, geen URL
+**Impact: beveiliging, white label**
+
+`organization_branding.logo_url` was vrije tekst. Een beheerder heeft
+`branding.manage`, dus RLS staat toe dat hij die kolom schrijft — en dat kan met
+zijn eigen token rechtstreeks tegen PostgREST, dus "het formulier biedt dat veld
+niet aan" is geen maatregel.
+
+Die waarde belandt in een `<img src>` op portaalpagina's die ouders van *andere*
+cliënten bekijken. In het gunstigste geval is dat een tracking pixel richting een
+derde partij; in het slechtste geval een verzoek dat de browser van die ouder
+namens hem uitvoert.
+
+Vervangen door `logo_path`, met een CHECK-constraint die het pad exact vastpint
+op `<organization_id>/logo.<ext>`; de URL wordt in code samengesteld. Een
+prefixtest bleek niet genoeg — een browser lost `..` op vóór het versturen — en
+dat is precies wat de mutatietest bij Fase 10 aantoonde.
+
+*Consequentie:* `logo_url` en `favicon_url` zijn verwijderd in migratie 0021.
+Een organisatie kan dus geen extern gehost logo meer opgeven. Dat is bedoeld:
+een logo dat wij niet serveren, kunnen wij ook niet garanderen.
+
+### D-21 — Een domeinnaam wordt pas exclusief na verificatie
+**Impact: SaaS, misbruik tussen tenants**
+
+`organization_domains.hostname` was globaal uniek. Daarmee kon één organisatie
+de domeinnaam van een concurrent onbruikbaar maken door hem in te typen: de rij
+bleef `PENDING`, maar de echte eigenaar kon hem nooit meer toevoegen.
+
+Uniciteit geldt nu alleen bij `verification_status = 'VERIFIED'`. Twee
+organisaties mogen dezelfde hostname claimen; wie hem als eerste met een
+DNS-TXT-record bewijst, krijgt hem. De verliezer van die race krijgt een nette
+melding in plaats van een fout.
+
+*Het risico dat je moet kennen:* een organisatie kan nog steeds *zien* dat een
+domeinnaam al geverifieerd is, doordat verificatie faalt met "al door een andere
+organisatie geverifieerd". Dat is bewust — een generieke fout zou de beheerder
+uren naar zijn DNS laten staren — en het lekt niets wat een DNS-lookup niet ook
+vertelt.
+
+### D-22 — "Mogelijk gemaakt door TagPoint" verbergen is nu voor iedereen
+**Impact: SaaS, commercieel**
+
+`hide_platform_branding` is instelbaar door elke organisatie met
+`branding.manage`. In een afgemaakt SaaS-product hoort dit een betaalde
+entitlement te zijn in `plans.limits` (§36).
+
+Bewust uitgesteld en niet vergeten: de plangrenzen zelf zijn nog een skelet, en
+één entitlement afdwingen zonder de rest van de plancontrole zou de indruk
+wekken dat die controle bestaat. Hoort bij de fase waarin abonnementen echt
+worden.
+
 ## Openstaande vragen aan jou
 
 1. ~~Bestaat er al een Supabase-project?~~ **Beantwoord: nee.** Zie hierboven.
@@ -378,8 +430,11 @@ Node 22, npm en Docker zijn in de ontwikkelomgeving aanwezig en geverifieerd.
    worden?** Zo ja, dan hoort daar een importplan én een AVG-toets bij.
 3. **Is er een DPO of jurist** die D-03 (gezondheidsgegevens) en D-12
    (anonimisering vs. verwijdering) kan toetsen?
-4. **Domeinen:** is `tagpoint.nl` in bezit en waar staat de DNS? Dat bepaalt hoe
-   custom domains in Fase 10 worden geautomatiseerd.
+4. **Domeinen:** is `tagpoint.nl` in bezit en waar staat de DNS? De
+   applicatiekant van custom domains is af (Fase 10): een organisatie voegt een
+   domeinnaam toe, publiceert een TXT-record en verifieert. Wat nog ontbreekt is
+   de platformkant — het wildcard-domein en de automatische certificaten bij de
+   hostingpartij — en daarvoor is dit antwoord nodig.
 5. **Moeten chauffeurs offline kunnen werken?** Het datamodel (`occurred_at`
    los van `recorded_at`) ondersteunt het al, maar een offline-queue in de PWA
    is substantieel extra werk en hoort dan nu in de planning.

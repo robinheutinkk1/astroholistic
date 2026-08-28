@@ -4,6 +4,10 @@ import { getDriverContext } from '@/features/driver/service';
 import { getCurrentUser } from '@/features/rbac/session';
 import { signOutAction } from '@/features/auth/actions';
 import { Button } from '@/components/ui/button';
+import { BrandMark } from '@/features/branding/components/brand-mark';
+import { readBrandingForViewer } from '@/features/branding/service';
+import { brandName, brandStyle } from '@/features/branding/theme';
+import { logoUrl } from '@/features/branding/url';
 
 /**
  * Always rendered per request: every screen here depends on who is signed in
@@ -42,11 +46,21 @@ export default async function DriverLayout({ children }: { children: React.React
     );
   }
 
+  // The driver's employer, not the hostname. A driver who opens the app on the
+  // platform host still works for one company and should see it.
+  const branding = await readBrandingForViewer(context.organizationId);
+
   return (
-    <div className="flex min-h-dvh flex-col bg-[var(--tp-surface-muted)]">
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[var(--tp-border)] bg-[var(--tp-surface)] px-4 py-3">
-        <Link href="/driver" className="text-base font-semibold">
-          Mijn ritten
+    <div
+      style={brandStyle(branding)}
+      className="flex min-h-dvh flex-col bg-[var(--tp-surface-muted)]"
+    >
+      <header className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-[var(--tp-border)] bg-[var(--tp-surface)] px-4 py-3">
+        <Link href="/driver" className="flex min-w-0 items-center gap-2">
+          <BrandMark
+            name={brandName(branding, 'Mijn ritten')}
+            logoUrl={logoUrl(branding?.logo_path, branding?.updated_at)}
+          />
         </Link>
         <form action={signOutAction}>
           <button

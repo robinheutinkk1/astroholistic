@@ -317,6 +317,28 @@ Branding wordt als CSS custom properties (`--tp-primary`, `--tp-secondary`) op
 de root gezet in de server-rendered layout, zodat er geen flits van
 platformkleuren is.
 
+**Twee bronnen, in deze volgorde.** De root-layout past de *host*-branding toe
+via `public.branding_for_host()` — dat is het enige dat beschikbaar is voordat
+iemand inlogt, en het dekt daarmee de loginpagina en de NFC-landingspagina. Elke
+shell daaronder die het béter weet, overschrijft diezelfde variabelen met de
+branding van de organisatie van de ingelogde gebruiker:
+
+| Shell           | Bron                                                         |
+| --------------- | ------------------------------------------------------------ |
+| root / publiek  | host (alleen geverifieerde domeinen)                          |
+| `(org)`         | actief lidmaatschap                                           |
+| `/driver`       | de organisatie van de chauffeur                               |
+| `/portaal`      | de organisatie van de cliënten, mits het er precies één is    |
+
+Een chauffeur op de platform-host ziet dus toch zijn werkgever, en een
+contactpersoon die bij twee vervoerders staat ingeschreven krijgt bewust géén
+tenantbranding: er is dan geen "hun" bedrijf om te tonen.
+
+Kleuren worden op drie plaatsen gevalideerd: in het formulier (`zod`), in
+`brandStyle()` vlak voordat ze een stylesheet in gaan, en met een
+CHECK-constraint in de database. Dat is geen dubbelwerk — alleen de laatste is
+onbereikbaar voor een verzoek dat het formulier overslaat.
+
 ## 12. Foutafhandeling
 
 - Eén `AppError`-hiërarchie: `ValidationError`, `AuthenticationError`,

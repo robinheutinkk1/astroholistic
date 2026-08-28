@@ -42,13 +42,21 @@ insert into organization_settings (organization_id, checkout_mode) values
   ('0a000000-0000-4000-8000-000000000000', 'OPTIONAL'),
   ('0b000000-0000-4000-8000-000000000000', 'REQUIRED');
 
-insert into organization_branding (organization_id, display_name, primary_color) values
-  ('0a000000-0000-4000-8000-000000000000', 'Taxi Ontzorgd', '#1f47d6'),
-  ('0b000000-0000-4000-8000-000000000000', 'Voorbeeld Taxi', '#0d9488');
+insert into organization_branding
+  (organization_id, display_name, primary_color, secondary_color, support_email) values
+  ('0a000000-0000-4000-8000-000000000000', 'Taxi Ontzorgd',  '#1f47d6', '#f59e0b', 'support@taxi-ontzorgd.test'),
+  ('0b000000-0000-4000-8000-000000000000', 'Voorbeeld Taxi', '#0d9488', '#7c3aed', 'support@voorbeeldtaxi.test');
 
-insert into organization_domains (organization_id, hostname, is_primary, verification_status) values
-  ('0a000000-0000-4000-8000-000000000000', 'dispatch.taxi-ontzorgd.test', true, 'VERIFIED'),
-  ('0b000000-0000-4000-8000-000000000000', 'planning.voorbeeldtaxi.test', true, 'VERIFIED');
+insert into organization_domains
+  (organization_id, hostname, is_primary, verification_status, verified_at) values
+  ('0a000000-0000-4000-8000-000000000000', 'dispatch.taxi-ontzorgd.test', true,  'VERIFIED', now()),
+  ('0b000000-0000-4000-8000-000000000000', 'planning.voorbeeldtaxi.test', true,  'VERIFIED', now()),
+  -- Both organisations claim the same unverified hostname. Since 0021 that is
+  -- allowed: nobody has proven ownership yet, so neither may lock the other
+  -- out. Verification is the moment uniqueness starts to apply, and the
+  -- security suite asserts the second verification fails.
+  ('0a000000-0000-4000-8000-000000000000', 'betwist.example.test',        false, 'PENDING',  null),
+  ('0b000000-0000-4000-8000-000000000000', 'betwist.example.test',        false, 'PENDING',  null);
 
 -- --- Memberships and roles -------------------------------------------------
 insert into organization_users (id, organization_id, user_id, status) values

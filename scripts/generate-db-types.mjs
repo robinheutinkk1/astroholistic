@@ -80,7 +80,11 @@ function mapUdt(udtName) {
     bytea: 'string',
     inet: 'string',
   };
-  return byUdt[udtName] ?? 'string';
+  // pg_get_function_result prints SQL type names ("boolean", "timestamp with
+  // time zone"), while information_schema.columns gives udt names ("bool",
+  // "timestamptz"). Both reach this function, so both spellings must resolve —
+  // otherwise a boolean RPC column silently types as string.
+  return SCALAR_TYPES.get(udtName) ?? byUdt[udtName] ?? 'string';
 }
 
 /** `p_token_hash bytea, p_source event_source DEFAULT 'NFC'` → typed fields. */

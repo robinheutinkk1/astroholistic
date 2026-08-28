@@ -430,11 +430,49 @@ ouder direct buiten. Loopt de financiering van een opdrachtgever af, dan
 verdwijnt de cliënt uit zijn lijst zonder dat iemand iets hoeft op te ruimen.
 Beide getest.
 
-## Fase 10 — White label en domeinen
+## Fase 10 — White label en domeinen ✅ afgerond
 
-Brandinginstellingen met validatie; logo-upload; CSS-variabelen server-rendered;
-`organization_domains` met verificatie; host-resolutie in middleware; Vercel
-wildcard-configuratie.
+Opgeleverd:
+
+- `/instellingen/branding`: weergavenaam, twee kleuren, supportgegevens en
+  logo-upload naar de publieke storage-bucket `organization-logos`
+- `/instellingen/domeinen`: eigen domeinnamen toevoegen, het TXT-record dat
+  gepubliceerd moet worden, verifiëren, hoofddomein kiezen en verwijderen
+- Branding toegepast op **alle** shells: de root-layout leest de host, en de
+  planner-, chauffeurs- en portaalshell overschrijven dat met de organisatie
+  van de ingelogde gebruiker
+- Migratie 0021: storage-bucket en -policies, `logo_path`/`favicon_path` met een
+  exacte CHECK-constraint, uniciteit van domeinnamen pas bij `VERIFIED`, een
+  trigger die zelfverificatie blokkeert, en `public.branding_for_host()`
+
+_Verificatie:_ `npm run verify` groen (225 tests), `npm run test:security` groen
+(265 tests, waarvan 38 nieuw voor branding en domeinen). Vijf mutatietests
+uitgevoerd — prefixcheck in plaats van exact patroon, storage-policy zonder
+mapcontrole, trigger verwijderd, `branding_for_host` zonder `VERIFIED`-filter, en
+branding leesbaar voor elke ingelogde gebruiker — alle vijf gaven falende tests.
+
+**De host bepaalt wat er geverfd wordt, nooit wat er gelezen mag worden.** De
+Host-header is door de bezoeker te kiezen. Hij mag daarom alleen een naam, een
+logo en twee kleuren opleveren, en alleen voor een domein waarvan het eigendom
+met een DNS-record is aangetoond. Tenantscope blijft komen uit het lidmaatschap
+en uit RLS.
+
+**Een pad in plaats van een URL.** `logo_url` was vrije tekst, en een beheerder
+mag die kolom schrijven — ook buiten het formulier om. Zo'n URL komt terecht in
+een `<img src>` op een portaalpagina die andermans ouders bekijken. De kolom
+bevat nu een opslagpad dat een CHECK-constraint exact vastpint; de URL wordt in
+code samengesteld. Zie docs/DATABASE.md voor waarom een prefixtest niet volstaat.
+
+**Niet gebouwd, bewust:** automatische TLS-certificaten en de DNS-/CDN-koppeling
+zelf. Dat is platformconfiguratie (bij Vercel: een wildcard-domein plus de
+Domains API) en geen applicatiecode; het staat in docs/DEPLOYMENT bij Fase 14.
+
+**Niet lokaal te testen:** de daadwerkelijke upload naar Supabase Storage en het
+opvragen van een echt TXT-record. Storage draait als losse dienst en Docker-images
+zijn in deze omgeving geblokkeerd; de DNS-lookup is daarom achter een
+injecteerbare resolver gezet zodat elke uitkomst wél getest is. De regels die de
+tenantgrens bewaken — de storage-policies, de CHECK-constraint, de trigger en de
+RPC — draaien in de database en zijn volledig getest.
 
 ## Fase 11 — Rapportages
 

@@ -198,6 +198,109 @@ export async function setupThenRead<T = Record<string, unknown>>(
   }
 }
 
+/**
+ * Runs several statements as one user, in one transaction that is rolled back,
+ * and returns the last result.
+ *
+ * Needed whenever a test has to *arrange* a row and then act on it as the same
+ * user. Folding both halves into a single statement with a data-modifying CTE
+ * does not work: the CTE's rows are not visible to the rest of the statement,
+ * so the second half quietly matches nothing and the test passes for the wrong
+ * reason.
+ */
+export async function asUserSteps<T = Record<string, unknown>>(
+  userId: string | null,
+  steps: readonly { sql: string; params?: unknown[] }[],
+): Promise<QueryResult<T>> {
+  const db = await connect();
+  await db.query('begin');
+  try {
+    const role = userId ? 'authenticated' : 'anon';
+    const claims = userId
+      ? JSON.stringify({ sub: userId, role })
+      : JSON.stringify({ role });
+    await db.query(`set local role ${role}`);
+    await db.query('select set_config($1, $2, true)', ['request.jwt.claims', claims]);
+
+    let last: QueryResult<T> = { rows: [], rowCount: 0 };
+    for (const step of steps) {
+      const result = await db.query(step.sql, step.params ?? []);
+      last = { rows: result.rows as T[], rowCount: result.rowCount ?? 0 };
+    }
+    return last;
+  } finally {
+    await db.query('rollback');
+  }
+}
+
+/** asUserSteps, but asserting that one of the steps is refused. */
+export async function expectDeniedSteps(
+  userId: string | null,
+  steps: readonly { sql: string; params?: unknown[] }[],
+): Promise<string> {
+  try {
+    await asUserSteps(userId, steps);
+  } catch (error) {
+    return error instanceof Error ? error.message : String(error);
+  }
+  throw new Error('Expected one of the statements to be denied, but all succeeded.');
+}
+
+/**
+ * Runs several statements as the `service_role`, in one rolled-back
+ * transaction, returning the last result.
+ */
+export async function asServiceRoleSteps<T = Record<string, unknown>>(
+  steps: readonly { sql: string; params?: unknown[] }[],
+): Promise<QueryResult<T>> {
+  const db = await connect();
+  await db.query('begin');
+  try {
+    await db.query('set local role service_role');
+    await db.query('select set_config($1, $2, true)', [
+      'request.jwt.claims',
+      JSON.stringify({ role: 'service_role' }),
+    ]);
+
+    let last: QueryResult<T> = { rows: [], rowCount: 0 };
+    for (const step of steps) {
+      const result = await db.query(step.sql, step.params ?? []);
+      last = { rows: result.rows as T[], rowCount: result.rowCount ?? 0 };
+    }
+    return last;
+  } finally {
+    await db.query('rollback');
+  }
+}
+
+/**
+ * Runs SQL as the `service_role`, in a transaction that is always rolled back.
+ *
+ * PostgREST switches into this role when a request carries the service key,
+ * which is how the domain-verification path writes its result. Some rules —
+ * the trigger that stops a tenant declaring their own domain verified — behave
+ * differently for it, so proving those rules needs this role, not the owner
+ * connection.
+ */
+export async function asServiceRole<T = Record<string, unknown>>(
+  sql: string,
+  params: unknown[] = [],
+): Promise<QueryResult<T>> {
+  const db = await connect();
+  await db.query('begin');
+  try {
+    await db.query('set local role service_role');
+    await db.query('select set_config($1, $2, true)', [
+      'request.jwt.claims',
+      JSON.stringify({ role: 'service_role' }),
+    ]);
+    const result = await db.query(sql, params);
+    return { rows: result.rows as T[], rowCount: result.rowCount ?? 0 };
+  } finally {
+    await db.query('rollback');
+  }
+}
+
 /** Convenience: how many rows of a table this user can see, with a filter. */
 export async function countVisible(
   userId: string | null,
