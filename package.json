@@ -25,7 +25,10 @@
     "verify": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run build",
     "db:local": "bash scripts/local-postgres.sh start",
     "db:local:stop": "bash scripts/local-postgres.sh stop",
-    "db:local:reset": "bash scripts/local-postgres.sh reset"
+    "db:local:reset": "bash scripts/local-postgres.sh reset",
+    "db:rebuild": "bash scripts/db-rebuild.sh",
+    "db:seed": "psql -h /tmp -p 5433 -U postgres -v ON_ERROR_STOP=1 -q -f supabase/seed/seed.sql",
+    "test:security": "vitest run --config vitest.security.config.mts"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
@@ -52,6 +55,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.3",
     "@types/node": "^22.15.0",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^6.1.0",
@@ -59,6 +63,7 @@
     "eslint-config-next": "^16.3.3",
     "eslint-config-prettier": "^10.1.8",
     "jsdom": "^30.0.1",
+    "pg": "^8.23.0",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "supabase": "^2.116.0",

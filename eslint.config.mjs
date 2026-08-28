@@ -134,8 +134,11 @@ export default tseslint.config(
 
   // Test and config files are held to a looser standard on purpose.
   {
-    files: ['**/*.test.{ts,tsx}', '**/__tests__/**', '*.config.{ts,mts,mjs}'],
+    files: ['**/*.test.{ts,tsx}', '**/__tests__/**', 'tests/**', '*.config.{ts,mts,mjs}'],
     rules: {
+      // Security fixtures address seeded rows by id on purpose; that is data
+      // under test, not a hardcoded tenant in production code.
+      'no-restricted-syntax': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/no-unsafe-call': 'off',

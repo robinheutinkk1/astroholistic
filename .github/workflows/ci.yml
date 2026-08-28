@@ -45,3 +45,46 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
           NEXT_PUBLIC_APP_URL: http://localhost:3000
           NEXT_PUBLIC_PLATFORM_HOST: localhost:3000
+
+  security:
+    name: Tenant isolation (RLS)
+    runs-on: ubuntu-latest
+    # Merge-blocking. If these fail, one customer can see another customer's
+    # clients — there is no "fix it in the next PR" for that.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ['5433:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Apply the Supabase shim and every migration
+        run: |
+          psql "$DB" -v ON_ERROR_STOP=1 -q -f supabase/testing/bootstrap-local.sql
+          for file in supabase/migrations/*.sql; do
+            psql "$DB" -v ON_ERROR_STOP=1 -q -f "$file"
+          done
+          psql "$DB" -v ON_ERROR_STOP=1 -q -f supabase/seed/seed.sql
+        env:
+          DB: postgresql://postgres@localhost:5433/postgres
+
+      - name: Tenant isolation suite
+        run: npm run test:security
+        env:
+          TEST_DATABASE_URL: postgresql://authenticator@localhost:5433/postgres
+          TEST_DATABASE_ADMIN_URL: postgresql://postgres@localhost:5433/postgres

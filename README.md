@@ -4,8 +4,10 @@ Multi-tenant SaaS-platform voor vervoersbedrijven: cliëntenbeheer, terugkerende
 ritplanning, dispatching, een chauffeurs-PWA met NFC/QR check-in, en portalen
 voor cliënten, contactpersonen en opdrachtgevers.
 
-> **Status: Fase 1 afgerond** — projectfundament staat, database volgt in Fase 2.
-> `npm run verify` is groen (format, lint, typecheck, 74 tests, build).
+> **Status: Fase 2 afgerond** — database en tenant-isolatie staan.
+> `npm run verify` groen (74 tests), `npm run test:security` groen
+> (78 tests, waaronder 68 inbraakscenario's tussen organisaties).
+> Er is nog geen bruikbare gebruikersinterface; die begint in Fase 3.
 
 ## Documentatie
 

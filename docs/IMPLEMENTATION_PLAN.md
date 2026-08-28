@@ -60,17 +60,37 @@ DST-conversie koos bij de dubbele oktobernacht de verkeerde doorgang, en de
 state machine bood `PROBLEM` aan als vervolgstatus op een rit die al `PROBLEM`
 was. Beide zijn in de implementatie gecorrigeerd, niet in de test.
 
-## Fase 2 — Database en RLS
+## Fase 2 — Database en RLS ✅ afgerond
 
-Migrations in de volgorde uit `DATABASE.md` §11. Alle tabellen, enums,
-constraints, indexes, `app`-helperfuncties, RLS-policies, append-only triggers,
-seed van `permissions` en systeemrollen.
+**13 migrations, 33 tabellen, 96 policies, 78 beveiligingstests.**
 
-pgTAP-tests plus de Vitest-suite met echte JWT's per persona. **De volledige
-S1–S21-matrix uit `SECURITY.md` §8 moet groen zijn.** CI-check op tabellen
-zonder RLS.
+Opgeleverd:
 
-_Klaar als:_ tenant-isolatie aantoonbaar werkt. **Fase 3 begint niet eerder.**
+- Volledig schema volgens `DATABASE.md`: tenancy, RBAC, cliënten en relaties,
+  vloot, locaties, ritten, terugkerende ritten, ride events, tags,
+  auditlog, notificaties en wijzigingsverzoeken
+- RLS aan op **elke** tabel, met policies per commando en een `with check` op
+  elke insert en update
+- `app`-helperfuncties, alle `security definer` met `set search_path = ''`
+- De permissiecatalogus (54 permissies) en zes systeemrollen als data
+- State machine in de database als trigger, naast de TypeScript-versie — een
+  test bewijst dat beide identiek zijn
+- Append-only handhaving op `ride_events` en `audit_logs` in drie lagen
+- Escalatietriggers: cross-tenant rolinjectie, laatste eigenaar, eigen rollen
+- Seed data met twee organisaties en acht persona's (fictief)
+
+_Verificatie:_ `npm run db:rebuild` slaagt vanaf een lege database.
+`npm run test:security` is groen: 68 inbraakscenario's plus 10 structurele
+garanties.
+
+**De suite is gevalideerd met mutatietesten.** Drie policies zijn expres
+verzwakt om te controleren dat de tests dat vangen: `clients_select` openzetten
+liet 12 tests falen, chauffeursisolatie weghalen 2, en de append-only trigger
+verwijderen 2. Een suite die alleen "nul rijen" verwacht kan groen zijn zonder
+iets te bewijzen; deze niet.
+
+Ook geverifieerd met `EXPLAIN`: de permissiecheck draait als `InitPlan` met
+`loops=1`, dus één keer per query in plaats van één keer per rij.
 
 ## Fase 3 — Auth en RBAC
 
