@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ChevronRight, Users } from 'lucide-react';
+import { ChevronRight, Nfc, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/states';
 import { requireDriverContext, getTodayRides } from '@/features/driver/service';
@@ -35,6 +35,14 @@ export default async function DriverTodayPage() {
 
   return (
     <div className="flex flex-col gap-4">
+      <Link
+        href="/driver/scan"
+        className="flex min-h-14 items-center justify-center gap-2 rounded-[var(--tp-radius)] bg-[var(--tp-primary)] font-medium text-[var(--tp-primary-foreground)]"
+      >
+        <Nfc className="size-5" aria-hidden="true" />
+        Tag scannen
+      </Link>
+
       <p className="text-sm text-[var(--tp-muted-foreground)]">
         {trips.length > 0
           ? `${trips.length} ${trips.length === 1 ? 'groepsrit' : 'groepsritten'}`

@@ -1831,6 +1831,35 @@ export interface Database {
           },
         ];
       };
+      tag_scan_attempts: {
+        Row: {
+          id: number;
+          user_id: string | null;
+          outcome: Database['public']['Enums']['checkin_outcome'];
+          attempted_at: string;
+        };
+        Insert: {
+          id?: number;
+          user_id?: string | null;
+          outcome: Database['public']['Enums']['checkin_outcome'];
+          attempted_at?: string;
+        };
+        Update: {
+          id?: number;
+          user_id?: string | null;
+          outcome?: Database['public']['Enums']['checkin_outcome'];
+          attempted_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'tag_scan_attempts_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       trip_stops: {
         Row: {
           id: string;
@@ -2141,7 +2170,21 @@ export interface Database {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      checkin_by_tag_token: {
+        Args: {
+          p_token_hash: string;
+          p_source?: string;
+        };
+        Returns: {
+          outcome: Database['public']['Enums']['checkin_outcome'] | null;
+          ride_id: string | null;
+          client_first_name: string | null;
+          client_last_name: string | null;
+          occurred_at: string | null;
+        }[];
+      };
+    };
     Enums: {
       absence_reason: 'NOT_HOME' | 'CANCELLED_BY_CLIENT' | 'ILL' | 'NO_ACCESS' | 'OTHER';
       account_status: 'ACTIVE' | 'SUSPENDED';
@@ -2149,6 +2192,14 @@ export interface Database {
       change_request_kind:
         'ABSENCE' | 'TIME_CHANGE' | 'DESTINATION_CHANGE' | 'CANCEL' | 'OTHER';
       change_request_status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'APPLIED';
+      checkin_outcome:
+        | 'CHECKED_IN'
+        | 'ALREADY_CHECKED_IN'
+        | 'NO_ACTIVE_RIDE'
+        | 'NO_ACCESS'
+        | 'UNKNOWN_TAG'
+        | 'NOT_ALLOWED'
+        | 'RATE_LIMITED';
       checkout_mode: 'DISABLED' | 'OPTIONAL' | 'REQUIRED';
       client_status: 'ACTIVE' | 'INACTIVE';
       domain_verification_status: 'PENDING' | 'VERIFIED' | 'FAILED';

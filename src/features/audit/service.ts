@@ -38,6 +38,12 @@ export type AuditAction =
   | 'ride_template.updated'
   | 'ride_template.archived'
   | 'rides.generated'
+  | 'tag.created'
+  | 'tag.assigned'
+  | 'tag.unassigned'
+  | 'tag.status_changed'
+  | 'tag.lost'
+  | 'tag.checked_in'
   | 'member.roles_changed'
   | 'member.suspended'
   | 'member.reactivated';

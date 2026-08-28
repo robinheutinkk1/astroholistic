@@ -83,6 +83,35 @@ function mapUdt(udtName) {
   return byUdt[udtName] ?? 'string';
 }
 
+/** `p_token_hash bytea, p_source event_source DEFAULT 'NFC'` → typed fields. */
+function parseArgs(signature) {
+  if (!signature || signature.trim() === '') return [];
+  return signature.split(',').map((raw) => {
+    const part = raw.trim();
+    const optional = / DEFAULT /i.test(part);
+    const [name, ...rest] = part.replace(/ DEFAULT .*/i, '').trim().split(/\s+/);
+    return { name, optional, type: mapUdt(rest.join(' ').replace(/\[\]$/, '')) };
+  });
+}
+
+/** `TABLE(outcome checkin_outcome, ride_id uuid, ...)` → an object type. */
+function parseResult(result, returnsSet, enums) {
+  const table = /^TABLE\((.*)\)$/is.exec(result ?? '');
+  if (!table) {
+    const scalar = mapUdt((result ?? 'text').replace(/^SETOF /i, ''));
+    return returnsSet ? `${scalar}[]` : scalar;
+  }
+  const fields = table[1].split(',').map((raw) => {
+    const [name, ...rest] = raw.trim().split(/\s+/);
+    const type = rest.join(' ');
+    const mapped = enums.has(type)
+      ? `Database['public']['Enums']['${type}']`
+      : mapUdt(type);
+    return `${name}: ${mapped} | null`;
+  });
+  return `{ ${fields.join('; ')} }[]`;
+}
+
 const client = new pg.Client({ connectionString: CONNECTION });
 await client.connect();
 
@@ -103,6 +132,39 @@ for (const e of enums) {
   e.labels = String(e.labels).split(',');
 }
 const enumNames = new Set(enums.map((e) => e.name));
+
+// Functions exposed through PostgREST. Without these, every .rpc() call is
+// untyped and its result collapses to `never` at the call site.
+const { rows: functions } = await client.query(`
+  select p.proname as name,
+         pg_get_function_arguments(p.oid) as args,
+         pg_get_function_result(p.oid) as result,
+         p.proretset as returns_set
+  from pg_proc p
+  join pg_namespace n on n.oid = p.pronamespace
+  where n.nspname = 'public'
+    and p.prokind = 'f'
+    and has_function_privilege('authenticated', p.oid, 'execute')
+    -- Extension-owned functions (pgcrypto, citext, ...) are not ours to type,
+    -- and their overloads would collide on name.
+    and not exists (
+      select 1 from pg_depend d
+      where d.objid = p.oid and d.deptype = 'e'
+    )
+  order by p.proname
+`);
+
+// Overloads share a name, which cannot be expressed in this type shape. Keep
+// the first and warn, rather than emitting a duplicate key.
+const seenFunctions = new Set();
+const uniqueFunctions = functions.filter((fn) => {
+  if (seenFunctions.has(fn.name)) {
+    console.warn(`Skipping overload of ${fn.name}(); only the first is typed.`);
+    return false;
+  }
+  seenFunctions.add(fn.name);
+  return true;
+});
 
 const { rows: tables } = await client.query(`
   select tablename as name from pg_tables
@@ -244,7 +306,23 @@ for (const { name } of tables) {
 
 lines.push('    };');
 lines.push('    Views: Record<string, never>;');
-lines.push('    Functions: Record<string, never>;');
+
+if (uniqueFunctions.length === 0) {
+  lines.push('    Functions: Record<string, never>;');
+} else {
+  lines.push('    Functions: {');
+  for (const fn of uniqueFunctions) {
+    lines.push(`      ${fn.name}: {`);
+    lines.push('        Args: {');
+    for (const arg of parseArgs(fn.args)) {
+      lines.push(`          ${arg.name}${arg.optional ? '?' : ''}: ${arg.type};`);
+    }
+    lines.push('        };');
+    lines.push(`        Returns: ${parseResult(fn.result, fn.returns_set, enumNames)};`);
+    lines.push('      };');
+  }
+  lines.push('    };');
+}
 lines.push('    Enums: {');
 for (const e of enums) {
   lines.push(`      ${e.name}: ${e.labels.map((l) => `'${l}'`).join(' | ')};`);

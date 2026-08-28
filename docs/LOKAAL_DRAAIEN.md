@@ -142,7 +142,17 @@ Wil je het op je telefoon proberen, start dan met `npm run dev -- -H 0.0.0.0` en
 open het IP-adres van je pc op je telefoon (zelfde wifi). In Chrome of Safari
 kun je hem daarna aan je beginscherm toevoegen.
 
-**6. Wat mist er in de formulieren?**
+**6. Maak een NFC-tag aan.**
+Ga als planner naar NFC-tags → Tag aanmaken. Je krijgt eenmalig een link te
+zien; die schrijf je naar een NFC-sticker of print je als QR-code. Koppel de tag
+aan Jan Jansen.
+
+Open die link daarna in een privévenster: je ziet alleen "log in om verder te
+gaan", geen naam en geen bedrijf. Log in als `chauffeur1@ontzorgd.test` en open
+hem opnieuw — dan checkt hij Jan in. Nog een keer openen zegt "al ingecheckt om
+…", zonder tweede registratie.
+
+**7. Wat mist er in de formulieren?**
 Kijk bij een cliënt of je alle velden mist die Taxi Ontzorgd nodig heeft. Het
 rolstoelveld ontbreekt met opzet (besluit D-03); alles wat je verder mist, hoor
 ik graag.

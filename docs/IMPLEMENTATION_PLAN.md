@@ -291,11 +291,53 @@ geweigerde of trage fix mag een chauffeur die naast de bus staat niet ophouden.
 meldt terwijl hij onderweg is, moet niet zijn rit uit de workflow getrokken
 zien; de dispatcher beslist wat er gebeurt.
 
-## Fase 7 — NFC en QR
+## Fase 7 — NFC en QR ✅ afgerond
 
-Volgens `NFC.md`: tags aanmaken, tokenafgifte, koppelen/ontkoppelen, statussen,
-vervangen, QR-rendering, bulk-PDF; `/t/[token]`-landingspagina; check-in RPC in
-één transactie; duplicaathandling; rate limiting; volledige beveiligingstests.
+Opgeleverd:
+
+- Tags aanmaken met een 128-bits willekeurig token, gekoppeld aan een cliënt,
+  uitschakelen, als verloren melden
+- QR-code die dezelfde URL bevat als de NFC-tag — één systeem, geen tweede
+  identifier en geen tweede intrekpad
+- Publieke landingspagina `/t/[token]`
+- Check-in als één databasefunctie: event én statuswijziging in dezelfde
+  transactie
+- Scanknop in de chauffeursapp: Web NFC waar beschikbaar, code overtypen altijd
+- Rate limiting op scanpogingen
+
+_Verificatie:_ `npm run verify` groen (158 tests), `npm run test:security` groen
+(187 tests, waarvan 21 nieuw voor de scanflow).
+
+**Een gevonden tag is waardeloos.** De URL bevat een 128-bits willekeurig token,
+niet de leesbare code van het label — die is enumereerbaar. De database bewaart
+alleen een gepepperde hash, dus een databasedump levert geen werkende tag-URL's
+op. De pagina toont een niet-ingelogde bezoeker niets: geen naam, geen
+organisatie, en geen bevestiging dát het token bestaat. Woord voor woord
+dezelfde pagina als een willekeurige string, geverifieerd tegen de draaiende
+server.
+
+**Een echt lek dat de eigen test vond.** De eerste versie zocht eerst de tag op
+en controleerde dáárna de chauffeur. Gevolg: een onbekend token gaf
+`UNKNOWN_TAG`, maar een echt token van een ánder vervoersbedrijf gaf
+`NO_ACCESS`. Dat verschil is een orakel — iedereen met een willekeurig
+chauffeursaccount kon een echte TagPoint-tag onderscheiden van een verzonnen
+code. Nu wordt eerst vastgesteld wie de beller is, en zijn "geen tag" en "niet
+jouw tag" hetzelfde antwoord.
+
+**Dubbel scannen is geen dubbele check-in.** Drie taps leveren één event op en
+de melding "Jan is al ingecheckt om 08:27" — geen foutmelding, want de chauffeur
+heeft niets fout gedaan.
+
+**Scannen is identificatie, geen autorisatie.** Het token identificeert de tag;
+het sessietoken identificeert de persoon. Alleen een chauffeur met een rit voor
+die cliënt, vandaag, krijgt een naam te zien.
+
+**De QR-encoder is met de hand geschreven, en teruggelezen.** Eén vaste
+configuratie in plaats van een bibliotheek die elke modus aankan. De test
+decodeert de matrix terug naar de oorspronkelijke URL, zodat een fout in
+plaatsing of masking zichtbaar wordt in CI in plaats van pas op een telefoon —
+al blijft een echte camera de enige manier om contrast en printkwaliteit te
+bevestigen.
 
 ## Fase 8 — Realtime dispatch
 
