@@ -384,10 +384,51 @@ die heeft de Docker-stack nodig. Wél getest is alles waar hij van afhangt: wat
 er gepubliceerd wordt, of die tabellen RLS aan hebben, en of de policies die hij
 raadpleegt de organisaties daadwerkelijk scheiden.
 
-## Fase 9 — Portalen
+## Fase 9 — Portalen ✅ afgerond
 
-Cliënt-, contact- en opdrachtgeverportaal; `change_requests`-workflow met
-beoordeling door planners; per-portaal beveiligingstests.
+Opgeleverd:
+
+- Eén portaal op `/portaal` voor cliënten, contactpersonen en opdrachtgevers:
+  komende en eerdere ritten, status, chauffeursvoornaam
+- Wijzigingsverzoeken en afmeldingen indienen, met de status van elk verzoek
+- Beoordelingsscherm voor planners op `/verzoeken`
+
+_Verificatie:_ `npm run verify` groen (174 tests), `npm run test:security` groen
+(227 tests, waarvan 22 nieuw voor de portalen).
+
+**Eén portaal, geen drie.** Het masterprompt beschrijft een cliëntportaal (§31),
+een ouderportaal (§32) en een opdrachtgeverportaal (§33). Functioneel zijn dat
+hetzelfde scherm: "de mensen wier vervoer ik mag volgen, hun ritten, en het
+handjevol dingen dat ik mag doen". Alleen de bevoegdheden verschillen, en die
+staan al op de koppelingen. Drie bijna identieke schermen zouden drie plekken
+zijn om een fout te herstellen, en drie kansen dat er één lekt.
+
+Een gebruiker kan bovendien meerdere rollen tegelijk hebben — een ouder die zelf
+ook cliënt is. Bevoegdheden tellen dan op in plaats van dat de laatst geladen
+rij wint.
+
+**Portalen schrijven nooit in ritten** (besluit D-08). Wat een ouder invult is
+een verzoek; een planner beslist. Zonder dat zou een afmelding om 05:00 stil een
+planning omgooien waar nog niemand naar gekeken heeft, zonder spoor van wie het
+deed. Vier tests bewaken dat, en RLS weigert het — niet alleen de knop is weg.
+
+**Goedkeuren wijzigt de rit niet.** Het legt het besluit vast; de planner past
+de rit daarna zelf aan. "Deze rit annuleren" van een ouder en van de planning
+zijn niet dezelfde handeling — bij de tweede is er iemand verantwoordelijk voor
+het gevolg. Het scherm zegt dat er ook bij.
+
+**Niemand beoordeelt zijn eigen verzoek**, ook niet met de permissie. Anders kan
+een medewerker die óók ouder is zijn eigen wijziging goedkeuren.
+
+**Bevoegdheden staan op de koppeling, niet op de persoon.** Een ouder mag zich
+voor het ene kind afmelden en voor het andere niet. Een opdrachtgever volgt het
+vervoer maar spreekt niet namens de cliënt, en krijgt daarom geen knoppen — met
+een zin die uitlegt waarom, in plaats van dode knoppen.
+
+**Toegang vervalt vanzelf.** Zet een organisatie `can_view_rides` uit, dan is de
+ouder direct buiten. Loopt de financiering van een opdrachtgever af, dan
+verdwijnt de cliënt uit zijn lijst zonder dat iemand iets hoeft op te ruimen.
+Beide getest.
 
 ## Fase 10 — White label en domeinen
 

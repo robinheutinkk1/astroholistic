@@ -57,6 +57,12 @@ const ALL_NAV_ITEMS: readonly NavItem[] = [
     icon: 'care',
     permission: 'care_organizations.view',
   },
+  {
+    href: '/verzoeken',
+    label: 'Verzoeken',
+    icon: 'care',
+    permission: 'change_requests.view',
+  },
   { href: '/tags', label: 'NFC-tags', icon: 'tags', permission: 'tags.view' },
   {
     href: '/instellingen',

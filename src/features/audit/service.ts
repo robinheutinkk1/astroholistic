@@ -44,6 +44,8 @@ export type AuditAction =
   | 'tag.status_changed'
   | 'tag.lost'
   | 'tag.checked_in'
+  | 'change_request.submitted'
+  | 'change_request.reviewed'
   | 'member.roles_changed'
   | 'member.suspended'
   | 'member.reactivated';

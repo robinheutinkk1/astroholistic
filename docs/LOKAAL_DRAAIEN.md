@@ -152,7 +152,15 @@ gaan", geen naam en geen bedrijf. Log in als `chauffeur1@ontzorgd.test` en open
 hem opnieuw — dan checkt hij Jan in. Nog een keer openen zegt "al ingecheckt om
 …", zonder tweede registratie.
 
-**7. Wat mist er in de formulieren?**
+**7. Bekijk het ouderportaal.**
+Log in als `ouder@ontzorgd.test` en ga naar `/portaal`. Olga ziet alleen Jan —
+niet Piet, die bij dezelfde organisatie hoort. Geef een rit door als afmelding;
+log daarna in als planner en beoordeel hem via Verzoeken.
+
+Probeer als ouder de URL van een andere cliënt te plakken: je krijgt "niet
+gevonden".
+
+**8. Wat mist er in de formulieren?**
 Kijk bij een cliënt of je alle velden mist die Taxi Ontzorgd nodig heeft. Het
 rolstoelveld ontbreekt met opzet (besluit D-03); alles wat je verder mist, hoor
 ik graag.
