@@ -1,5 +1,8 @@
 import 'server-only';
 import { z } from 'zod';
+// De lengte staat in features/tags/config.ts, buiten server-only, zodat de
+// controle op het scherm en de validatie hier niet uit elkaar kunnen lopen.
+import { MIN_PEPPER_LENGTH } from '@/features/tags/config';
 
 /**
  * Server-only secrets.
@@ -14,7 +17,12 @@ import { z } from 'zod';
 const schemas = {
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, 'SUPABASE_SERVICE_ROLE_KEY is not set'),
   /** Pepper for NFC/QR token hashing — kept outside the database on purpose. */
-  TAG_TOKEN_PEPPER: z.string().min(32, 'TAG_TOKEN_PEPPER must be at least 32 characters'),
+  TAG_TOKEN_PEPPER: z
+    .string()
+    .min(
+      MIN_PEPPER_LENGTH,
+      `TAG_TOKEN_PEPPER must be at least ${MIN_PEPPER_LENGTH} characters`,
+    ),
   CRON_SECRET: z.string().min(16, 'CRON_SECRET must be at least 16 characters'),
 } as const;
 

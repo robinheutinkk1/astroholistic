@@ -17,7 +17,13 @@ import { Sidebar, type NavItem } from './sidebar';
  * zijn en die passen niet onder een knop. Hij sluit bij een routewijziging —
  * zonder dat blijft hij openstaan over de pagina die je net hebt geopend.
  */
-export function MobileNav({ items, title }: { items: readonly NavItem[]; title: string }) {
+export function MobileNav({
+  items,
+  title,
+}: {
+  items: readonly NavItem[];
+  title: string;
+}) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const [lastPath, setLastPath] = useState(pathname);
@@ -50,7 +56,9 @@ export function MobileNav({ items, title }: { items: readonly NavItem[]; title: 
           aria-describedby={undefined}
         >
           <div className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-[var(--tp-border)] px-4">
-            <Dialog.Title className="truncate text-sm font-semibold">{title}</Dialog.Title>
+            <Dialog.Title className="truncate text-sm font-semibold">
+              {title}
+            </Dialog.Title>
             <Dialog.Close asChild>
               <button
                 type="button"

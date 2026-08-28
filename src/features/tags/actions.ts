@@ -9,6 +9,7 @@ import {
   type FormState,
 } from '@/lib/errors/form-state';
 import { isPlausibleToken, normalizeToken } from './token';
+import { isTagFeatureConfigured } from './config';
 import * as tagService from './service';
 
 const CONTEXT = 'tag action';
@@ -36,6 +37,17 @@ export async function createTagAction(
 
   if (!parsed.success) {
     return { status: 'error', message: 'Die omschrijving is te lang.' };
+  }
+
+  // Achtervang: het scherm verbergt de knop al wanneer dit ontbreekt, maar een
+  // formulier dat rechtstreeks wordt gepost hoort ook een bruikbaar antwoord te
+  // krijgen in plaats van een generieke fout.
+  if (!isTagFeatureConfigured()) {
+    return {
+      status: 'error',
+      message:
+        'Tags zijn nog niet aangezet op dit platform: TAG_TOKEN_PEPPER ontbreekt. Zie docs/DEPLOYMENT.md stap 5.',
+    };
   }
 
   try {
