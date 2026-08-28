@@ -1,10 +1,11 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   addDays,
   instantToLocalDate,
   instantToLocalTime,
   isoWeekday,
   localToInstant,
+  todayInTimezone,
 } from './timezone';
 
 const AMS = 'Europe/Amsterdam';
@@ -112,5 +113,43 @@ describe('addDays', () => {
 
   it('subtracts with a negative offset', () => {
     expect(addDays('2026-01-01', -1)).toBe('2025-12-31');
+  });
+});
+
+describe('todayInTimezone', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('returns the local date, not the UTC date, just after midnight', () => {
+    // 22:30 UTC on 15 July is already 00:30 on 16 July in Amsterdam. A
+    // dispatcher on the night shift must see today's rides, not yesterday's.
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-07-15T22:30:00Z'));
+    expect(todayInTimezone(AMS)).toBe('2026-07-16');
+  });
+
+  it('returns the local date just before midnight', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-07-15T21:30:00Z'));
+    expect(todayInTimezone(AMS)).toBe('2026-07-15');
+  });
+
+  it('handles winter time, where the offset is one hour', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-01-15T23:30:00Z'));
+    expect(todayInTimezone(AMS)).toBe('2026-01-16');
+  });
+
+  it('gives a different answer for a timezone behind UTC', () => {
+    const instant = new Date('2026-07-16T02:00:00Z');
+    expect(todayInTimezone(AMS, instant)).toBe('2026-07-16');
+    expect(todayInTimezone('America/New_York', instant)).toBe('2026-07-15');
+  });
+
+  it('formats as YYYY-MM-DD so it compares directly with a date column', () => {
+    expect(todayInTimezone(AMS, new Date('2026-03-05T12:00:00Z'))).toMatch(
+      /^\d{4}-\d{2}-\d{2}$/,
+    );
   });
 });

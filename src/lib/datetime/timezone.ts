@@ -169,3 +169,15 @@ export function addDays(date: string, days: number): LocalDate {
   const shifted = new Date(Date.UTC(year, month - 1, day + days));
   return shifted.toISOString().slice(0, 10);
 }
+
+/**
+ * Today's calendar date in an organisation's timezone.
+ *
+ * "Today" must be the organisation's today, not the server's. A Vercel function
+ * runs in UTC: at 00:30 Amsterdam time in summer it is still 22:30 the previous
+ * day in UTC, so `new Date().toISOString().slice(0, 10)` would show the night
+ * dispatcher yesterday's rides.
+ */
+export function todayInTimezone(timeZone: string, now: Date = new Date()): LocalDate {
+  return instantToLocalDate(now, timeZone);
+}

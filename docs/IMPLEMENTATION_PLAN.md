@@ -152,11 +152,50 @@ de redirects, de permissielogica tegen de echte database, en de
 formuliervalidatie. Op een omgeving met `npm run db:start` is de inlogflow wel
 end-to-end te doorlopen — dat is de eerste controle die daar hoort te gebeuren.
 
-## Fase 4 — Beheer-core
+## Fase 4 — Beheer-core ✅ afgerond
 
-Dashboard met dagcijfers; CRUD voor cliënten, contacten, opdrachtgevers,
-chauffeurs, voertuigen, locaties; server-side paginatie, filtering en sortering
-vanaf het begin (§49); auditlogging op alle mutaties.
+Opgeleverd:
+
+- Dashboard met echte dagcijfers: geplande, afgeronde, onderweg zijnde en
+  wachtende ritten, plus problemen, afwezigheid en ritten zonder chauffeur
+- Cliënten, chauffeurs, voertuigen en locaties: lijst, aanmaken, wijzigen,
+  verwijderen — met zoeken, paginering en bevestigingsdialoog
+- Auditlogging op elke mutatie
+- Gedeelde bouwstenen: `lib/pagination.ts`, `Table`, `SearchField`,
+  `Pagination`, `Select`, `DeleteDialog`, `lib/errors/form-state.ts`
+
+_Verificatie:_ `npm run verify` groen (99 tests), `npm run test:security` groen
+(128 tests). Alle routes gecontroleerd tegen de draaiende dev-server, zonder
+fouten in de log.
+
+**Server-side lijsten vanaf het begin.** Zoeken, sorteren en pagineren gebeurt
+in de database. De sorteerkolom komt nooit rechtstreeks uit de URL maar wordt
+tegen een toegestane lijst gecontroleerd; een onbekende of kwaadaardige waarde
+valt terug op de standaard. Zoektermen worden ge-escaped, zodat iemand die naar
+`50%` zoekt niet alles terugkrijgt. Dertien tests dekken dit af, inclusief
+onzin-parameters die pagina 1 moeten opleveren in plaats van een foutmelding.
+
+**Een stabiele tiebreaker op elke lijst.** Zonder `order by ..., id` kunnen twee
+cliënten met dezelfde achternaam tussen pagina's van plaats wisselen, waardoor
+er één nooit getoond wordt.
+
+**Verwijderen is soft delete.** Een cliënt verdwijnt uit de lijsten maar de
+ritten blijven — dat is de vervoersadministratie. Het verwijderdialoog noemt dat
+concreet ("de 42 bestaande ritten blijven bewaard") in plaats van "weet je het
+zeker?".
+
+**Chauffeurs met toekomstige ritten kunnen niet verdwijnen.** De planning zou
+stilzwijgend zijn toegewezene verliezen; de service weigert en zegt hoeveel
+ritten eerst opnieuw toegewezen moeten worden.
+
+**Het cliëntformulier heeft bewust geen veld voor rolstoel of medische
+opmerkingen** (besluit D-03). Er staat een zichtbare toelichting waarom, zodat
+het geen omissie lijkt die iemand later "even" aanvult.
+
+**Gevonden tijdens het bouwen:** `insert ... returning` vereist óók leesrecht.
+Een planner mag een auditregel schrijven maar de auditlog niet lezen, dus
+`recordAudit()` doet bewust geen `returning` — anders faalt elke mutatie die een
+planner doet. Vastgelegd in een test met die uitleg.
 
 ## Fase 5 — Ritten en planning
 

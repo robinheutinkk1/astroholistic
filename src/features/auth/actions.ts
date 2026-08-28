@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation';
 import type { Route } from 'next';
 import { revalidatePath } from 'next/cache';
-import { isAppError, ValidationError } from '@/lib/errors/app-error';
+import { IDLE, toFormState, type FormState } from '@/lib/errors/form-state';
 import {
   forgotPasswordSchema,
   resetPasswordSchema,
@@ -17,30 +17,7 @@ import * as authService from './service';
  * the form. No business logic lives here (docs/ARCHITECTURE.md §4).
  */
 
-export interface FormState {
-  readonly status: 'idle' | 'error' | 'success';
-  readonly message?: string;
-  readonly fieldErrors?: Record<string, string[]>;
-}
-
-export const IDLE: FormState = { status: 'idle' };
-
-function toFormState(error: unknown): FormState {
-  if (error instanceof ValidationError) {
-    return {
-      status: 'error',
-      message: error.message,
-      fieldErrors: { ...error.fieldErrors },
-    };
-  }
-  if (isAppError(error)) {
-    return { status: 'error', message: error.message };
-  }
-  // Never surface an unexpected error's text: it can leak schema or
-  // infrastructure detail (docs/SECURITY.md §12).
-  console.error('Unexpected error in auth action', error);
-  return { status: 'error', message: 'Er ging iets mis. Probeer het opnieuw.' };
-}
+export { IDLE, type FormState };
 
 export async function signInAction(
   _previous: FormState,
@@ -61,7 +38,7 @@ export async function signInAction(
   }
 
   const result = await authService.signIn(parsed.data);
-  if (!result.ok) return toFormState(result.error);
+  if (!result.ok) return toFormState(result.error, 'auth action');
 
   // Only relative paths: an attacker-supplied absolute URL here would turn the
   // login form into an open redirect.
@@ -119,7 +96,7 @@ export async function resetPasswordAction(
   }
 
   const result = await authService.resetPassword(parsed.data);
-  if (!result.ok) return toFormState(result.error);
+  if (!result.ok) return toFormState(result.error, 'auth action');
   redirect('/dashboard');
 }
 
@@ -141,7 +118,7 @@ export async function updateProfileAction(
   }
 
   const result = await authService.updateProfile(parsed.data);
-  if (!result.ok) return toFormState(result.error);
+  if (!result.ok) return toFormState(result.error, 'auth action');
 
   revalidatePath('/profiel');
   return { status: 'success', message: 'Je profiel is opgeslagen.' };
