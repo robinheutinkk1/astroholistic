@@ -9,8 +9,8 @@ voor cliënten, contactpersonen en opdrachtgevers.
 > [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) §14 en
 > [`docs/SECURITY_AUDIT.md`](docs/SECURITY_AUDIT.md).
 >
-> `npm run verify` groen (278 tests) · `npm run test:security` groen (345 tests)
-> · `npm run test:e2e` 22 geslaagd, 12 overgeslagen zonder authenticatiedienst.
+> `npm run verify` groen (320 tests) · `npm run test:security` groen (385 tests)
+> · `npm run test:e2e` 34 geslaagd, 12 overgeslagen zonder authenticatiedienst.
 
 ## Documentatie
 

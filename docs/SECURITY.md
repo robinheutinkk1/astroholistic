@@ -58,6 +58,8 @@ Beschermwaardig, in volgorde van ernst bij verlies:
 | T31 | De planner kan niet zien wélk adres toegang heeft tot een dossier | `app.linked_portal_user_ids()` opent `profiles` precies zo ver als nodig: alleen accounts die aan een eigen cliënt, contactpersoon of zorgorganisatie hangen (S72–S75) |
 | T32 | Een koppeling steekt de tenantgrens over: een contactpersoon of opdrachtgever van vervoerder B wordt aan een cliënt van A gehangen, waarmee diens portaalgebruiker inzage krijgt | Migratie 0029: de policies op `client_contacts` en `client_care_organizations` eisen dat **beide** kanten in dezelfde organisatie zitten, op insert én update (S78–S80) |
 | T33 | Een afgelopen indicatie blijft toegang geven | `valid_from`/`valid_to` worden door RLS gelezen, niet door het scherm (S86–S87) |
+| T34 | Na uitloggen blijft de planning van de vorige gebruiker in de cache van de browser staan — op een gedeelde computer leest de volgende hem gewoon terug | `signOutAction` doet `revalidatePath('/', 'layout')` vóór de doorverwijzing (D-42) |
+| T35 | De code van een NFC-tag komt in een URL terecht, en daarmee in de geschiedenis van de browser en in de logboeken van elke tussenliggende server | De QR wordt in de browser getekend uit de code die daar al in het geheugen staat; er is geen route die een tagcode in een pad zet (D-40) |
 
 ## 3. Authenticatie
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useMemo, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Copy, Plus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +11,7 @@ import { Table, Tbody, Td, Th, Thead, Tr } from '@/components/ui/data-table';
 import { EmptyState } from '@/components/ui/states';
 import { FormStatus } from '@/features/auth/components/form-status';
 import { IDLE, type FormState } from '@/lib/errors/form-state';
+import { qrSvg } from '../qr';
 import {
   assignTagAction,
   createTagAction,
@@ -71,6 +72,21 @@ function NewTagPanel({
   const [copied, setCopied] = useState(false);
   const url = `${appUrl}/t/${created.token}`;
 
+  /*
+   * De QR wordt hier in de browser gemaakt en niet door een route op de server
+   * opgehaald. Dat kan ook niet anders: van de tag bewaren we alleen een
+   * versleutelde afdruk, dus de server kan deze link nooit opnieuw opbouwen.
+   *
+   * Er stond eerder een link naar `/tags/{id}/qr`. Die pagina bestond niet — en
+   * had ook niet kunnen bestaan. Bovendien zou de code dan in de URL staan, en
+   * daarmee in de geschiedenis van de browser en in de logboeken van elke
+   * tussenliggende server. Precies wat een geheim niet moet overkomen.
+   */
+  const qrDataUri = useMemo(
+    () => `data:image/svg+xml;base64,${btoa(qrSvg(url, 160))}`,
+    [url],
+  );
+
   return (
     <div className="flex flex-col gap-3 rounded-[var(--tp-radius)] border-2 border-[var(--tp-primary)] bg-[var(--tp-surface)] p-4">
       <div>
@@ -99,14 +115,30 @@ function NewTagPanel({
         </Button>
       </div>
 
-      <a
-        href={`/tags/${created.id}/qr`}
-        target="_blank"
-        rel="noreferrer"
-        className="text-sm font-medium text-[var(--tp-primary)] underline underline-offset-4"
-      >
-        QR-code openen om te printen
-      </a>
+      <div className="flex flex-wrap items-center gap-4">
+        {/* eslint-disable-next-line @next/next/no-img-element -- een data-URI die
+            hier ter plekke is opgebouwd; next/image is voor bestanden op een
+            server en zou hier alleen een omweg zijn. */}
+        <img
+          src={qrDataUri}
+          alt={`QR-code voor tag ${created.publicCode}`}
+          width={160}
+          height={160}
+          className="rounded border border-[var(--tp-border)] bg-white"
+        />
+        <div className="flex flex-col gap-2 text-sm">
+          <p className="text-[var(--tp-muted-foreground)]">
+            Dezelfde link als op de NFC-tag, voor wie een telefoon zonder NFC heeft.
+          </p>
+          <a
+            href={qrDataUri}
+            download={`tag-${created.publicCode}.svg`}
+            className="font-medium text-[var(--tp-primary)] underline underline-offset-4"
+          >
+            QR-code downloaden om te printen
+          </a>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,10 +1,24 @@
 'use client';
 
+import { useTransition } from 'react';
 import Link from 'next/link';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { LogOut, User } from 'lucide-react';
 import { signOutAction } from '@/features/auth/actions';
 
+/**
+ * WAAROM `onSelect` EN GEEN FORMULIER. Dit menu had dezelfde fout als de
+ * organisatiewisselaar: een <form> met een submit-knop binnen een
+ * DropdownMenu.Item. Dat doet niets. Het menu-item vangt de klik af en sluit
+ * het menu, waarna React het formulier weghaalt voordat de browser het kan
+ * versturen -- uitloggen deed dus letterlijk niets, zonder foutmelding.
+ *
+ * Bijkomend probleem van diezelfde constructie: met `asChild` kreeg het <form>
+ * `role="menuitem"` in plaats van de knop erin. Voor een schermlezer was het
+ * een menu-item zonder bedienbare inhoud.
+ *
+ * `preventDefault()` houdt het menu open tot de actie is gestart.
+ */
 export function UserMenu({
   fullName,
   email,
@@ -14,6 +28,8 @@ export function UserMenu({
   email: string;
   roleLabels: readonly string[];
 }) {
+  const [pending, startTransition] = useTransition();
+
   const initials = (fullName ?? email)
     .split(/[\s@.]+/)
     .filter(Boolean)
@@ -51,23 +67,25 @@ export function UserMenu({
           <DropdownMenu.Item asChild>
             <Link
               href="/profiel"
-              className="flex items-center gap-2 rounded-[calc(var(--tp-radius)-2px)] px-2 py-1.5 text-sm hover:bg-[var(--tp-surface-muted)]"
+              className="flex min-h-11 items-center gap-2 rounded-[calc(var(--tp-radius)-2px)] px-2 py-1.5 text-sm hover:bg-[var(--tp-surface-muted)]"
             >
               <User className="size-4" aria-hidden="true" />
               Mijn profiel
             </Link>
           </DropdownMenu.Item>
 
-          <DropdownMenu.Item asChild>
-            <form action={signOutAction}>
-              <button
-                type="submit"
-                className="flex w-full items-center gap-2 rounded-[calc(var(--tp-radius)-2px)] px-2 py-1.5 text-left text-sm hover:bg-[var(--tp-surface-muted)]"
-              >
-                <LogOut className="size-4" aria-hidden="true" />
-                Uitloggen
-              </button>
-            </form>
+          <DropdownMenu.Item
+            disabled={pending}
+            onSelect={(event) => {
+              event.preventDefault();
+              startTransition(() => {
+                void signOutAction();
+              });
+            }}
+            className="flex min-h-11 w-full cursor-pointer items-center gap-2 rounded-[calc(var(--tp-radius)-2px)] px-2 py-1.5 text-sm outline-none hover:bg-[var(--tp-surface-muted)] focus-visible:bg-[var(--tp-surface-muted)] data-[disabled]:opacity-60"
+          >
+            <LogOut className="size-4" aria-hidden="true" />
+            {pending ? 'Uitloggen…' : 'Uitloggen'}
           </DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>

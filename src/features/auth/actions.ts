@@ -64,6 +64,15 @@ export async function signInAction(
 
 export async function signOutAction(): Promise<never> {
   await authService.signOut();
+
+  /*
+   * De cache leegmaken hoort bij het uitloggen en is geen nettigheid. Zonder
+   * dit houdt de router van de browser de opgehaalde pagina's van de vorige
+   * gebruiker vast: wie na het uitloggen op "terug" drukt, of op een gedeelde
+   * computer het volgende tabblad opent, kan de planning van zijn voorganger
+   * nog uit die cache zien. De sessie is dan al weg, maar het beeld niet.
+   */
+  revalidatePath('/', 'layout');
   redirect('/login');
 }
 

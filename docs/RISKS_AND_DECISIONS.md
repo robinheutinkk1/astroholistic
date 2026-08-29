@@ -773,6 +773,65 @@ zou alleen cosmetisch zijn.
 *Wat dit kost:* wie de code leest ziet twee woorden voor één begrip. Daarom
 staat het hier.
 
+### D-40 — Componenttests, omdat drie kapotte knoppen de productie haalden
+
+*Wat er mis was:* drie dingen op het scherm zagen er goed uit en deden niets.
+
+1. **Wisselen van organisatie** — een `<form>` in een Radix-menu-item.
+2. **Uitloggen** — precies dezelfde constructie, in het accountmenu. Ik heb de
+   eerste gerepareerd zonder te kijken of het elders ook stond. Dat had gemoeten.
+3. **QR-code van een tag** — een link naar `/tags/{id}/qr`, een pagina die niet
+   bestond en ook niet kón bestaan: van een tag bewaren we alleen een
+   versleutelde afdruk, dus de server kan die link nooit opnieuw opbouwen.
+
+*Waarom niets dit ving:* de logica eronder klopte, dus de unittests waren groen.
+De E2E-suite die het wél zou zien slaat over zolang er geen ingelogde sessie is,
+en die vereist een draaiende GoTrue die er in deze omgeving niet is. Tussen
+"logica klopt" en "een browser met een sessie" zat een gat waar deze drie
+fouten precies in pasten.
+
+*Besluit:* componenttests met Testing Library, in jsdom. Die renderen de echte
+component, klikken er echt op, en controleren dat de server action wordt
+aangeroepen met de juiste gegevens. Geen sessie nodig, dus ze draaien overal —
+inclusief in CI.
+
+*Getoetst dat ze werken:* van elke test is de kapotte versie teruggezet en
+gecontroleerd dat hij dan valt. Een test die niet omvalt bij de fout die hij
+zou moeten vangen, is erger dan geen test.
+
+*Wat dit niet vervangt:* jsdom is geen browser. CSP, echte navigatie en de
+werkelijke server actions blijven het terrein van de E2E-suite, en die blijft
+half overgeslagen tot er een omgeving met GoTrue is.
+
+### D-41 — Een test die dode links vindt
+
+*Situatie:* de zijbalk verwees maandenlang naar `/opdrachtgevers`, een pagina
+die niet bestond. TypeScript ving het niet: `href` in de navigatiedefinitie is
+een gewone string in een array, en de `Route`-typen van Next dekken alleen JSX.
+
+*Besluit:* `tests/routes.test.ts` leest de routes uit de bestandsstructuur en
+vergelijkt ze met elke hard ingetypte link en redirect in de broncode.
+
+*Wat het meteen opleverde:* behalve `/opdrachtgevers` ook de QR-link hierboven.
+Twee dode links in een codebase waarvan ik dacht dat hij af was.
+
+*Grens:* de test kent alleen letterlijk ingetypte paden. Een volledig
+samengestelde link (`` `/${soort}/${id}` ``) valt erbuiten. Dat is een bewuste
+grens: liever een test die geen valse alarmen geeft dan een die iedereen
+uitzet.
+
+### D-42 — Uitloggen maakt ook de cache leeg
+
+*Situatie:* `signOutAction` beëindigde de sessie en stuurde door naar `/login`,
+en verder niets.
+
+*Probleem:* de router van de browser houdt opgehaalde pagina's vast. Wie na het
+uitloggen op "terug" drukte, kon de planning van de vorige gebruiker nog uit die
+cache zien. De sessie was weg, het beeld niet. Op een gedeelde computer in een
+taxicentrale is dat geen theoretisch scenario.
+
+*Besluit:* `revalidatePath('/', 'layout')` vóór de doorverwijzing.
+
 ## Openstaande vragen aan jou
 
 1. ~~Bestaat er al een Supabase-project?~~ **Beantwoord: nee.** Zie hierboven.
