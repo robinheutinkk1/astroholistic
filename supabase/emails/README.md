@@ -16,6 +16,39 @@ alles wat deze applicatie gebruikt: een uitnodiging en een wachtwoordherstel.
 4. Zet het onderwerp uit de tabel hierboven in het veld **Subject**.
 5. Nodig jezelf uit op een tweede adres en kijk hoe hij aankomt.
 
+## Het logo moet er eerst zijn
+
+De mails verwijzen naar `https://taxi.tagpoint.nl/email-logo.png`. Dat bestand
+hoort in `public/email-logo.png` in dit project; alles in `public/` is zonder
+inloggen bereikbaar, en dat is precies wat een mailprogramma nodig heeft.
+
+**Zolang dat bestand er niet staat, ziet de ontvanger een kapot plaatje.** Dat is
+slechter dan de tekstregel die er eerst stond, dus dit is geen detail voor later.
+
+Eisen aan het bestand:
+
+- **PNG met transparante achtergrond.** De mail heeft een lichte achtergrond;
+  een JPG krijgt daar een grijs blokje omheen.
+- **264 bij 64 pixels**, dus twee keer de weergavemaat van 132x32. Schermen zijn
+  tegenwoordig scherper dan de maat die in de HTML staat, en een logo op ware
+  grootte oogt daarop wazig.
+- **Donkere inkt.** De mail is licht van achtergrond en er is geen donkere versie:
+  een wit logo wordt onzichtbaar.
+
+Wijkt jouw logo af van 132x32 in verhouding, pas dan `width` en `height` in
+allebei de sjablonen aan. Laat ze niet weg: zonder die attributen springt de
+opmaak in Outlook uit elkaar terwijl het plaatje nog laadt.
+
+## Waarom er geen uitgeschreven link meer onder de knop staat
+
+Die stond er eerst, voor het geval een mailprogramma de knop wegknipt. Bewust
+verwijderd omdat hij rommelig oogt.
+
+Wat je daarmee opgeeft: bij een ontvanger wiens mailprogramma de knop niet
+rendert, is er geen tweede weg naar binnen. Dat is bij zakelijke Outlook geen
+theoretisch scenario. Gebeurt dat, dan is de terugweg de link hier weer
+toevoegen.
+
 ## Niet aanpassen zonder te testen
 
 `{{ .ConfirmationURL }}` is de eenmalige link. Zonder die exacte schrijfwijze

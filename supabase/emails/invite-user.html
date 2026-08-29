@@ -19,7 +19,7 @@
     <meta name="x-apple-disable-message-reformatting" />
     <meta name="color-scheme" content="light" />
     <meta name="supported-color-schemes" content="light" />
-    <title>Je bent uitgenodigd voor TagPoint Taxi Dispatch</title>
+    <title>Je bent uitgenodigd</title>
     <!--[if mso]>
       <style>
         body,
@@ -82,17 +82,34 @@
             <!-- Afzender -->
             <tr>
               <td style="padding: 0 0 20px 4px">
-                <span
+                <!--
+                  Een absolute https-URL, want een mailprogramma haalt het
+                  plaatje van internet en kan niets met een bestand uit de repo.
+                  Dit adres wijst naar public/email-logo.png in dit project.
+
+                  De alt-tekst is niet optioneel: Outlook blokkeert plaatjes
+                  standaard, en dan is dit het enige dat de ontvanger boven de
+                  mail ziet staan.
+                -->
+                <img
+                  src="https://taxi.tagpoint.nl/email-logo.png"
+                  alt="TagPoint"
+                  width="132"
+                  height="32"
                   style="
+                    display: block;
+                    width: 132px;
+                    height: 32px;
+                    border: 0;
+                    outline: none;
+                    text-decoration: none;
                     font-family:
                       -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
                     font-size: 15px;
                     font-weight: 600;
-                    letter-spacing: -0.01em;
                     color: #0f172a;
                   "
-                  >TagPoint Taxi Dispatch</span
-                >
+                />
               </td>
             </tr>
 
@@ -131,8 +148,7 @@
                     color: #334155;
                   "
                 >
-                  Er is een account voor je aangemaakt in TagPoint Taxi Dispatch, het
-                  systeem waarmee ritten worden gepland en geregistreerd.
+                  Er is een account voor je aangemaakt waarmee je het vervoer kunt volgen.
                 </p>
 
                 <p
@@ -199,35 +215,6 @@
                     </td>
                   </tr>
                 </table>
-
-                <!-- De link ook uitgeschreven. Bedrijfsmail knipt knoppen weg,
-                     en dan is dit het enige dat overblijft. -->
-                <p
-                  style="
-                    margin: 28px 0 0 0;
-                    font-family:
-                      -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-                    font-size: 13px;
-                    line-height: 20px;
-                    color: #64748b;
-                  "
-                >
-                  Werkt de knop niet? Kopieer deze link naar je browser:
-                </p>
-                <p style="margin: 6px 0 0 0; word-break: break-all">
-                  <a
-                    href="{{ .ConfirmationURL }}"
-                    style="
-                      font-family:
-                        'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-                      font-size: 12px;
-                      line-height: 18px;
-                      color: #475569;
-                      text-decoration: underline;
-                    "
-                    >{{ .ConfirmationURL }}</a
-                  >
-                </p>
 
                 <!-- Scheidingslijn als tabelrij: een <hr> valt in Outlook uit
                      elkaar. -->
@@ -296,9 +283,8 @@
                     color: #94a3b8;
                   "
                 >
-                  Deze mail is verstuurd naar {{ .Email }} omdat er een account is
-                  aangemaakt in TagPoint Taxi Dispatch. Antwoorden op dit bericht kan
-                  niet.
+                  Deze mail is verstuurd naar {{ .Email }} omdat er een account voor je is
+                  aangemaakt. Antwoorden op dit bericht kan niet.
                 </p>
               </td>
             </tr>
