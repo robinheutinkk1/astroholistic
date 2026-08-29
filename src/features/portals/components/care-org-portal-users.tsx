@@ -9,10 +9,7 @@ import { Input } from '@/components/ui/input';
 import { EmptyState } from '@/components/ui/states';
 import { IDLE, type FormState } from '@/lib/errors/form-state';
 import { FormStatus } from '@/features/auth/components/form-status';
-import {
-  grantPortalAccessAction,
-  revokeCareOrgPortalUserAction,
-} from '../actions';
+import { grantPortalAccessAction, revokeCareOrgPortalUserAction } from '../actions';
 import type { CareOrgPortalUser } from '../grants';
 
 function PendingButton({ label, variant }: { label: string; variant?: 'outline' }) {

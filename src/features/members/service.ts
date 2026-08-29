@@ -4,7 +4,11 @@ import { requirePermission, requireUser } from '@/features/rbac/session';
 import { type Permission } from '@/features/rbac/permissions';
 import { AuthorizationError, ConflictError, NotFoundError } from '@/lib/errors/app-error';
 import { err, ok, type Result } from '@/lib/result/result';
-import { type InviteMemberInput, type SetMemberStatusInput, type UpdateMemberRolesInput } from './schema';
+import {
+  type InviteMemberInput,
+  type SetMemberStatusInput,
+  type UpdateMemberRolesInput,
+} from './schema';
 import { inviteOrFindUser } from '@/features/auth/invite';
 
 export interface MemberRow {
@@ -179,16 +183,14 @@ export async function inviteMember(
   // rollen waarvan er één al bestond, faalt de hele insert en zou de nieuwe rol
   // stil verdwijnen. Een upsert laat de bestaande rij staan en voegt de nieuwe
   // wél toe.
-  const { error: roleError } = await supabase
-    .from('organization_user_roles')
-    .upsert(
-      input.roleIds.map((roleId) => ({
-        organization_user_id: membershipId,
-        role_id: roleId,
-        granted_by: user.id,
-      })),
-      { onConflict: 'organization_user_id,role_id', ignoreDuplicates: true },
-    );
+  const { error: roleError } = await supabase.from('organization_user_roles').upsert(
+    input.roleIds.map((roleId) => ({
+      organization_user_id: membershipId,
+      role_id: roleId,
+      granted_by: user.id,
+    })),
+    { onConflict: 'organization_user_id,role_id', ignoreDuplicates: true },
+  );
 
   if (roleError) {
     return err(new ConflictError('De rol kon niet worden toegekend.'));

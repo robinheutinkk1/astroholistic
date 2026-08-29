@@ -160,8 +160,8 @@ export default async function ClientDetailPage({
             <CardTitle>Contactpersonen</CardTitle>
             <CardDescription>
               Wie er voor deze cliënt regelt, en wat die persoon mag. De vinkjes gelden
-              per cliënt: dezelfde moeder kan voor haar zoon afmelden en voor haar
-              dochter alleen meekijken.
+              per cliënt: dezelfde moeder kan voor haar zoon afmelden en voor haar dochter
+              alleen meekijken.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -201,8 +201,8 @@ export default async function ClientDetailPage({
           <CardTitle>Portaaltoegang</CardTitle>
           <CardDescription>
             Geef de cliënt een eigen login om zijn ritten te volgen en een afwezigheid
-            door te geven. Dat is geen medewerkersaccount: hij ziet niets van de
-            planning en niets van andere cliënten.
+            door te geven. Dat is geen medewerkersaccount: hij ziet niets van de planning
+            en niets van andere cliënten.
           </CardDescription>
         </CardHeader>
         <CardContent>

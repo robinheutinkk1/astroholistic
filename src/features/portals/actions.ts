@@ -184,7 +184,10 @@ export async function revokePortalAccessAction(
   if (!parsed.success) return { status: 'error', message: 'Ongeldige aanvraag.' };
 
   try {
-    const result = await grants.revokePortalAccess(membership.organizationId, parsed.data);
+    const result = await grants.revokePortalAccess(
+      membership.organizationId,
+      parsed.data,
+    );
     if (!result.ok) return toFormState(result.error, CONTEXT);
   } catch (error) {
     return toFormState(error, CONTEXT);

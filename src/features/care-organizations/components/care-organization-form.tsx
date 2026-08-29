@@ -10,10 +10,7 @@ import { Select } from '@/components/ui/select';
 import { FormStatus } from '@/features/auth/components/form-status';
 import { IDLE, type FormState } from '@/lib/errors/form-state';
 import { type Tables } from '@/types/database';
-import {
-  createCareOrganizationAction,
-  updateCareOrganizationAction,
-} from '../actions';
+import { createCareOrganizationAction, updateCareOrganizationAction } from '../actions';
 
 function SubmitButton({ label }: { label: string }) {
   const { pending } = useFormStatus();
@@ -114,9 +111,7 @@ export function CareOrganizationForm({
       </div>
 
       <div className="flex gap-2">
-        <SubmitButton
-          label={isEdit ? 'Wijzigingen opslaan' : 'Opdrachtgever aanmaken'}
-        />
+        <SubmitButton label={isEdit ? 'Wijzigingen opslaan' : 'Opdrachtgever aanmaken'} />
         <Button variant="outline" asChild>
           <Link href="/opdrachtgevers">Annuleren</Link>
         </Button>

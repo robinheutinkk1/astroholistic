@@ -7,10 +7,7 @@ import {
   type ResolvedListParams,
 } from '@/lib/pagination';
 import { type Tables } from '@/types/database';
-import {
-  type CareOrganizationFormInput,
-  type CareOrganizationSort,
-} from './schema';
+import { type CareOrganizationFormInput, type CareOrganizationSort } from './schema';
 
 export type CareOrganizationRow = Pick<
   Tables<'care_organizations'>,
@@ -167,9 +164,7 @@ export interface ClientFunderRow {
 }
 
 /** De opdrachtgevers van één cliënt. */
-export async function findFundersForClient(
-  clientId: string,
-): Promise<ClientFunderRow[]> {
+export async function findFundersForClient(clientId: string): Promise<ClientFunderRow[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from('client_care_organizations')

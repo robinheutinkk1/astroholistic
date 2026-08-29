@@ -67,8 +67,8 @@ export function PortalAccessCard({
           <span className="text-[var(--tp-muted-foreground)]">{currentEmail}</span>
         </div>
         <p className="text-sm text-[var(--tp-muted-foreground)]">
-          Deze persoon ziet in het portaal alleen de eigen ritten — nooit die van
-          anderen, en nooit de planning van de organisatie.
+          Deze persoon ziet in het portaal alleen de eigen ritten — nooit die van anderen,
+          en nooit de planning van de organisatie.
         </p>
         {canManage ? (
           <form action={revokeAction}>

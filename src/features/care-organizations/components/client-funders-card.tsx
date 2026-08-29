@@ -112,10 +112,7 @@ export function ClientFundersCard({
         selectable.length === 0 ? (
           <p className="text-sm text-[var(--tp-muted-foreground)]">
             Er zijn nog geen opdrachtgevers.{' '}
-            <Link
-              href="/opdrachtgevers/nieuw"
-              className="underline underline-offset-4"
-            >
+            <Link href="/opdrachtgevers/nieuw" className="underline underline-offset-4">
               Maak er een aan
             </Link>
             .
@@ -128,7 +125,11 @@ export function ClientFundersCard({
             <input type="hidden" name="clientId" value={clientId} />
             <p className="text-sm font-medium">Opdrachtgever koppelen</p>
             <div className="grid gap-3 sm:grid-cols-3">
-              <Field label="Wie betaalt" htmlFor={`careOrganizationId-${clientId}`} required>
+              <Field
+                label="Wie betaalt"
+                htmlFor={`careOrganizationId-${clientId}`}
+                required
+              >
                 <Select
                   name="careOrganizationId"
                   options={selectable.map((careOrg) => ({
@@ -155,8 +156,8 @@ export function ClientFundersCard({
               </Field>
             </div>
             <p className="text-xs text-[var(--tp-muted-foreground)]">
-              Vanaf de begindatum ziet deze zorgorganisatie de ritten van deze cliënt —
-              en na de einddatum niet meer.
+              Vanaf de begindatum ziet deze zorgorganisatie de ritten van deze cliënt — en
+              na de einddatum niet meer.
             </p>
             <div>
               <PendingButton label="Koppelen" />

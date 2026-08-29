@@ -47,8 +47,8 @@ export default async function MembersPage() {
           <CardHeader>
             <CardTitle>Iemand uitnodigen</CardTitle>
             <CardDescription>
-              De uitgenodigde krijgt een mail met een link waarmee hij zelf een
-              wachtwoord instelt. Jij ziet dat wachtwoord nooit.
+              De uitgenodigde krijgt een mail met een link waarmee hij zelf een wachtwoord
+              instelt. Jij ziet dat wachtwoord nooit.
             </CardDescription>
           </CardHeader>
           <CardContent>

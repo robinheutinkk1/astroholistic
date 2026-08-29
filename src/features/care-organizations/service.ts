@@ -7,11 +7,7 @@ import { err, ok, type Result } from '@/lib/result/result';
 import { type Page, type ResolvedListParams } from '@/lib/pagination';
 import * as repository from './repository';
 
-export type {
-  CareOrganizationRow,
-  ClientFunderRow,
-  FundedClientRow,
-} from './repository';
+export type { CareOrganizationRow, ClientFunderRow, FundedClientRow } from './repository';
 import {
   type CareOrganizationFormInput,
   type CareOrganizationLinkInput,

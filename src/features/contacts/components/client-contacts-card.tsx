@@ -213,10 +213,7 @@ export function ClientContactsCard({
         selectable.length === 0 ? (
           <p className="text-sm text-[var(--tp-muted-foreground)]">
             Er zijn geen contactpersonen meer om te koppelen.{' '}
-            <Link
-              href="/contactpersonen/nieuw"
-              className="underline underline-offset-4"
-            >
+            <Link href="/contactpersonen/nieuw" className="underline underline-offset-4">
               Maak er een aan
             </Link>
             .
@@ -238,7 +235,10 @@ export function ClientContactsCard({
                   }))}
                 />
               </Field>
-              <Field label="Relatie tot de cliënt" htmlFor={`new-relationship-${clientId}`}>
+              <Field
+                label="Relatie tot de cliënt"
+                htmlFor={`new-relationship-${clientId}`}
+              >
                 <Input name="relationship" placeholder="moeder" />
               </Field>
             </div>

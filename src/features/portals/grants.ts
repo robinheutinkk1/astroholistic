@@ -170,7 +170,8 @@ export async function grantPortalAccess(
     organizationId,
     actorUserId: user.id,
     action: 'portal_access.granted',
-    entityType: input.kind === 'CARE_ORG' ? 'care_organizations' : `${input.kind.toLowerCase()}s`,
+    entityType:
+      input.kind === 'CARE_ORG' ? 'care_organizations' : `${input.kind.toLowerCase()}s`,
     entityId: input.subjectId,
     // Geen e-mailadres in het logboek: dat is een persoonsgegeven dat hier
     // niets toevoegt. Wie het was staat in de gekoppelde rij.
@@ -245,7 +246,9 @@ export async function listCareOrgPortalUsers(
 
   const { data } = await supabase
     .from('care_organization_users')
-    .select('id, user_id, status, profile:profiles!care_organization_users_user_id_fkey (full_name, email)')
+    .select(
+      'id, user_id, status, profile:profiles!care_organization_users_user_id_fkey (full_name, email)',
+    )
     .eq('care_organization_id', careOrganizationId);
 
   return (data ?? []).map((row) => {

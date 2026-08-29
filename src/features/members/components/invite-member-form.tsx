@@ -46,7 +46,13 @@ export function InviteMemberForm({ roles }: { roles: readonly AssignableRole[] }
         hint="Heeft dit adres al een account op het platform? Dan komt er geen mail en wordt de persoon meteen toegevoegd."
         error={state.fieldErrors?.['email']?.[0]}
       >
-        <Input name="email" type="email" autoComplete="off" required placeholder="collega@vervoerder.nl" />
+        <Input
+          name="email"
+          type="email"
+          autoComplete="off"
+          required
+          placeholder="collega@vervoerder.nl"
+        />
       </Field>
 
       <fieldset className="flex flex-col gap-2">
