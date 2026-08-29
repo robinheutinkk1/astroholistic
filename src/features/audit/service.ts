@@ -19,6 +19,8 @@ export type AuditAction =
   | 'contact.unlinked'
   | 'care_organization.created'
   | 'care_organization.updated'
+  | 'care_organization.client_linked'
+  | 'care_organization.client_unlinked'
   | 'driver.created'
   | 'driver.updated'
   | 'driver.deleted'

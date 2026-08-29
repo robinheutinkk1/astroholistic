@@ -56,6 +56,8 @@ Beschermwaardig, in volgorde van ernst bij verlies:
 | T29 | Uitnodigingen worden gebruikt om massaal onbekenden aan te schrijven | Emmer `member-invite`, 25 per uur, per organisatie en niet per uitnodiger |
 | T30 | Portaaltoegang koppelt een vreemd account aan een cliëntdossier | Alleen binnen de eigen organisatie (`clients.update` / `contacts.manage` / `care_organizations.manage`); een portaalgebruiker kan zichzelf nergens aan koppelen (S66–S71) |
 | T31 | De planner kan niet zien wélk adres toegang heeft tot een dossier | `app.linked_portal_user_ids()` opent `profiles` precies zo ver als nodig: alleen accounts die aan een eigen cliënt, contactpersoon of zorgorganisatie hangen (S72–S75) |
+| T32 | Een koppeling steekt de tenantgrens over: een contactpersoon of opdrachtgever van vervoerder B wordt aan een cliënt van A gehangen, waarmee diens portaalgebruiker inzage krijgt | Migratie 0029: de policies op `client_contacts` en `client_care_organizations` eisen dat **beide** kanten in dezelfde organisatie zitten, op insert én update (S78–S80) |
+| T33 | Een afgelopen indicatie blijft toegang geven | `valid_from`/`valid_to` worden door RLS gelezen, niet door het scherm (S86–S87) |
 
 ## 3. Authenticatie
 
@@ -272,6 +274,17 @@ test je RLS niet.
 | S75 | Chauffeur ziet portaalprofielen                      | onzichtbaar                         |
 | S76 | Dispatcher hangt een medewerker aan een zorgorganisatie | geweigerd                        |
 | S77 | Toegang intrekken werkt onmiddellijk                 | ja; 0 rijen zichtbaar               |
+| S78 | Contactpersoon van vervoerder B aan cliënt van A hangen | geweigerd                        |
+| S79 | Opdrachtgever van vervoerder B aan cliënt van A hangen | geweigerd                         |
+| S80 | Bestaande koppeling omzetten naar een vreemd contact-id | geweigerd                        |
+| S81 | Koppelen binnen de eigen organisatie                 | ja (de regel blokkeert geen werk)   |
+| S82 | Chauffeur koppelt een contactpersoon                 | geweigerd                           |
+| S83 | Dispatcher koppelt een opdrachtgever                 | geweigerd                           |
+| S84 | Chauffeur maakt een contactpersoon of opdrachtgever aan | geweigerd                        |
+| S85 | Contactpersoon zonder `can_view_rides`               | 0 ritten zichtbaar                  |
+| S86 | Opdrachtgever buiten de looptijd                     | 0 cliënten zichtbaar                |
+| S87 | Opdrachtgever binnen de looptijd                     | ziet zijn eigen cliënten            |
+| S88 | Zacht verwijderde contactpersoon                     | uit beeld; ritten blijven staan     |
 
 Aanvullend: een CI-check die faalt op elke tabel in `public` **zonder**
 `rowsecurity = true`. Nieuwe tabellen kunnen dan niet ongemerkt onbeveiligd

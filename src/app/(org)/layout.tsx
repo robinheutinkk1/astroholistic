@@ -56,6 +56,12 @@ const ALL_NAV_ITEMS: readonly NavItem[] = [
     permission: 'locations.view',
   },
   {
+    href: '/contactpersonen',
+    label: 'Contactpersonen',
+    icon: 'care',
+    permission: 'contacts.view',
+  },
+  {
     href: '/opdrachtgevers',
     label: 'Opdrachtgevers',
     icon: 'care',

@@ -720,6 +720,59 @@ profiel, en toont het scherm eerlijk niets.
 een chauffeur ziet deze profielen niet — hij mag geen cliënten inzien. Getoetst
 met S72–S75, inclusief een mutatietest waarin de policy is opengezet.
 
+### D-37 — Een koppeling mag de tenantgrens niet oversteken (gat, gedicht)
+
+*Wat er mis was:* de policies op `client_contacts` en
+`client_care_organizations` controleerden alleen of de **cliënt** van jouw
+organisatie was. Over de contactpersoon of de opdrachtgever aan de andere kant
+zeiden ze niets. Een planner van vervoerder A kon dus, met een id dat hij ergens
+vandaan had, een contactpersoon van vervoerder B aan zijn eigen cliënt hangen —
+en omdat `app.visible_client_ids()` die koppeling leest, kreeg de
+portaalgebruiker van die vreemde contactpersoon daarmee de ritten van een cliënt
+van A te zien.
+
+*Waarom dat toch ernstig is, ook al is er een insider voor nodig:* het
+uitgangspunt van dit product is dat de database de scheiding bewaakt en niet het
+scherm. Een verkeerd id uit een gekopieerde URL of een importscript is genoeg,
+en dan is er niets wat het tegenhoudt.
+
+*Wat er is gedaan:* migratie 0029 eist dat beide kanten in dezelfde organisatie
+zitten, op insert én op update — die tweede is nodig, anders blijft de omweg
+"koppel eerst netjes, wijzig daarna het id" open. Getoetst met S78–S80 en
+mutatiegetest door de oude policies terug te zetten: alle drie de tests vallen
+dan om.
+
+*Gevonden:* tijdens het bouwen van de beheerschermen voor contactpersonen en
+opdrachtgevers, niet door een test die er al stond. Dat is het eerlijke
+antwoord: de suite dekte de kant van de cliënt, niet die van de koppeling.
+
+### D-38 — De afspraken staan op de koppeling, niet op de persoon
+
+*Situatie:* een contactpersoon kan aan meerdere cliënten hangen. Dezelfde moeder
+regelt voor haar zoon alles en kijkt bij haar dochter alleen mee.
+
+*Besluit:* `can_view_rides`, `can_report_absence` en `can_request_changes` staan
+op `client_contacts` — per cliënt dus, niet op de persoon. Het scherm laat ze
+ook per koppeling zien.
+
+*Gevolg voor het portaal:* iemand met twee koppelingen krijgt de vereniging van
+zijn rechten per cliënt, niet één rechtenniveau over alles heen. Dat zit al in
+`getPortalAccess()`.
+
+### D-39 — De route heet `/opdrachtgevers`, het datamodel `care_organizations`
+
+*Situatie:* de navigatie verwees al naar `/opdrachtgevers`, maar die pagina
+bestond niet — een 404 die niemand had gemerkt omdat er ook geen scherm was om
+naartoe te gaan. Het datamodel noemt hetzelfde ding `care_organizations`.
+
+*Besluit:* de URL en de schermtaal volgen de navigatie ("opdrachtgever": de
+partij die betaalt), de tabellen en de code houden `care_organizations`. Een
+tabel hernoemen kost een migratie en raakt policies, functies en tests; de winst
+zou alleen cosmetisch zijn.
+
+*Wat dit kost:* wie de code leest ziet twee woorden voor één begrip. Daarom
+staat het hier.
+
 ## Openstaande vragen aan jou
 
 1. ~~Bestaat er al een Supabase-project?~~ **Beantwoord: nee.** Zie hierboven.

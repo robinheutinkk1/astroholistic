@@ -196,3 +196,43 @@ export async function revokePortalAccessAction(
     message: 'De toegang is ingetrokken. Er is per direct niets meer te zien.',
   };
 }
+
+/**
+ * Eén medewerker van een zorgorganisatie zijn toegang afnemen.
+ *
+ * Apart van revokePortalAccessAction, omdat een zorgorganisatie meerdere
+ * mensen kan hebben: "de toegang van De Brug intrekken" bestaat niet, alleen
+ * "Marieke van De Brug".
+ */
+export async function revokeCareOrgPortalUserAction(
+  _previous: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const membership = await getActiveMembership();
+  if (!membership) return { status: 'error', message: 'Geen actieve organisatie.' };
+
+  const parsed = z
+    .object({ careOrganizationId: z.uuid(), membershipId: z.uuid() })
+    .safeParse({
+      careOrganizationId: formData.get('careOrganizationId'),
+      membershipId: formData.get('membershipId'),
+    });
+  if (!parsed.success) return { status: 'error', message: 'Ongeldige aanvraag.' };
+
+  try {
+    const result = await grants.revokeCareOrgPortalUser(
+      membership.organizationId,
+      parsed.data.careOrganizationId,
+      parsed.data.membershipId,
+    );
+    if (!result.ok) return toFormState(result.error, CONTEXT);
+  } catch (error) {
+    return toFormState(error, CONTEXT);
+  }
+
+  revalidatePath(`/opdrachtgevers/${parsed.data.careOrganizationId}`);
+  return {
+    status: 'success',
+    message: 'De toegang is ingetrokken. Deze medewerker ziet per direct niets meer.',
+  };
+}
