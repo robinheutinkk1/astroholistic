@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { getActiveMembership } from '@/features/organizations/active-organization';
+import { InviteMemberForm } from '@/features/members/components/invite-member-form';
 import { MemberList } from '@/features/members/components/member-list';
 import { listAssignableRoles, listMembers } from '@/features/members/service';
 
@@ -24,6 +25,9 @@ export default async function MembersPage() {
   }
 
   const canManageRoles = membership.permissions.has('organization.roles.manage');
+  const canManageMembers = membership.permissions.has('organization.members.manage');
+  // Uitnodigen is beide: een lidmaatschap aanmaken én er een rol aan hangen.
+  const canInvite = canManageRoles && canManageMembers;
   const [members, roles] = await Promise.all([
     listMembers(membership.organizationId),
     canManageRoles ? listAssignableRoles(membership.organizationId) : Promise.resolve([]),
@@ -38,6 +42,21 @@ export default async function MembersPage() {
         </p>
       </div>
 
+      {canInvite ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Iemand uitnodigen</CardTitle>
+            <CardDescription>
+              De uitgenodigde krijgt een mail met een link waarmee hij zelf een
+              wachtwoord instelt. Jij ziet dat wachtwoord nooit.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <InviteMemberForm roles={roles} />
+          </CardContent>
+        </Card>
+      ) : null}
+
       <Card>
         <CardHeader>
           <CardTitle>Medewerkers</CardTitle>
@@ -51,7 +70,7 @@ export default async function MembersPage() {
             members={members}
             roles={roles}
             canManageRoles={canManageRoles}
-            canManageMembers={membership.permissions.has('organization.members.manage')}
+            canManageMembers={canManageMembers}
           />
         </CardContent>
       </Card>

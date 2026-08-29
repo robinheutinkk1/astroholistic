@@ -51,6 +51,11 @@ Beschermwaardig, in volgorde van ernst bij verlies:
 | T24 | Erasure vernietigt de vervoersadministratie | Anonimiseren in plaats van verwijderen; ritten en events blijven (S49) |
 | T25 | Nieuwe tabel mist RLS of grants en lekt of blokkeert stil | Coveragetest op `pg_tables`; de grant van 0010 is een momentopname en elke latere tabel krijgt een eigen grant |
 | T26 | Bruteforce op login of wachtwoordreset | `consume_rate_limit()` in de database, per adres én per account; alleen de service role mag hem aanroepen |
+| T27 | Iemand die leden mag beheren deelt via een uitnodiging rollen uit die hij zelf niet mag geven | `inviteMember()` eist óók `organization.roles.manage`, en de policy op `organization_user_roles` is de laatste grens (S58, S61) |
+| T28 | Een uitgenodigd adres krijgt post terwijl de uitnodiging wordt geweigerd | Rechten en rolkeuze worden gecontroleerd vóór er een account wordt gemaakt; hetzelfde geldt voor portaaltoegang (S65) |
+| T29 | Uitnodigingen worden gebruikt om massaal onbekenden aan te schrijven | Emmer `member-invite`, 25 per uur, per organisatie en niet per uitnodiger |
+| T30 | Portaaltoegang koppelt een vreemd account aan een cliëntdossier | Alleen binnen de eigen organisatie (`clients.update` / `contacts.manage` / `care_organizations.manage`); een portaalgebruiker kan zichzelf nergens aan koppelen (S66–S71) |
+| T31 | De planner kan niet zien wélk adres toegang heeft tot een dossier | `app.linked_portal_user_ids()` opent `profiles` precies zo ver als nodig: alleen accounts die aan een eigen cliënt, contactpersoon of zorgorganisatie hangen (S72–S75) |
 
 ## 3. Authenticatie
 
@@ -247,6 +252,26 @@ test je RLS niet.
 | S55 | Pogingen ouder dan het venster tellen mee            | mag niet                            |
 | S56 | Anon of ingelogde gebruiker roept de limiter aan     | geweigerd                           |
 | S57 | Subject leesbaar opgeslagen; tabel groeit oneindig   | gehasht; sweep ruimt op             |
+| S58 | Uitnodiger zonder `roles.manage` hangt een rol op het nieuwe lid | geweigerd                  |
+| S59 | Dispatcher voegt zelf een collega toe                | geweigerd                           |
+| S60 | Eigenaar van B zet iemand in organisatie A           | geweigerd                           |
+| S61 | Iemand breidt zijn eigen rollen uit                  | geweigerd                           |
+| S62 | Dezelfde persoon twee keer in dezelfde organisatie   | geweigerd door de unique constraint |
+| S63 | Tenant leest `auth.users` om te zien of iemand bestaat | geweigerd                         |
+| S64 | Nieuw auth-account levert een profielrij op          | ja, met naam uit de metadata        |
+| S65 | Uitnodiging op een geweigerde poging                 | geen account, geen mail             |
+| S66 | Planner geeft een eigen cliënt portaaltoegang        | ja                                  |
+| S67 | Planner van B koppelt een account aan een cliënt van A | 0 rijen                           |
+| S68 | Chauffeur geeft portaaltoegang                       | 0 rijen                             |
+| S69 | Portaalgebruiker ziet alleen zijn eigen dossier      | ja; ritten van anderen 0 rijen      |
+| S70 | Portaalgebruiker heeft een permissie                 | nee; `permitted_org_ids` leeg       |
+| S71 | Portaalgebruiker koppelt zichzelf aan een tweede cliënt | 0 rijen                          |
+| S72 | Planner ziet het adres van de gekoppelde portaalgebruiker | ja                             |
+| S73 | Profiel dat aan niets hangt                          | onzichtbaar                         |
+| S74 | Organisatie B ziet de portaalgebruiker van A         | onzichtbaar                         |
+| S75 | Chauffeur ziet portaalprofielen                      | onzichtbaar                         |
+| S76 | Dispatcher hangt een medewerker aan een zorgorganisatie | geweigerd                        |
+| S77 | Toegang intrekken werkt onmiddellijk                 | ja; 0 rijen zichtbaar               |
 
 Aanvullend: een CI-check die faalt op elke tabel in `public` **zonder**
 `rowsecurity = true`. Nieuwe tabellen kunnen dan niet ongemerkt onbeveiligd

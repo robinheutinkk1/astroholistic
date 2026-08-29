@@ -4,7 +4,8 @@ import { requirePermission, requireUser } from '@/features/rbac/session';
 import { type Permission } from '@/features/rbac/permissions';
 import { AuthorizationError, ConflictError, NotFoundError } from '@/lib/errors/app-error';
 import { err, ok, type Result } from '@/lib/result/result';
-import { type SetMemberStatusInput, type UpdateMemberRolesInput } from './schema';
+import { type InviteMemberInput, type SetMemberStatusInput, type UpdateMemberRolesInput } from './schema';
+import { inviteOrFindUser } from '@/features/auth/invite';
 
 export interface MemberRow {
   readonly membershipId: string;
@@ -98,6 +99,112 @@ export async function listAssignableRoles(
       name: role.name,
       description: role.description,
     }));
+}
+
+/**
+ * Nodigt iemand uit voor deze organisatie, met een rol.
+ *
+ * DE VOLGORDE IS BEWUST. Eerst wordt gecontroleerd of de uitnodiger deze rol
+ * überhaupt mag toekennen, dan pas wordt er een account gemaakt of een mail
+ * verstuurd. Andersom zou een geweigerde uitnodiging alsnog een mail hebben
+ * opgeleverd bij iemand die er niets van begrijpt.
+ */
+export async function inviteMember(
+  organizationId: string,
+  input: InviteMemberInput,
+): Promise<Result<{ invited: boolean }>> {
+  const user = await requirePermission(organizationId, 'organization.members.manage');
+
+  // Uitnodigen mét rol is ook rollen toekennen. Zonder deze tweede controle zou
+  // iemand die alleen leden mag beheren via een uitnodiging alsnog rollen
+  // uitdelen — de RLS-policy op organization_user_roles zou dat tegenhouden,
+  // maar pas nadat er al een account en een mail de deur uit waren.
+  await requirePermission(organizationId, 'organization.roles.manage');
+
+  const assignable = await listAssignableRoles(organizationId);
+  const allowedIds = new Set(assignable.map((role) => role.id));
+  if (!input.roleIds.every((id) => allowedIds.has(id))) {
+    return err(
+      new AuthorizationError(
+        'Je kunt geen rol toekennen met meer rechten dan je zelf hebt.',
+      ),
+    );
+  }
+
+  const outcome = await inviteOrFindUser(input.email);
+  if (outcome.kind === 'FAILED') {
+    return err(
+      new ConflictError(
+        'De uitnodiging kon niet worden verstuurd. Controleer of e-mail is ingesteld op dit platform.',
+      ),
+    );
+  }
+
+  const supabase = await createClient();
+
+  // Bestaat het lidmaatschap al, dan is dit geen fout maar een herhaling: de
+  // uitnodiger klikte twee keer, of de persoon zat er al bij.
+  const { data: existing } = await supabase
+    .from('organization_users')
+    .select('id, status')
+    .eq('organization_id', organizationId)
+    .eq('user_id', outcome.userId)
+    .maybeSingle();
+
+  let membershipId = existing?.id;
+
+  if (!membershipId) {
+    const { data: created, error } = await supabase
+      .from('organization_users')
+      .insert({
+        organization_id: organizationId,
+        user_id: outcome.userId,
+        // Een bestaand account is meteen actief: die persoon kan al inloggen.
+        // Een uitgenodigd account wordt actief zodra hij zijn wachtwoord zet.
+        status: outcome.kind === 'EXISTING' ? 'ACTIVE' : 'INVITED',
+        invited_by: user.id,
+        invited_at: new Date().toISOString(),
+        joined_at: outcome.kind === 'EXISTING' ? new Date().toISOString() : null,
+      })
+      .select('id')
+      .single();
+
+    if (error || !created) {
+      return err(new ConflictError('Het lidmaatschap kon niet worden aangemaakt.'));
+    }
+    membershipId = created.id;
+  }
+
+  // `ignoreDuplicates` en niet "negeer foutcode 23505": bij een insert van twee
+  // rollen waarvan er één al bestond, faalt de hele insert en zou de nieuwe rol
+  // stil verdwijnen. Een upsert laat de bestaande rij staan en voegt de nieuwe
+  // wél toe.
+  const { error: roleError } = await supabase
+    .from('organization_user_roles')
+    .upsert(
+      input.roleIds.map((roleId) => ({
+        organization_user_id: membershipId,
+        role_id: roleId,
+        granted_by: user.id,
+      })),
+      { onConflict: 'organization_user_id,role_id', ignoreDuplicates: true },
+    );
+
+  if (roleError) {
+    return err(new ConflictError('De rol kon niet worden toegekend.'));
+  }
+
+  await supabase.from('audit_logs').insert({
+    organization_id: organizationId,
+    actor_user_id: user.id,
+    actor_kind: 'PLANNER',
+    action: 'member.invited',
+    entity_type: 'organization_users',
+    entity_id: membershipId,
+    metadata: { existing_account: outcome.kind === 'EXISTING' },
+  });
+
+  return ok({ invited: outcome.kind === 'INVITED' });
 }
 
 export async function updateMemberRoles(

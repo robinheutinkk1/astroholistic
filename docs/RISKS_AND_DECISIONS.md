@@ -658,6 +658,68 @@ bestond (fase 13) en een lintstap die faalt op een schone checkout (fase 14).
 `claude/**` toe aan de `push`-trigger. Zolang dat niet gebeurt is de
 merge-blokkade op de securitysuite een afspraak, geen mechanisme.
 
+### D-34 — Uitnodigen mag alleen wie óók rollen mag toekennen
+
+*Situatie:* iemand toevoegen aan een organisatie is één handeling, maar bestaat
+uit twee dingen: een lidmaatschap aanmaken (`organization.members.manage`) en er
+een rol op hangen (`organization.roles.manage`). Die twee permissies zijn
+bewust gescheiden — een kantoormedewerker mag mensen op non-actief zetten
+zonder ook rechten te mogen uitdelen.
+
+*Besluit:* het uitnodigingsscherm eist allebei. Wie alleen leden beheert ziet de
+kaart niet.
+
+*Waarom niet alleen `members.manage`:* dan was uitnodigen een omweg om rollen
+uit te delen. De policy op `organization_user_roles` zou dat alsnog tegenhouden,
+maar pas nádat er een account was aangemaakt en een mail was verstuurd naar
+iemand die vervolgens nergens in kan. De weigering hoort te komen voordat er
+post uitgaat.
+
+*Wat dit kost:* een organisatie die de twee rollen echt wil scheiden, kan
+niemand laten uitnodigen zonder hem ook rollen te laten uitdelen. Dat is een
+bewuste versimpeling; een aparte "mag uitnodigen met een vaste rol"-permissie
+is later toe te voegen zonder iets af te breken.
+
+### D-35 — Een portaalgebruiker is geen lid van de organisatie
+
+*Situatie:* een cliënt, een ouder en een zorgcoördinator moeten kunnen inloggen.
+De verleiding is groot om daar rollen voor te maken: "rol cliënt", "rol ouder".
+
+*Besluit:* dat gebeurt niet. Een portaalgebruiker staat in géén enkele
+`organization_users`-rij en heeft daarmee letterlijk nul permissies. Wat hij
+ziet komt uit de relatie — `clients.user_id`, `contacts.user_id`,
+`care_organization_users` — en die relatie is ook wat RLS leest.
+
+*Waarom:* een rol zit in hetzelfde stelsel als de rol van een planner. Eén
+verkeerd vinkje in een rollenscherm is dan genoeg om een ouder de hele planning
+te laten zien. Een relatie kan dat niet: er is geen vinkje dat `visible_client_ids`
+opeens uitbreidt.
+
+*Gevolg:* toegang intrekken is het weghalen van de koppeling, en werkt per
+direct — RLS leest de relatie bij elke query opnieuw, er loopt geen sessie door.
+
+*Getoetst:* S66–S71 en S77.
+
+### D-36 — `profiles` gaat precies zo ver open als nodig om te tonen wie toegang heeft
+
+*Situatie:* de vervoerder is verwerkingsverantwoordelijke en moet kunnen
+aantonen welk e-mailadres bij welk dossier kan. Maar `profiles_select` liet
+alleen jezelf en je collega's zien, en een portaalgebruiker is juist geen
+collega. Het scherm kon dus "heeft toegang" tonen en nooit "wie".
+
+*Besluit:* migratie 0028 voegt één clausule toe via
+`app.linked_portal_user_ids()`: profielen die aan een eigen cliënt,
+contactpersoon of zorgorganisatie hangen, en alleen voor wie de bijbehorende
+leesrechten heeft.
+
+*Waarom niet de service role:* dan zou de applicatie zelf beslissen wie dit mag
+zien, en is de vraag niet meer aan de database gesteld. Nu weigert RLS het
+profiel, en toont het scherm eerlijk niets.
+
+*Wat dit niet doet:* het adressenboek van een andere vervoerder blijft dicht, en
+een chauffeur ziet deze profielen niet — hij mag geen cliënten inzien. Getoetst
+met S72–S75, inclusief een mutatietest waarin de policy is opengezet.
+
 ## Openstaande vragen aan jou
 
 1. ~~Bestaat er al een Supabase-project?~~ **Beantwoord: nee.** Zie hierboven.

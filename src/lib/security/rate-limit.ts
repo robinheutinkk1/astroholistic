@@ -32,6 +32,12 @@ export const RATE_LIMITS = {
   'portal-write': { limit: 40, windowSeconds: 3600 },
   /** Exports take personal data out of the system. */
   'report-export': { limit: 30, windowSeconds: 3600 },
+  /**
+   * Uitnodigingen, per organisatie. Elke uitnodiging stuurt post naar een
+   * derde; het adres van de uitnodiger is hier geen zinnig anker, want een
+   * planner nodigt zijn hele ploeg vanaf hetzelfde kantoor uit.
+   */
+  'member-invite': { limit: 25, windowSeconds: 3600 },
 } as const;
 
 export type RateLimitBucket = keyof typeof RATE_LIMITS;

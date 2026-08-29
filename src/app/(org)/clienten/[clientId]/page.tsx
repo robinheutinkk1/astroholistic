@@ -9,10 +9,12 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { ClientForm } from '@/features/clients/components/client-form';
+import { PortalAccessCard } from '@/features/portals/components/portal-access-card';
 import { DeleteClientButton } from '@/features/clients/components/delete-client-button';
 import { getActiveMembership } from '@/features/organizations/active-organization';
 import { getClient } from '@/features/clients/service';
 import { countClientRides } from '@/features/clients/repository';
+import { getPortalAccountEmail } from '@/features/portals/grants';
 
 export const metadata: Metadata = { title: 'Cliënt' };
 
@@ -33,6 +35,7 @@ export default async function ClientDetailPage({
 
   const rideCount = await countClientRides(clientId);
   const canEdit = membership.permissions.has('clients.update');
+  const portalEmail = client.user_id ? await getPortalAccountEmail(client.user_id) : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -85,6 +88,25 @@ export default async function ClientDetailPage({
               <dd>{client.external_reference ?? '—'}</dd>
             </dl>
           )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Portaaltoegang</CardTitle>
+          <CardDescription>
+            Geef de cliënt een eigen login om zijn ritten te volgen en een afwezigheid
+            door te geven. Dat is geen medewerkersaccount: hij ziet niets van de
+            planning en niets van andere cliënten.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <PortalAccessCard
+            kind="CLIENT"
+            subjectId={client.id}
+            currentEmail={portalEmail}
+            canManage={canEdit}
+          />
         </CardContent>
       </Card>
 

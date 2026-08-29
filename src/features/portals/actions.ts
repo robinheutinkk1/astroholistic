@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { requireUser } from '@/features/rbac/session';
-import { consumeForUser } from '@/lib/security/rate-limit';
+import { consume, consumeForUser } from '@/lib/security/rate-limit';
 import { z } from 'zod';
 import { getActiveMembership } from '@/features/organizations/active-organization';
 import {
@@ -10,6 +10,7 @@ import {
   toFormState,
   type FormState,
 } from '@/lib/errors/form-state';
+import * as grants from './grants';
 import * as portalService from './service';
 import * as reviewService from './review';
 
@@ -118,5 +119,80 @@ export async function reviewRequestAction(
       parsed.data.decision === 'APPROVED'
         ? 'Goedgekeurd. Pas de rit nu zelf aan; de aanvrager ziet de status.'
         : 'Afgewezen. De aanvrager ziet je toelichting.',
+  };
+}
+
+/*
+ * Portaaltoegang uitdelen en intrekken.
+ *
+ * Deze twee horen bij de beheerkant en niet bij het portaal zelf, maar ze staan
+ * hier omdat ze over dezelfde toegang gaan: één plek om te lezen wie het
+ * portaal in mag en waarom.
+ */
+
+export async function grantPortalAccessAction(
+  _previous: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const membership = await getActiveMembership();
+  if (!membership) return { status: 'error', message: 'Geen actieve organisatie.' };
+
+  const parsed = grants.portalAccessSchema.safeParse({
+    kind: formData.get('kind'),
+    subjectId: formData.get('subjectId'),
+    email: formData.get('email'),
+  });
+  if (!parsed.success) return fromValidationIssues(parsed.error.flatten().fieldErrors);
+
+  // Dezelfde emmer als het uitnodigen van medewerkers: het gaat om hetzelfde
+  // risico, namelijk post sturen naar een adres dat iemand anders toebehoort.
+  if (!(await consume('member-invite', membership.organizationId))) {
+    return {
+      status: 'error',
+      message:
+        'Er zijn kort achter elkaar veel uitnodigingen verstuurd. Probeer het over een uur opnieuw.',
+    };
+  }
+
+  try {
+    const result = await grants.grantPortalAccess(membership.organizationId, parsed.data);
+    if (!result.ok) return toFormState(result.error, CONTEXT);
+
+    revalidatePath('/clienten');
+    return {
+      status: 'success',
+      message: result.data.invited
+        ? `Er is een uitnodiging gestuurd naar ${parsed.data.email}. Zodra het wachtwoord is ingesteld, werkt de toegang.`
+        : `${parsed.data.email} had al een account en kan meteen inloggen. Er is geen mail verstuurd.`,
+    };
+  } catch (error) {
+    return toFormState(error, CONTEXT);
+  }
+}
+
+export async function revokePortalAccessAction(
+  _previous: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const membership = await getActiveMembership();
+  if (!membership) return { status: 'error', message: 'Geen actieve organisatie.' };
+
+  const parsed = grants.portalRevokeSchema.safeParse({
+    kind: formData.get('kind'),
+    subjectId: formData.get('subjectId'),
+  });
+  if (!parsed.success) return { status: 'error', message: 'Ongeldige aanvraag.' };
+
+  try {
+    const result = await grants.revokePortalAccess(membership.organizationId, parsed.data);
+    if (!result.ok) return toFormState(result.error, CONTEXT);
+  } catch (error) {
+    return toFormState(error, CONTEXT);
+  }
+
+  revalidatePath('/clienten');
+  return {
+    status: 'success',
+    message: 'De toegang is ingetrokken. Er is per direct niets meer te zien.',
   };
 }
