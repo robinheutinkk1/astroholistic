@@ -45,6 +45,18 @@ export const locationFormSchema = z.object({
   // personal or medical information — that belongs nowhere in this product.
   accessNotes: optionalText(300, 'Die toelichting is te lang.'),
   status: z.enum(['ACTIVE', 'INACTIVE']).catch('ACTIVE'),
+  /**
+   * De opdrachtgever waar deze locatie een vestiging van is.
+   *
+   * Leeg voor een woonadres, een station of een ziekenhuis: die horen bij
+   * niemand. Eén opdrachtgever heeft doorgaans meerdere vestigingen, en dat is
+   * precies waarom dit veld op de locatie staat en niet andersom.
+   */
+  careOrganizationId: z
+    .union([z.literal(''), z.uuid()])
+    .transform((value) => (value === '' ? null : value))
+    .nullable()
+    .catch(null),
 });
 
 export type LocationFormInput = z.infer<typeof locationFormSchema>;

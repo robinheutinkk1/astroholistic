@@ -50,19 +50,13 @@ export function ContactForm({ contact }: { contact?: Tables<'contacts'> }) {
         >
           <Input name="lastName" defaultValue={contact?.last_name ?? ''} />
         </Field>
-        <Field
-          label="Telefoon"
-          htmlFor="phone"
-          error={state.fieldErrors?.['phone']?.[0]}
-          hint="Het nummer dat de planner belt als een rit uitloopt."
-        >
+        <Field label="Telefoon" htmlFor="phone" error={state.fieldErrors?.['phone']?.[0]}>
           <Input name="phone" type="tel" defaultValue={contact?.phone ?? ''} />
         </Field>
         <Field
           label="E-mailadres"
           htmlFor="email"
           error={state.fieldErrors?.['email']?.[0]}
-          hint="Alleen voor contact. Portaaltoegang regel je apart, hieronder."
         >
           <Input name="email" type="email" defaultValue={contact?.email ?? ''} />
         </Field>

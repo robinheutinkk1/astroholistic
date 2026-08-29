@@ -43,7 +43,6 @@ export function InviteMemberForm({ roles }: { roles: readonly AssignableRole[] }
         label="E-mailadres"
         htmlFor="invite-email"
         required
-        hint="Heeft dit adres al een account op het platform? Dan komt er geen mail en wordt de persoon meteen toegevoegd."
         error={state.fieldErrors?.['email']?.[0]}
       >
         <Input

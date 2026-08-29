@@ -1,12 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CareOrganizationForm } from '@/features/care-organizations/components/care-organization-form';
 import { getActiveMembership } from '@/features/organizations/active-organization';
 
@@ -23,10 +17,6 @@ export default async function NewCareOrganizationPage() {
       <Card>
         <CardHeader>
           <CardTitle>Gegevens</CardTitle>
-          <CardDescription>
-            Na het opslaan koppel je cliënten met een looptijd, en nodig je de mensen uit
-            die mee mogen kijken.
-          </CardDescription>
         </CardHeader>
         <CardContent>
           <CareOrganizationForm />

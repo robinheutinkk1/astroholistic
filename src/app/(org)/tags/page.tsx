@@ -1,12 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TagManager } from '@/features/tags/components/tag-manager';
 import { listTags } from '@/features/tags/service';
 import { isTagFeatureConfigured, isTemporaryHost } from '@/features/tags/config';
@@ -53,7 +47,7 @@ export default async function TagsPage() {
           <p className="mt-1 text-[var(--tp-muted-foreground)]">
             Aanmaken lukt daarom niet. De beheerder van het platform moet de
             omgevingsvariabele <code className="font-mono">TAG_TOKEN_PEPPER</code>{' '}
-            instellen — een willekeurige waarde van minstens 32 tekens. Zie
+            instellen: een willekeurige waarde van minstens 32 tekens. Zie
             docs/DEPLOYMENT.md stap 5.
           </p>
         </div>
@@ -71,7 +65,7 @@ export default async function TagsPage() {
             De link op een tag begint nu met{' '}
             <code className="font-mono">{publicEnv.NEXT_PUBLIC_APP_URL}</code>. Dat is een
             tijdelijk adres van de hostingpartij. Tags die je nu beschrijft blijven
-            daarnaar wijzen, óók na de overstap naar het eigen domein — en ze stoppen met
+            daarnaar wijzen, óók na de overstap naar het eigen domein, en ze stoppen met
             werken zodra dat tijdelijke adres verdwijnt. Omzetten kan niet: de code op een
             tag is niet op te vragen, dus elke tag zou opnieuw moeten worden aangemaakt en
             beschreven.
@@ -85,10 +79,6 @@ export default async function TagsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Tags</CardTitle>
-          <CardDescription>
-            Op de tag zelf staat alleen de code — nooit de naam van de cliënt. Wie hem
-            vindt, kan er niets mee.
-          </CardDescription>
         </CardHeader>
         <CardContent>
           <TagManager

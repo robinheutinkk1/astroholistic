@@ -99,7 +99,6 @@ export function CareOrgPortalUsers({
             label="E-mailadres"
             htmlFor={`care-portal-email-${careOrganizationId}`}
             required
-            hint="Deze persoon ziet alleen de cliënten die deze opdrachtgever financiert, en alleen binnen de looptijd."
             error={grantState.fieldErrors?.['email']?.[0]}
           >
             <Input name="email" type="email" autoComplete="off" required />

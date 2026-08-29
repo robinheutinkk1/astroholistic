@@ -7,7 +7,7 @@ import { type RideSummary } from '../service';
  * and is noise; the reader deserves to see which of the two it is.
  */
 function share(part: number, whole: number): string {
-  if (whole === 0) return '—';
+  if (whole === 0) return '-';
   return `${Math.round((part / whole) * 100)}%`;
 }
 
@@ -41,7 +41,7 @@ export function SummaryCards({ summary }: { summary: RideSummary }) {
   const delay = summary.avgDelaySeconds;
   const delayLabel =
     delay === null
-      ? '—'
+      ? '-'
       : `${delay >= 0 ? '+' : '−'}${Math.abs(Math.round(delay / 60))} min`;
 
   return (

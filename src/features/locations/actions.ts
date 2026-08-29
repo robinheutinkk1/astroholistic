@@ -24,6 +24,7 @@ function parseForm(formData: FormData) {
     city: formData.get('city'),
     accessNotes: formData.get('accessNotes'),
     status: formData.get('status'),
+    careOrganizationId: formData.get('careOrganizationId'),
   });
 }
 

@@ -32,7 +32,6 @@ export function ResetPasswordForm() {
         label="Nieuw wachtwoord"
         htmlFor="password"
         error={state.fieldErrors?.['password']?.[0]}
-        hint="Minimaal 12 tekens. Een zin werkt goed en onthoud je makkelijker."
         required
       >
         <Input name="password" type="password" autoComplete="new-password" autoFocus />

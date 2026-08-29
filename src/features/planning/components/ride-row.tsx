@@ -67,8 +67,8 @@ export function RideRow({
       </Td>
 
       <Td className="text-[var(--tp-muted-foreground)]">
-        <span className="block">{ride.pickup?.name ?? '—'}</span>
-        <span className="block text-xs">→ {ride.destination?.name ?? '—'}</span>
+        <span className="block">{ride.pickup?.name ?? '-'}</span>
+        <span className="block text-xs">→ {ride.destination?.name ?? '-'}</span>
       </Td>
 
       <Td>

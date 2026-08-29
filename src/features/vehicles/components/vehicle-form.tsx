@@ -70,7 +70,6 @@ export function VehicleForm({ vehicle }: { vehicle?: Tables<'vehicles'> }) {
           label="Zitplaatsen"
           htmlFor="seats"
           error={state.fieldErrors?.['seats']?.[0]}
-          hint="Exclusief de chauffeur."
           required
         >
           <Input
@@ -85,7 +84,6 @@ export function VehicleForm({ vehicle }: { vehicle?: Tables<'vehicles'> }) {
           label="Rolstoelplaatsen"
           htmlFor="wheelchairPositions"
           error={state.fieldErrors?.['wheelchairPositions']?.[0]}
-          hint="Nul betekent: dit voertuig is niet rolstoeltoegankelijk."
           required
         >
           <Input

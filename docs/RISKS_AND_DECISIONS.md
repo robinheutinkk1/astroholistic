@@ -832,6 +832,80 @@ taxicentrale is dat geen theoretisch scenario.
 
 *Besluit:* `revalidatePath('/', 'layout')` vóór de doorverwijzing.
 
+### D-43 — Een opdrachtgever heeft meerdere vestigingen
+
+*Situatie:* Humankind is één opdrachtgever met vestigingen in Enschede, Hengelo
+en Almelo. Die stonden in `locations` als losse adressen zonder enig verband, en
+de vraag "hoeveel ritten reden we voor Humankind?" was daarmee niet te
+beantwoorden zonder zelf te weten welke adressen bij elkaar hoorden.
+
+*Besluit:* `locations.care_organization_id`, optioneel. Een woonadres, station
+of ziekenhuis hoort bij niemand en houdt het veld leeg.
+
+*Waarom op de locatie en niet andersom:* de verhouding is één opdrachtgever op
+veel vestigingen. Een lijst vestigingen op de opdrachtgever zou een derde tabel
+kosten voor precies dezelfde informatie.
+
+*De tenantgrens:* een samengestelde foreign key op
+`(organization_id, care_organization_id)`, niet een gewone naar `id`. Anders kon
+een locatie van vervoerder A naar een opdrachtgever van vervoerder B wijzen, en
+dat is hetzelfde gat dat D-37 op de koppeltabellen dichtte. Getoetst met S89.
+
+*`on delete set null` en niet `cascade`:* een opdrachtgever die vertrekt mag
+nooit de adressen meenemen waar nog ritten naartoe rijden.
+
+### D-44 — "Voor een opdrachtgever" betekent ophalen én afleveren
+
+*Situatie:* een rit heeft twee locaties. Bij het filteren op opdrachtgever moest
+gekozen worden welke telt.
+
+*Besluit:* allebei. Een rit telt mee als de ophaal- óf de bestemmingslocatie een
+vestiging van die opdrachtgever is.
+
+*Waarom:* het ophalen ná de dagbesteding is net zo goed een rit voor die
+opdrachtgever. Alleen op bestemming filteren zou precies de helft van de cijfers
+laten verdwijnen, en wel de helft die niemand mist tot de factuur niet klopt.
+
+*Gevolg voor "per locatie":* de kolom Ritten telt op tot meer dan het totaal
+bovenaan, want elke rit raakt twee locaties. Dat is geen fout maar de vraag: hoe
+druk is deze vestiging.
+
+*Eén uitzondering:* is er een opdrachtgever gekozen, dan toont "per locatie"
+alleen diens vestigingen. Zonder die regel zou "Humankind, per locatie" ook alle
+woonadressen tonen waar die ritten vandaan komen, en dat is een ander antwoord
+dan de vraag.
+
+### D-45 — `create or replace` vervangt geen functie met een nieuwe parameter
+
+*Wat er bijna misging:* de rapportagefuncties kregen er twee parameters bij via
+`create or replace`. Dat vervangt niets: het maakt een tweede versie naast de
+oude. Postgres kan daarna niet kiezen tussen beide, en een aanroep met drie
+argumenten treft de ongefilterde versie.
+
+*Hoe het opviel:* een handmatige controle in psql gaf "function is not unique".
+Was die aanroep wél eenduidig geweest, dan had het filter er in het scherm
+uitgezien alsof het werkte terwijl er niets werd gefilterd.
+
+*Besluit:* de oude signaturen expliciet droppen in de migratie, en een test die
+faalt zodra er van een rapportagefunctie meer dan één variant bestaat.
+
+### D-46 — Uitlegteksten uit de interface
+
+*Situatie:* onder vrijwel elke kaartkop stond een zin die uitlegde wat de kaart
+deed, en er stonden gedachtestreepjes doorheen. Voor de bouwer nuttig, voor een
+klant die zijn eigen vak kent alleen ruis, en samen gaven ze het scherm de toon
+van een handleiding in plaats van een werkinstrument.
+
+*Besluit:* alle `CardDescription`-teksten en `hint`-teksten weg, en de
+gedachtestreepjes uit zichtbare tekst.
+
+*Wat blijft:* de bevestiging vóór iets onomkeerbaars ("de 42 bestaande ritten
+blijven staan"), en de tekst in een leeg scherm. Dat eerste is geen uitleg maar
+een gevolg, en het tweede is de enige inhoud die er op dat moment is.
+
+*Wat dit niet raakt:* het commentaar in de code. Dat is voor de volgende
+ontwikkelaar en komt nooit op een scherm.
+
 ## Openstaande vragen aan jou
 
 1. ~~Bestaat er al een Supabase-project?~~ **Beantwoord: nee.** Zie hierboven.

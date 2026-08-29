@@ -39,12 +39,7 @@ async function TodayFigures({
         <StatCard label="Cliënt afwezig" value={counts.absent} tone="warning" />
       ) : null}
       {counts.unassigned > 0 ? (
-        <StatCard
-          label="Zonder chauffeur"
-          value={counts.unassigned}
-          tone="warning"
-          hint="Deze ritten hebben nog niemand toegewezen."
-        />
+        <StatCard label="Zonder chauffeur" value={counts.unassigned} tone="warning" />
       ) : null}
     </div>
   );

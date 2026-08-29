@@ -63,8 +63,8 @@ async function TemplateTable({ organizationId }: { organizationId: string }) {
               {describeRecurrence(template.days_of_week)}
             </Td>
             <Td className="text-[var(--tp-muted-foreground)]">
-              <span className="block">{template.pickup?.name ?? '—'}</span>
-              <span className="block text-xs">→ {template.destination?.name ?? '—'}</span>
+              <span className="block">{template.pickup?.name ?? '-'}</span>
+              <span className="block text-xs">→ {template.destination?.name ?? '-'}</span>
             </Td>
             <Td className="text-[var(--tp-muted-foreground)]">
               {template.driver

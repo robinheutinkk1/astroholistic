@@ -1,13 +1,7 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { ArrowRight, Check } from 'lucide-react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 /**
  * Wat je moet doen voordat er iets te plannen valt.
@@ -42,10 +36,6 @@ export function GettingStarted({ steps }: { steps: readonly SetupStep[] }) {
     <Card>
       <CardHeader>
         <CardTitle>Aan de slag</CardTitle>
-        <CardDescription>
-          Nog {remaining.length} {remaining.length === 1 ? 'stap' : 'stappen'} voordat u
-          ritten kunt plannen. Deze kaart verdwijnt vanzelf als alles klaar is.
-        </CardDescription>
       </CardHeader>
       <CardContent>
         <ol className="flex flex-col gap-1">

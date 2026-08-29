@@ -1,12 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RequestReview } from '@/features/portals/components/request-review';
 import { listRequests } from '@/features/portals/review';
 import { getActiveMembership } from '@/features/organizations/active-organization';
@@ -39,10 +33,6 @@ export default async function RequestsPage({
       <Card>
         <CardHeader>
           <CardTitle>{alles === '1' ? 'Alle verzoeken' : 'Openstaand'}</CardTitle>
-          <CardDescription>
-            Portalen wijzigen zelf nooit een rit. Wat hier binnenkomt is een verzoek,
-            zodat er altijd iemand is die het besluit neemt.
-          </CardDescription>
         </CardHeader>
         <CardContent>
           <RequestReview

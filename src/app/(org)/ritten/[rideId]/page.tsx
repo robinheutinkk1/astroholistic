@@ -1,13 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RideForm } from '@/features/rides/components/ride-form';
 import { RideStatusBadge } from '@/features/rides/components/ride-status-badge';
 import { loadPickerOptions } from '@/features/rides/pickers';
@@ -91,11 +85,6 @@ export default async function RideDetailPage({
       <Card>
         <CardHeader>
           <CardTitle>Ritgegevens</CardTitle>
-          {!canEdit ? (
-            <CardDescription>
-              Je hebt geen rechten om deze rit te wijzigen.
-            </CardDescription>
-          ) : null}
         </CardHeader>
         <CardContent>
           {canEdit ? (
@@ -111,10 +100,6 @@ export default async function RideDetailPage({
       <Card>
         <CardHeader>
           <CardTitle>Verloop van de rit</CardTitle>
-          <CardDescription>
-            Deze regels kunnen niet worden gewijzigd of verwijderd — het is de vastlegging
-            van wat er gebeurd is.
-          </CardDescription>
         </CardHeader>
         <CardContent>
           {events.length === 0 ? (

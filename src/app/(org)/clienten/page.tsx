@@ -60,10 +60,10 @@ async function ClientTable({
                   {client.last_name}, {client.first_name}
                 </Link>
               </Td>
-              <Td className="text-[var(--tp-muted-foreground)]">{client.city ?? '—'}</Td>
-              <Td className="text-[var(--tp-muted-foreground)]">{client.phone ?? '—'}</Td>
+              <Td className="text-[var(--tp-muted-foreground)]">{client.city ?? '-'}</Td>
+              <Td className="text-[var(--tp-muted-foreground)]">{client.phone ?? '-'}</Td>
               <Td className="text-[var(--tp-muted-foreground)]">
-                {client.external_reference ?? '—'}
+                {client.external_reference ?? '-'}
               </Td>
               <Td>
                 <Badge variant={client.status === 'ACTIVE' ? 'success' : 'neutral'}>

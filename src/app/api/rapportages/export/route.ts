@@ -7,11 +7,13 @@ import {
   perClientTable,
   perDayTable,
   perDriverTable,
+  perLocationTable,
   tableToCsv,
   type CsvTable,
 } from '@/features/reports/export';
 import { getReports, recordExport } from '@/features/reports/service';
 import {
+  resolveScope,
   reportPeriodSchema,
   REPORT_KINDS,
   type ReportKind,
@@ -25,10 +27,11 @@ import { consumeForUser } from '@/lib/security/rate-limit';
  * A route handler rather than a Server Action, because the browser has to
  * receive a file: an action returns a value to React, not a download.
  *
- * Note what this does NOT do: it does not accept a list of columns, a filter or
- * a raw query from the caller. The three shapes below are the whole surface.
- * An export endpoint that assembles a query from user input is how a reporting
- * feature turns into a data-exfiltration tool with a friendly name.
+ * Note what this does NOT do: it does not accept a list of columns or a raw
+ * query from the caller. De vier vormen hieronder zijn de hele oppervlakte, en
+ * het filter is twee id's die door dezelfde SQL-functie gaan als het scherm.
+ * Een export die een query samenstelt uit invoer van de aanroeper is hoe een
+ * rapportagefunctie verandert in een exfiltratiepunt met een vriendelijke naam.
  */
 export const dynamic = 'force-dynamic';
 
@@ -59,6 +62,19 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'invalid_period' }, { status: 400 });
   }
 
+  // Hetzelfde filter als op het scherm, zodat de export precies dat oplevert
+  // wat de planner voor zich ziet. Een onbekende id valt weg in plaats van een
+  // fout te geven; RLS bepaalt daarna alsnog wat er te tellen valt.
+  const scope = resolveScope(
+    {
+      from: period.data.from,
+      to: period.data.to,
+      opdrachtgever: params.get('opdrachtgever') ?? undefined,
+      locatie: params.get('locatie') ?? undefined,
+    },
+    period.data.from,
+  );
+
   // An export takes personal data out of the product. A planner making thirty
   // in an hour is not reporting, and a compromised session should not be able
   // to walk the whole client base out through this endpoint in a minute.
@@ -71,7 +87,7 @@ export async function GET(request: NextRequest) {
   // the SQL functions check it again.
   let reports;
   try {
-    reports = await getReports(membership.organizationId, period.data);
+    reports = await getReports(membership.organizationId, scope);
   } catch {
     return NextResponse.json({ error: 'forbidden' }, { status: 403 });
   }
@@ -81,9 +97,11 @@ export async function GET(request: NextRequest) {
       ? perDayTable(reports.perDay)
       : kind === 'per-chauffeur'
         ? perDriverTable(reports.perDriver)
-        : perClientTable(reports.perClient);
+        : kind === 'per-locatie'
+          ? perLocationTable(reports.perLocation)
+          : perClientTable(reports.perClient);
 
-  await recordExport(membership.organizationId, kind, period.data, table.rows.length);
+  await recordExport(membership.organizationId, kind, scope, table.rows.length);
 
   const filename = csvFilename(
     `${membership.organizationName}-${EXPORT_LABELS[kind]}`,

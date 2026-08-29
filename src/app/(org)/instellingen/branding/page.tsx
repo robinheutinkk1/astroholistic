@@ -1,12 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BrandingForm } from '@/features/branding/components/branding-form';
 import { LogoUpload } from '@/features/branding/components/logo-upload';
 import { getBranding } from '@/features/branding/service';
@@ -36,10 +30,6 @@ export default async function BrandingSettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Logo</CardTitle>
-          <CardDescription>
-            Wordt getoond aan iedereen die met uw organisatie te maken heeft, ook aan
-            bezoekers die nog niet zijn ingelogd.
-          </CardDescription>
         </CardHeader>
         <CardContent>
           <LogoUpload logoUrl={logoUrl(branding?.logo_path, branding?.updated_at)} />

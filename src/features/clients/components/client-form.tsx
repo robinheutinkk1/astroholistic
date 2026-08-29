@@ -93,7 +93,6 @@ export function ClientForm({ client }: { client?: Tables<'clients'> }) {
         <Field
           label="Interne referentie"
           htmlFor="externalReference"
-          hint="Bijvoorbeeld het cliëntnummer van de opdrachtgever."
           error={state.fieldErrors?.['externalReference']?.[0]}
         >
           <Input

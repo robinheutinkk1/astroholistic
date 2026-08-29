@@ -93,9 +93,9 @@ function NewTagPanel({
         <p className="text-sm font-medium">Tag aangemaakt: {created.publicCode}</p>
         <p className="mt-1 text-sm text-[var(--tp-muted-foreground)]">
           Schrijf deze link nu naar de NFC-tag, of print de QR-code. Na het sluiten van
-          dit vak is de code <strong>niet meer op te vragen</strong> — we bewaren hem
-          niet, alleen een versleutelde afdruk. Ben je hem kwijt, dan maak je een nieuwe
-          tag aan.
+          dit vak is de code <strong>niet meer op te vragen</strong>. We bewaren hem niet,
+          alleen een versleutelde afdruk. Ben je hem kwijt, dan maak je een nieuwe tag
+          aan.
         </p>
       </div>
 
@@ -251,7 +251,7 @@ export function TagManager({
                       <SmallButton label="Koppelen" />
                     </form>
                   ) : (
-                    <span className="text-sm text-[var(--tp-muted-foreground)]">—</span>
+                    <span className="text-sm text-[var(--tp-muted-foreground)]">-</span>
                   )}
                 </Td>
 

@@ -60,6 +60,8 @@ Beschermwaardig, in volgorde van ernst bij verlies:
 | T33 | Een afgelopen indicatie blijft toegang geven | `valid_from`/`valid_to` worden door RLS gelezen, niet door het scherm (S86–S87) |
 | T34 | Na uitloggen blijft de planning van de vorige gebruiker in de cache van de browser staan — op een gedeelde computer leest de volgende hem gewoon terug | `signOutAction` doet `revalidatePath('/', 'layout')` vóór de doorverwijzing (D-42) |
 | T35 | De code van een NFC-tag komt in een URL terecht, en daarmee in de geschiedenis van de browser en in de logboeken van elke tussenliggende server | De QR wordt in de browser getekend uit de code die daar al in het geheugen staat; er is geen route die een tagcode in een pad zet (D-40) |
+| T36 | Een locatie wijst naar de opdrachtgever van een andere vervoerder, waarmee diens cijfers in de rapportage van deze vervoerder belanden | Samengestelde foreign key op `(organization_id, care_organization_id)`; de combinatie bestaat simpelweg niet (S89) |
+| T37 | Een rapportagefilter dat wordt genegeerd, waardoor de ene opdrachtgever de cijfers van de andere op zijn factuur ziet | Het filter zit in de SQL-functie, niet in de query van het scherm; S90-S93 falen zodra het niets doet, en S96 vangt een achtergebleven ongefilterde variant |
 
 ## 3. Authenticatie
 
@@ -287,6 +289,14 @@ test je RLS niet.
 | S86 | Opdrachtgever buiten de looptijd                     | 0 cliënten zichtbaar                |
 | S87 | Opdrachtgever binnen de looptijd                     | ziet zijn eigen cliënten            |
 | S88 | Zacht verwijderde contactpersoon                     | uit beeld; ritten blijven staan     |
+| S89 | Locatie koppelen aan opdrachtgever van andere vervoerder | geweigerd door de FK            |
+| S90 | Filter op opdrachtgever telt minder dan ongefilterd  | ja (het filter filtert echt)        |
+| S91 | Opdrachtgever zonder vestigingen                     | 0 ritten                            |
+| S92 | Opdrachtgever én locatie samen                       | werkt als EN, niet als OF           |
+| S93 | Vreemd opdrachtgever-id als filter                   | 0 rijen, geen foutmelding           |
+| S94 | Chauffeur vraagt cijfers op, met of zonder filter    | 0                                   |
+| S95 | Per locatie bij gekozen opdrachtgever                | alleen diens vestigingen            |
+| S96 | Meer dan één variant van een rapportagefunctie       | mag niet bestaan                    |
 
 Aanvullend: een CI-check die faalt op elke tabel in `public` **zonder**
 `rowsecurity = true`. Nieuwe tabellen kunnen dan niet ongemerkt onbeveiligd

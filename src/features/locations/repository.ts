@@ -11,10 +11,18 @@ import { type LocationFormInput, type LocationSort } from './schema';
 
 export type LocationRow = Pick<
   Tables<'locations'>,
-  'id' | 'name' | 'kind' | 'address_line1' | 'postal_code' | 'city' | 'status'
+  | 'id'
+  | 'name'
+  | 'kind'
+  | 'address_line1'
+  | 'postal_code'
+  | 'city'
+  | 'status'
+  | 'care_organization_id'
 >;
 
-const LIST_COLUMNS = 'id, name, kind, address_line1, postal_code, city, status';
+const LIST_COLUMNS =
+  'id, name, kind, address_line1, postal_code, city, status, care_organization_id';
 
 export async function findLocations(
   organizationId: string,
@@ -61,6 +69,7 @@ function toRecord(input: LocationFormInput) {
     city: input.city,
     access_notes: input.accessNotes,
     status: input.status,
+    care_organization_id: input.careOrganizationId,
   };
 }
 

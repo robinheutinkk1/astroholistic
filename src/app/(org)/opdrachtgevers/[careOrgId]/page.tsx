@@ -1,14 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { DeleteDialog } from '@/components/ui/delete-dialog';
 import { EmptyState } from '@/components/ui/states';
 import { CareOrganizationForm } from '@/features/care-organizations/components/care-organization-form';
@@ -17,6 +12,7 @@ import { getActiveMembership } from '@/features/organizations/active-organizatio
 import {
   getCareOrganization,
   listFundedClients,
+  listLocationsForCareOrganization,
 } from '@/features/care-organizations/service';
 import { deleteCareOrganizationAction } from '@/features/care-organizations/actions';
 import { listCareOrgPortalUsers } from '@/features/portals/grants';
@@ -43,9 +39,12 @@ export default async function CareOrganizationDetailPage({
   if (!careOrganization) notFound();
 
   const canManage = membership.permissions.has('care_organizations.manage');
-  const [clients, portalUsers] = await Promise.all([
+  const [clients, portalUsers, locations] = await Promise.all([
     listFundedClients(membership.organizationId, careOrgId),
     listCareOrgPortalUsers(membership.organizationId, careOrgId),
+    membership.permissions.has('locations.view')
+      ? listLocationsForCareOrganization(membership.organizationId, careOrgId)
+      : Promise.resolve([]),
   ]);
 
   // De datum in de tijdzone van de organisatie, niet die van de server: een
@@ -89,9 +88,6 @@ export default async function CareOrganizationDetailPage({
       <Card>
         <CardHeader>
           <CardTitle>Gegevens</CardTitle>
-          {!canManage ? (
-            <CardDescription>Je hebt geen rechten om dit te wijzigen.</CardDescription>
-          ) : null}
         </CardHeader>
         <CardContent>
           {canManage ? (
@@ -99,25 +95,66 @@ export default async function CareOrganizationDetailPage({
           ) : (
             <dl className="grid max-w-lg gap-3 text-sm sm:grid-cols-2">
               <dt className="text-[var(--tp-muted-foreground)]">E-mailadres</dt>
-              <dd>{careOrganization.contact_email ?? '—'}</dd>
+              <dd>{careOrganization.contact_email ?? '-'}</dd>
               <dt className="text-[var(--tp-muted-foreground)]">Telefoon</dt>
-              <dd>{careOrganization.phone ?? '—'}</dd>
+              <dd>{careOrganization.phone ?? '-'}</dd>
               <dt className="text-[var(--tp-muted-foreground)]">Plaats</dt>
-              <dd>{careOrganization.city ?? '—'}</dd>
+              <dd>{careOrganization.city ?? '-'}</dd>
               <dt className="text-[var(--tp-muted-foreground)]">Referentie</dt>
-              <dd>{careOrganization.external_reference ?? '—'}</dd>
+              <dd>{careOrganization.external_reference ?? '-'}</dd>
             </dl>
           )}
         </CardContent>
       </Card>
 
+      {membership.permissions.has('locations.view') ? (
+        <Card>
+          <CardHeader className="flex flex-row items-start justify-between gap-4">
+            <CardTitle>Vestigingen</CardTitle>
+            <Button asChild variant="outline" size="sm">
+              <Link href={`/rapportages?opdrachtgever=${careOrganization.id}` as never}>
+                Rapportage
+              </Link>
+            </Button>
+          </CardHeader>
+          <CardContent>
+            {locations.length === 0 ? (
+              <EmptyState
+                title="Nog geen vestigingen"
+                description="Koppel een locatie aan deze opdrachtgever op de pagina van die locatie."
+              />
+            ) : (
+              <ul className="flex flex-col gap-2">
+                {locations.map((location) => (
+                  <li
+                    key={location.id}
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-[var(--tp-radius)] border border-[var(--tp-border)] p-3"
+                  >
+                    <div>
+                      <Link
+                        href={`/locaties/${location.id}` as never}
+                        className="font-medium underline-offset-4 hover:underline"
+                      >
+                        {location.name}
+                      </Link>
+                      <p className="text-xs text-[var(--tp-muted-foreground)]">
+                        {location.city ?? 'Geen plaats ingevuld'}
+                      </p>
+                    </div>
+                    <Badge variant={location.status === 'ACTIVE' ? 'success' : 'neutral'}>
+                      {location.status === 'ACTIVE' ? 'Actief' : 'Inactief'}
+                    </Badge>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      ) : null}
+
       <Card>
         <CardHeader>
           <CardTitle>Cliënten</CardTitle>
-          <CardDescription>
-            Wie deze opdrachtgever betaalt, en over welke periode. Koppelen doe je op de
-            pagina van de cliënt zelf.
-          </CardDescription>
         </CardHeader>
         <CardContent>
           {clients.length === 0 ? (
@@ -147,7 +184,7 @@ export default async function CareOrganizationDetailPage({
                         Vanaf {client.validFrom}
                         {client.validTo
                           ? ` tot en met ${client.validTo}`
-                          : ' — geen einddatum'}
+                          : ', geen einddatum'}
                       </p>
                     </div>
                     <Badge variant={running ? 'success' : 'neutral'}>
@@ -164,10 +201,6 @@ export default async function CareOrganizationDetailPage({
       <Card>
         <CardHeader>
           <CardTitle>Wie mag meekijken</CardTitle>
-          <CardDescription>
-            Ieder een eigen account, zodat je toegang per persoon kunt intrekken en het
-            logboek een naam heeft in plaats van een gedeelde login.
-          </CardDescription>
         </CardHeader>
         <CardContent>
           <CareOrgPortalUsers

@@ -68,7 +68,7 @@ export function RequestDialog({
           <Dialog.Description className="mt-1 text-sm text-[var(--tp-muted-foreground)]">
             Voor {clientName}
             {rideLabel ? `, ${rideLabel}` : ''}. De planning beoordeelt je verzoek en je
-            ziet hier wat ermee gebeurt — de rit verandert niet meteen.
+            ziet hier wat ermee gebeurt. De rit verandert niet meteen.
           </Dialog.Description>
 
           <form action={formAction} className="mt-4 flex flex-col gap-3">

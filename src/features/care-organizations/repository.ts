@@ -193,3 +193,27 @@ export async function findFundersForClient(clientId: string): Promise<ClientFund
     })
     .filter((row): row is ClientFunderRow => row !== null);
 }
+
+export interface CareOrgLocationRow {
+  readonly id: string;
+  readonly name: string;
+  readonly city: string | null;
+  readonly status: string;
+}
+
+/** De vestigingen die aan deze opdrachtgever hangen. */
+export async function findLocationsForCareOrganization(
+  organizationId: string,
+  careOrganizationId: string,
+): Promise<CareOrgLocationRow[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('locations')
+    .select('id, name, city, status')
+    .eq('organization_id', organizationId)
+    .eq('care_organization_id', careOrganizationId)
+    .is('deleted_at', null)
+    .order('name');
+
+  return data ?? [];
+}

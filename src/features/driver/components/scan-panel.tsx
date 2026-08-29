@@ -62,7 +62,7 @@ export function ScanPanel() {
       {nfcState === 'unsupported' ? (
         <p className="rounded-[var(--tp-radius)] bg-[var(--tp-surface)] p-4 text-sm text-[var(--tp-muted-foreground)]">
           Dit toestel kan niet vanuit de app scannen. Houd de tag tegen de achterkant van
-          je telefoon — die opent hem vanzelf — of typ de code hieronder over.
+          je telefoon, die opent hem vanzelf. Of typ de code hieronder over.
         </p>
       ) : null}
 

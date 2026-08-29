@@ -32,7 +32,6 @@ export function RetentionForm({ retention }: { retention: RetentionRow }) {
       <Field
         label="Wissen na hoeveel maanden zonder rit?"
         htmlFor="inactiveClientMonths"
-        hint="Gerekend vanaf de laatste rit, of vanaf het aanmaken als er nooit een rit was."
         error={state.fieldErrors?.['inactiveClientMonths']?.[0]}
       >
         <Input

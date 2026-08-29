@@ -1,12 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getActiveMembership } from '@/features/organizations/active-organization';
 import { RetentionForm } from '@/features/support/components/retention-form';
 import { SupportManager } from '@/features/support/components/support-manager';
@@ -40,10 +34,6 @@ export default async function SupportAccessPage() {
       <Card>
         <CardHeader>
           <CardTitle>Tijdelijke toegang geven</CardTitle>
-          <CardDescription>
-            Support kan alleen meekijken, nooit iets wijzigen. Wat er tijdens de toegang
-            gebeurt, staat in het logboek van uw organisatie.
-          </CardDescription>
         </CardHeader>
         <CardContent>
           <SupportManager grants={grants} staff={staff} now={Date.now()} />
@@ -53,10 +43,6 @@ export default async function SupportAccessPage() {
       <Card>
         <CardHeader>
           <CardTitle>Bewaartermijn</CardTitle>
-          <CardDescription>
-            Hoe lang gegevens van een cliënt bewaard blijven nadat er geen ritten meer
-            zijn. U bent de verwerkingsverantwoordelijke, dus dit is uw keuze.
-          </CardDescription>
         </CardHeader>
         <CardContent>
           <RetentionForm retention={retention} />

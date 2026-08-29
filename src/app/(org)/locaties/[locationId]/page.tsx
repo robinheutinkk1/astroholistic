@@ -1,15 +1,10 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DeleteDialog } from '@/components/ui/delete-dialog';
 import { LocationForm } from '@/features/locations/components/location-form';
 import { getActiveMembership } from '@/features/organizations/active-organization';
+import { listCareOrganizationOptions } from '@/features/care-organizations/options';
 import { getLocation } from '@/features/locations/service';
 import { deleteLocationAction } from '@/features/locations/actions';
 
@@ -31,6 +26,9 @@ export default async function LocationDetailPage({
   if (!record) notFound();
 
   const canManage = membership.permissions.has('locations.manage');
+  const careOrganizations = membership.permissions.has('care_organizations.view')
+    ? await listCareOrganizationOptions(membership.organizationId)
+    : [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -49,13 +47,10 @@ export default async function LocationDetailPage({
       <Card>
         <CardHeader>
           <CardTitle>Gegevens</CardTitle>
-          {!canManage ? (
-            <CardDescription>Je hebt geen rechten om dit te wijzigen.</CardDescription>
-          ) : null}
         </CardHeader>
         <CardContent>
           {canManage ? (
-            <LocationForm location={record} />
+            <LocationForm location={record} careOrganizations={careOrganizations} />
           ) : (
             <p className="text-sm text-[var(--tp-muted-foreground)]">
               Vraag een beheerder om wijzigingen door te voeren.

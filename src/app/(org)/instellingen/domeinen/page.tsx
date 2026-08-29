@@ -1,12 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DomainManager } from '@/features/domains/components/domain-manager';
 import { listDomains } from '@/features/domains/service';
 import { getActiveMembership } from '@/features/organizations/active-organization';
@@ -34,10 +28,6 @@ export default async function DomainSettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Eigen domeinnamen</CardTitle>
-          <CardDescription>
-            Een domeinnaam wordt pas gebruikt nadat u met een TXT-record heeft aangetoond
-            dat u er eigenaar van bent.
-          </CardDescription>
         </CardHeader>
         <CardContent>
           <DomainManager domains={domains} />

@@ -159,7 +159,6 @@ export function ClientContactsCard({
                   <Field
                     label="Relatie tot de cliënt"
                     htmlFor={`relationship-${link.contactId}`}
-                    hint="Bijvoorbeeld: moeder, mentor, begeleider."
                   >
                     <Input name="relationship" defaultValue={link.relationship ?? ''} />
                   </Field>

@@ -82,7 +82,7 @@ export function ClientFundersCard({
                 </Link>
                 <p className="text-xs text-[var(--tp-muted-foreground)]">
                   Vanaf {link.validFrom}
-                  {link.validTo ? ` tot en met ${link.validTo}` : ' — geen einddatum'}
+                  {link.validTo ? ` tot en met ${link.validTo}` : ', geen einddatum'}
                 </p>
               </div>
 
@@ -149,16 +149,11 @@ export function ClientFundersCard({
               <Field
                 label="Tot en met"
                 htmlFor={`validTo-${clientId}`}
-                hint="Leeg laten als de indicatie doorloopt."
                 error={linkState.fieldErrors?.['validTo']?.[0]}
               >
                 <Input name="validTo" type="date" />
               </Field>
             </div>
-            <p className="text-xs text-[var(--tp-muted-foreground)]">
-              Vanaf de begindatum ziet deze zorgorganisatie de ritten van deze cliënt — en
-              na de einddatum niet meer.
-            </p>
             <div>
               <PendingButton label="Koppelen" />
             </div>

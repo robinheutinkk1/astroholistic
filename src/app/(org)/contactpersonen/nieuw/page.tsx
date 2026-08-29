@@ -1,12 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ContactForm } from '@/features/contacts/components/contact-form';
 import { getActiveMembership } from '@/features/organizations/active-organization';
 
@@ -23,10 +17,6 @@ export default async function NewContactPage() {
       <Card>
         <CardHeader>
           <CardTitle>Gegevens</CardTitle>
-          <CardDescription>
-            Na het opslaan koppel je deze persoon aan een of meer cliënten, en bepaal je
-            per cliënt wat hij mag.
-          </CardDescription>
         </CardHeader>
         <CardContent>
           <ContactForm />

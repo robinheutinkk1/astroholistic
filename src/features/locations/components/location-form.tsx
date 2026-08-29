@@ -22,7 +22,18 @@ function SubmitButton({ label }: { label: string }) {
   );
 }
 
-export function LocationForm({ location }: { location?: Tables<'locations'> }) {
+export interface CareOrganizationOption {
+  readonly id: string;
+  readonly name: string;
+}
+
+export function LocationForm({
+  location,
+  careOrganizations = [],
+}: {
+  location?: Tables<'locations'>;
+  careOrganizations?: readonly CareOrganizationOption[];
+}) {
   const isEdit = location !== undefined;
   const [state, formAction] = useActionState<FormState, FormData>(
     isEdit ? updateLocationAction : createLocationAction,
@@ -81,7 +92,6 @@ export function LocationForm({ location }: { location?: Tables<'locations'> }) {
       <Field
         label="Toelichting voor de chauffeur"
         htmlFor="accessNotes"
-        hint="Praktische instructies, bijvoorbeeld: aanbellen bij de achteringang. Geen persoonlijke of medische informatie."
         error={state.fieldErrors?.['accessNotes']?.[0]}
       >
         <textarea
@@ -93,6 +103,22 @@ export function LocationForm({ location }: { location?: Tables<'locations'> }) {
           className="w-full rounded-[var(--tp-radius)] border border-[var(--tp-border)] bg-[var(--tp-surface)] px-3 py-2 text-sm"
         />
       </Field>
+
+      {careOrganizations.length > 0 ? (
+        <Field label="Opdrachtgever" htmlFor="careOrganizationId" className="max-w-xs">
+          <Select
+            name="careOrganizationId"
+            defaultValue={location?.care_organization_id ?? ''}
+            options={[
+              { value: '', label: 'Geen' },
+              ...careOrganizations.map((option) => ({
+                value: option.id,
+                label: option.name,
+              })),
+            ]}
+          />
+        </Field>
+      ) : null}
 
       <Field label="Status" htmlFor="status" className="max-w-xs">
         <Select

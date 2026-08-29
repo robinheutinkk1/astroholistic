@@ -2,13 +2,14 @@ import 'server-only';
 import { requirePermission, requireUser } from '@/features/rbac/session';
 import { recordAudit } from '@/features/audit/service';
 import * as repository from './repository';
-import { type ReportPeriod } from './schema';
+import { type ReportPeriod, type ReportScope } from './schema';
 
 export type {
   AbsenceReasonRow,
   ClientRow,
   DayRow,
   DriverRow,
+  LocationRow,
   RideSummary,
 } from './repository';
 
@@ -17,6 +18,7 @@ export interface ReportBundle {
   readonly perDay: readonly repository.DayRow[];
   readonly perDriver: readonly repository.DriverRow[];
   readonly perClient: readonly repository.ClientRow[];
+  readonly perLocation: readonly repository.LocationRow[];
   readonly absenceReasons: readonly repository.AbsenceReasonRow[];
 }
 
@@ -30,19 +32,21 @@ export interface ReportBundle {
  */
 export async function getReports(
   organizationId: string,
-  period: ReportPeriod,
+  scope: ReportScope,
 ): Promise<ReportBundle> {
   await requirePermission(organizationId, 'reports.view');
 
-  const [summary, perDay, perDriver, perClient, absenceReasons] = await Promise.all([
-    repository.fetchSummary(organizationId, period),
-    repository.fetchPerDay(organizationId, period),
-    repository.fetchPerDriver(organizationId, period),
-    repository.fetchPerClient(organizationId, period),
-    repository.fetchAbsenceReasons(organizationId, period),
-  ]);
+  const [summary, perDay, perDriver, perClient, perLocation, absenceReasons] =
+    await Promise.all([
+      repository.fetchSummary(organizationId, scope),
+      repository.fetchPerDay(organizationId, scope),
+      repository.fetchPerDriver(organizationId, scope),
+      repository.fetchPerClient(organizationId, scope),
+      repository.fetchPerLocation(organizationId, scope),
+      repository.fetchAbsenceReasons(organizationId, scope),
+    ]);
 
-  return { summary, perDay, perDriver, perClient, absenceReasons };
+  return { summary, perDay, perDriver, perClient, perLocation, absenceReasons };
 }
 
 /**
@@ -71,7 +75,7 @@ export async function getPortalClientSummary(period: ReportPeriod) {
 export async function recordExport(
   organizationId: string,
   kind: string,
-  period: ReportPeriod,
+  scope: ReportScope,
   rowCount: number,
 ): Promise<void> {
   const user = await requireUser();
@@ -81,6 +85,17 @@ export async function recordExport(
     action: 'report.exported',
     entityType: 'reports',
     entityId: null,
-    metadata: { report: kind, from: period.from, to: period.to, rows: rowCount },
+    metadata: {
+      report: kind,
+      from: scope.from,
+      to: scope.to,
+      rows: rowCount,
+      // Het filter hoort in het logboek: "wie nam wat mee" is een ander
+      // antwoord als het alleen de cijfers van één opdrachtgever betrof.
+      ...(scope.careOrganizationId
+        ? { care_organization_id: scope.careOrganizationId }
+        : {}),
+      ...(scope.locationId ? { location_id: scope.locationId } : {}),
+    },
   });
 }

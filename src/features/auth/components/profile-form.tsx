@@ -49,11 +49,7 @@ export function ProfileForm({
         <Input name="phone" type="tel" defaultValue={phone} autoComplete="tel" />
       </Field>
 
-      <Field
-        label="E-mailadres"
-        htmlFor="email"
-        hint="Neem contact op met je beheerder om je e-mailadres te wijzigen."
-      >
+      <Field label="E-mailadres" htmlFor="email">
         <Input name="email" defaultValue={email} disabled />
       </Field>
 

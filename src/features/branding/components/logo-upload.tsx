@@ -59,7 +59,6 @@ export function LogoUpload({ logoUrl }: { logoUrl: string | null }) {
         <Field
           label="Nieuw logo"
           htmlFor="logo"
-          hint="PNG, JPG of WebP, maximaal 512 kB. SVG wordt niet geaccepteerd."
           error={uploadState.fieldErrors?.['logo']?.[0]}
         >
           <input

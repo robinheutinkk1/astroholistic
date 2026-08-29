@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import type { Route } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { getActiveMembership } from '@/features/organizations/active-organization';
 
 export const metadata: Metadata = { title: 'Instellingen' };
@@ -49,7 +49,6 @@ export default async function SettingsPage() {
             <Card className="h-full transition-colors hover:bg-[var(--tp-surface-muted)]">
               <CardHeader>
                 <CardTitle>{section.title}</CardTitle>
-                <CardDescription>{section.description}</CardDescription>
               </CardHeader>
             </Card>
           </Link>

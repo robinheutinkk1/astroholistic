@@ -1,13 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { PrivacyCard } from '@/features/gdpr/components/privacy-card';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ClientForm } from '@/features/clients/components/client-form';
 import { PortalAccessCard } from '@/features/portals/components/portal-access-card';
 import { ClientContactsCard } from '@/features/contacts/components/client-contacts-card';
@@ -126,11 +120,6 @@ export default async function ClientDetailPage({
       <Card>
         <CardHeader>
           <CardTitle>Gegevens</CardTitle>
-          {!canEdit ? (
-            <CardDescription>
-              Je hebt geen rechten om deze cliënt te wijzigen.
-            </CardDescription>
-          ) : null}
         </CardHeader>
         <CardContent>
           {canEdit ? (
@@ -138,17 +127,17 @@ export default async function ClientDetailPage({
           ) : (
             <dl className="grid max-w-lg gap-3 text-sm sm:grid-cols-2">
               <dt className="text-[var(--tp-muted-foreground)]">Telefoon</dt>
-              <dd>{client.phone ?? '—'}</dd>
+              <dd>{client.phone ?? '-'}</dd>
               <dt className="text-[var(--tp-muted-foreground)]">E-mailadres</dt>
-              <dd>{client.email ?? '—'}</dd>
+              <dd>{client.email ?? '-'}</dd>
               <dt className="text-[var(--tp-muted-foreground)]">Adres</dt>
               <dd>
-                {client.address_line1 ?? '—'}
+                {client.address_line1 ?? '-'}
                 {client.postal_code ? `, ${client.postal_code}` : ''}
                 {client.city ? ` ${client.city}` : ''}
               </dd>
               <dt className="text-[var(--tp-muted-foreground)]">Referentie</dt>
-              <dd>{client.external_reference ?? '—'}</dd>
+              <dd>{client.external_reference ?? '-'}</dd>
             </dl>
           )}
         </CardContent>
@@ -158,11 +147,6 @@ export default async function ClientDetailPage({
         <Card>
           <CardHeader>
             <CardTitle>Contactpersonen</CardTitle>
-            <CardDescription>
-              Wie er voor deze cliënt regelt, en wat die persoon mag. De vinkjes gelden
-              per cliënt: dezelfde moeder kan voor haar zoon afmelden en voor haar dochter
-              alleen meekijken.
-            </CardDescription>
           </CardHeader>
           <CardContent>
             <ClientContactsCard
@@ -179,10 +163,6 @@ export default async function ClientDetailPage({
         <Card>
           <CardHeader>
             <CardTitle>Opdrachtgever</CardTitle>
-            <CardDescription>
-              De partij die dit vervoer betaalt. Zij ziet alleen de ritten binnen de
-              looptijd die je hier invult — daarna niets meer.
-            </CardDescription>
           </CardHeader>
           <CardContent>
             <ClientFundersCard
@@ -199,11 +179,6 @@ export default async function ClientDetailPage({
       <Card>
         <CardHeader>
           <CardTitle>Portaaltoegang</CardTitle>
-          <CardDescription>
-            Geef de cliënt een eigen login om zijn ritten te volgen en een afwezigheid
-            door te geven. Dat is geen medewerkersaccount: hij ziet niets van de planning
-            en niets van andere cliënten.
-          </CardDescription>
         </CardHeader>
         <CardContent>
           <PortalAccessCard
@@ -218,9 +193,6 @@ export default async function ClientDetailPage({
       <Card>
         <CardHeader>
           <CardTitle>Privacy</CardTitle>
-          <CardDescription>
-            Inzage en verwijdering op verzoek van de cliënt of zijn vertegenwoordiger.
-          </CardDescription>
         </CardHeader>
         <CardContent>
           <PrivacyCard

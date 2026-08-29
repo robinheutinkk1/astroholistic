@@ -1,12 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResetPasswordForm } from '@/features/auth/components/reset-password-form';
 import { getCurrentUser } from '@/features/rbac/session';
 
@@ -26,9 +20,6 @@ export default async function ResetPasswordPage() {
         <CardTitle as="h1" className="text-lg">
           Nieuw wachtwoord instellen
         </CardTitle>
-        <CardDescription>
-          Kies een wachtwoord dat je nergens anders gebruikt.
-        </CardDescription>
       </CardHeader>
       <CardContent>
         <ResetPasswordForm />

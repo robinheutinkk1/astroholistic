@@ -1,16 +1,21 @@
 import { Table, Tbody, Td, Th, Thead, Tr } from '@/components/ui/data-table';
 import { EmptyState } from '@/components/ui/states';
-import { type ClientRow, type DayRow, type DriverRow } from '../service';
+import {
+  type ClientRow,
+  type DayRow,
+  type DriverRow,
+  type LocationRow,
+} from '../service';
 
 function delayLabel(seconds: number | null): string {
-  if (seconds === null) return '—';
+  if (seconds === null) return '-';
   const minutes = Math.round(seconds / 60);
   if (minutes === 0) return 'op tijd';
   return minutes > 0 ? `${minutes} min later` : `${Math.abs(minutes)} min eerder`;
 }
 
 function share(part: number, whole: number): string {
-  return whole === 0 ? '—' : `${Math.round((part / whole) * 100)}%`;
+  return whole === 0 ? '-' : `${Math.round((part / whole) * 100)}%`;
 }
 
 export function PerDayTable({ rows }: { rows: readonly DayRow[] }) {
@@ -124,7 +129,52 @@ export function PerClientTable({ rows }: { rows: readonly ClientRow[] }) {
             <Td className="text-right tabular-nums">{row.completed}</Td>
             <Td className="text-right tabular-nums">{row.absent}</Td>
             <Td className="text-right tabular-nums">{row.cancelled}</Td>
-            <Td>{row.lastRideDate ?? '—'}</Td>
+            <Td>{row.lastRideDate ?? '-'}</Td>
+          </Tr>
+        ))}
+      </Tbody>
+    </Table>
+  );
+}
+
+/**
+ * Ritten per locatie.
+ *
+ * Een rit telt bij het ophaaladres én bij de bestemming, dus de kolom Ritten
+ * telt op tot meer dan het totaal bovenaan. Dat is de vraag die dit rapport
+ * beantwoordt: hoe druk is deze vestiging.
+ */
+export function PerLocationTable({ rows }: { rows: readonly LocationRow[] }) {
+  if (rows.length === 0) {
+    return (
+      <EmptyState
+        title="Geen ritten in deze periode"
+        description="Kies een andere periode of een ander filter."
+      />
+    );
+  }
+
+  return (
+    <Table caption="Ritten per locatie">
+      <Thead>
+        <Th>Locatie</Th>
+        <Th>Opdrachtgever</Th>
+        <Th className="text-right">Ritten</Th>
+        <Th className="text-right">Afgerond</Th>
+        <Th className="text-right">Afwezig</Th>
+        <Th className="text-right">Geannuleerd</Th>
+      </Thead>
+      <Tbody>
+        {rows.map((row) => (
+          <Tr key={row.locationId ?? 'onbekend'}>
+            <Td>{row.locationName ?? 'Onbekend'}</Td>
+            <Td className="text-[var(--tp-muted-foreground)]">
+              {row.careOrganizationName ?? '-'}
+            </Td>
+            <Td className="text-right tabular-nums">{row.total}</Td>
+            <Td className="text-right tabular-nums">{row.completed}</Td>
+            <Td className="text-right tabular-nums">{row.absent}</Td>
+            <Td className="text-right tabular-nums">{row.cancelled}</Td>
           </Tr>
         ))}
       </Tbody>

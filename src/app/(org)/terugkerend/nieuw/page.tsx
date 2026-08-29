@@ -1,12 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TemplateForm } from '@/features/ride-templates/components/template-form';
 import { loadPickerOptions } from '@/features/rides/pickers';
 import { getActiveMembership } from '@/features/organizations/active-organization';
@@ -25,9 +19,6 @@ export default async function NewTemplatePage() {
       <Card>
         <CardHeader>
           <CardTitle>De vaste afspraak</CardTitle>
-          <CardDescription>
-            Zodra je opslaat plant het systeem de komende weken meteen in.
-          </CardDescription>
         </CardHeader>
         <CardContent>
           <TemplateForm {...options} />

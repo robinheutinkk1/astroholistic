@@ -1,5 +1,10 @@
 import { toCsv, type CsvValue } from './csv';
-import { type ClientRow, type DayRow, type DriverRow } from './repository';
+import {
+  type ClientRow,
+  type DayRow,
+  type DriverRow,
+  type LocationRow,
+} from './repository';
 import { type ReportKind } from './schema';
 
 /**
@@ -24,6 +29,7 @@ function seconds(value: number | null): CsvValue {
 /** A name we could not read is shown as such, never as an empty cell. */
 const UNKNOWN_DRIVER = 'Onbekend / niet toegewezen';
 const UNKNOWN_CLIENT = 'Onbekend';
+const UNKNOWN_LOCATION = 'Onbekend';
 
 export function perDayTable(rows: readonly DayRow[]): CsvTable {
   return {
@@ -75,6 +81,20 @@ export function perClientTable(rows: readonly ClientRow[]): CsvTable {
   };
 }
 
+export function perLocationTable(rows: readonly LocationRow[]): CsvTable {
+  return {
+    headers: ['Locatie', 'Opdrachtgever', 'Ritten', 'Afgerond', 'Afwezig', 'Geannuleerd'],
+    rows: rows.map((row) => [
+      row.locationName ?? UNKNOWN_LOCATION,
+      row.careOrganizationName ?? '',
+      row.total,
+      row.completed,
+      row.absent,
+      row.cancelled,
+    ]),
+  };
+}
+
 export function tableToCsv(table: CsvTable): string {
   return toCsv(table.headers, table.rows);
 }
@@ -83,4 +103,5 @@ export const EXPORT_LABELS: Record<ReportKind, string> = {
   'per-dag': 'ritten-per-dag',
   'per-chauffeur': 'per-chauffeur',
   'per-client': 'per-client',
+  'per-locatie': 'per-locatie',
 };

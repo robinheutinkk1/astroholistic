@@ -150,7 +150,6 @@ export function DomainManager({ domains }: { domains: readonly DomainRow[] }) {
         <Field
           label="Domeinnaam"
           htmlFor="hostname"
-          hint="Bijvoorbeeld vervoer.uwbedrijf.nl. Laat uw domeinprovider deze naam met een CNAME naar het platform wijzen."
           error={addState.fieldErrors?.['hostname']?.[0]}
         >
           <Input name="hostname" placeholder="vervoer.uwbedrijf.nl" />

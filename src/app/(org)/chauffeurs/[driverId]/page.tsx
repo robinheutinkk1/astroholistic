@@ -1,12 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DeleteDialog } from '@/components/ui/delete-dialog';
 import { DriverForm } from '@/features/drivers/components/driver-form';
 import { getActiveMembership } from '@/features/organizations/active-organization';
@@ -51,9 +45,6 @@ export default async function DriverDetailPage({
       <Card>
         <CardHeader>
           <CardTitle>Gegevens</CardTitle>
-          {!canManage ? (
-            <CardDescription>Je hebt geen rechten om dit te wijzigen.</CardDescription>
-          ) : null}
         </CardHeader>
         <CardContent>
           {canManage ? (

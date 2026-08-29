@@ -87,7 +87,6 @@ export function RideForm({
         <Field
           label="Vertrektijd"
           htmlFor="scheduledPickupTime"
-          hint="Lokale tijd. Blijft ook na de zomertijdwissel kloppen."
           error={state.fieldErrors?.['scheduledPickupTime']?.[0]}
           required
         >
@@ -163,7 +162,6 @@ export function RideForm({
       <Field
         label="Notitie voor de chauffeur"
         htmlFor="notes"
-        hint="Praktische informatie over deze rit. Geen medische gegevens."
         error={state.fieldErrors?.['notes']?.[0]}
       >
         <textarea

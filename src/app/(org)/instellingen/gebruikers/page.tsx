@@ -1,12 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getActiveMembership } from '@/features/organizations/active-organization';
 import { InviteMemberForm } from '@/features/members/components/invite-member-form';
 import { MemberList } from '@/features/members/components/member-list';
@@ -46,10 +40,6 @@ export default async function MembersPage() {
         <Card>
           <CardHeader>
             <CardTitle>Iemand uitnodigen</CardTitle>
-            <CardDescription>
-              De uitgenodigde krijgt een mail met een link waarmee hij zelf een wachtwoord
-              instelt. Jij ziet dat wachtwoord nooit.
-            </CardDescription>
           </CardHeader>
           <CardContent>
             <InviteMemberForm roles={roles} />
@@ -60,10 +50,6 @@ export default async function MembersPage() {
       <Card>
         <CardHeader>
           <CardTitle>Medewerkers</CardTitle>
-          <CardDescription>
-            Een geschorst lid verliest zijn toegang onmiddellijk — niet pas bij de
-            volgende keer inloggen.
-          </CardDescription>
         </CardHeader>
         <CardContent>
           <MemberList

@@ -113,6 +113,12 @@ begin
   insert into public.care_organizations (organization_id, name, contact_email)
   values (v_org, 'Zorginstelling De Brug', 'vervoer@debrug.test') returning id into v_care;
 
+  -- Twee vestigingen onder één opdrachtgever, want dat is hoe het in het echt
+  -- werkt: de rapportage kan dan filteren op de opdrachtgever als geheel en
+  -- daarna uitsplitsen per vestiging.
+  update public.locations set care_organization_id = v_care
+  where id in (v_loc_dag, v_loc_school);
+
   insert into public.client_care_organizations (client_id, care_organization_id, valid_from)
   values (v_cl1, v_care, current_date - 365), (v_cl3, v_care, current_date - 200);
 

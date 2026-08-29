@@ -47,6 +47,14 @@ export async function listFundersForClient(
   return repository.findFundersForClient(clientId);
 }
 
+export async function listLocationsForCareOrganization(
+  organizationId: string,
+  careOrganizationId: string,
+): Promise<repository.CareOrgLocationRow[]> {
+  await requirePermission(organizationId, 'locations.view');
+  return repository.findLocationsForCareOrganization(organizationId, careOrganizationId);
+}
+
 export async function createCareOrganization(
   organizationId: string,
   input: CareOrganizationFormInput,

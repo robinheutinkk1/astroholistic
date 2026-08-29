@@ -68,7 +68,6 @@ export function BrandingForm({ branding }: { branding: BrandingRow | null }) {
       <Field
         label="Weergavenaam"
         htmlFor="displayName"
-        hint="De naam die cliënten, ouders en chauffeurs zien. Leeg laten betekent: de naam van de organisatie."
         error={state.fieldErrors?.['displayName']?.[0]}
       >
         <Input
@@ -97,7 +96,6 @@ export function BrandingForm({ branding }: { branding: BrandingRow | null }) {
         <Field
           label="Support-e-mailadres"
           htmlFor="supportEmail"
-          hint="Waar een ouder of cliënt terechtkan met vragen."
           error={state.fieldErrors?.['supportEmail']?.[0]}
         >
           <Input

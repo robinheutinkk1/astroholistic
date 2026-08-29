@@ -1,13 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DeleteDialog } from '@/components/ui/delete-dialog';
 import { EmptyState } from '@/components/ui/states';
 import { Badge } from '@/components/ui/badge';
@@ -68,9 +62,6 @@ export default async function ContactDetailPage({
       <Card>
         <CardHeader>
           <CardTitle>Gegevens</CardTitle>
-          {!canManage ? (
-            <CardDescription>Je hebt geen rechten om dit te wijzigen.</CardDescription>
-          ) : null}
         </CardHeader>
         <CardContent>
           {canManage ? (
@@ -78,9 +69,9 @@ export default async function ContactDetailPage({
           ) : (
             <dl className="grid max-w-lg gap-3 text-sm sm:grid-cols-2">
               <dt className="text-[var(--tp-muted-foreground)]">Telefoon</dt>
-              <dd>{contact.phone ?? '—'}</dd>
+              <dd>{contact.phone ?? '-'}</dd>
               <dt className="text-[var(--tp-muted-foreground)]">E-mailadres</dt>
-              <dd>{contact.email ?? '—'}</dd>
+              <dd>{contact.email ?? '-'}</dd>
             </dl>
           )}
         </CardContent>
@@ -89,10 +80,6 @@ export default async function ContactDetailPage({
       <Card>
         <CardHeader>
           <CardTitle>Gekoppelde cliënten</CardTitle>
-          <CardDescription>
-            Wat deze persoon mag, staat per cliënt vast. Je stelt het in op de pagina van
-            de cliënt zelf.
-          </CardDescription>
         </CardHeader>
         <CardContent>
           {links.length === 0 ? (
@@ -140,10 +127,6 @@ export default async function ContactDetailPage({
       <Card>
         <CardHeader>
           <CardTitle>Portaaltoegang</CardTitle>
-          <CardDescription>
-            Eén login voor alle cliënten waaraan deze persoon gekoppeld is. Wat hij per
-            cliënt te zien krijgt, blijft bepaald door de afspraken hierboven.
-          </CardDescription>
         </CardHeader>
         <CardContent>
           <PortalAccessCard

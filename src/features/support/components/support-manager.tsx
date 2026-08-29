@@ -122,14 +122,13 @@ export function SupportManager({
           <Field
             label="Waarom is dit nodig?"
             htmlFor="reason"
-            hint="Bijvoorbeeld het ticketnummer en de vraag. Dit leest u zelf terug in het overzicht hieronder."
             error={state.fieldErrors?.['reason']?.[0]}
             required
           >
             <Input
               name="reason"
               maxLength={200}
-              placeholder="Ticket 1234 — ritten van 3 maart"
+              placeholder="Ticket 1234, ritten van 3 maart"
             />
           </Field>
 

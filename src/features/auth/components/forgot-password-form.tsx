@@ -35,7 +35,6 @@ export function ForgotPasswordForm() {
             label="E-mailadres"
             htmlFor="email"
             error={state.fieldErrors?.['email']?.[0]}
-            hint="We sturen een link waarmee je een nieuw wachtwoord kunt instellen."
             required
           >
             <Input name="email" type="email" autoComplete="email" autoFocus />

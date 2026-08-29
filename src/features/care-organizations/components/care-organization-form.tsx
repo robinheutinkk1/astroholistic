@@ -90,7 +90,6 @@ export function CareOrganizationForm({
         <Field
           label="Eigen referentie"
           htmlFor="externalReference"
-          hint="Contractnummer of debiteurnummer, zoals jij het kent."
           error={state.fieldErrors?.['externalReference']?.[0]}
         >
           <Input

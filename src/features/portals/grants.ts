@@ -260,7 +260,7 @@ export async function listCareOrgPortalUsers(
       id: row.id,
       userId: row.user_id,
       fullName: profile?.full_name ?? null,
-      email: profile?.email ?? '—',
+      email: profile?.email ?? '-',
       status: row.status,
     };
   });

@@ -91,12 +91,7 @@ export function TemplateForm({
         />
       </Field>
 
-      <Field
-        label="Omschrijving"
-        htmlFor="name"
-        hint="Bijvoorbeeld: heenrit dagbesteding."
-        error={state.fieldErrors?.['name']?.[0]}
-      >
+      <Field label="Omschrijving" htmlFor="name" error={state.fieldErrors?.['name']?.[0]}>
         <Input name="name" defaultValue={template?.name ?? ''} />
       </Field>
 
@@ -133,7 +128,6 @@ export function TemplateForm({
         <Field
           label="Vertrektijd"
           htmlFor="departureTime"
-          hint="Lokale tijd; blijft kloppen na de zomertijdwissel."
           error={state.fieldErrors?.['departureTime']?.[0]}
           required
         >
@@ -194,7 +188,6 @@ export function TemplateForm({
         <Field
           label="Tot en met"
           htmlFor="endsOn"
-          hint="Leeg laten als er geen einddatum is."
           error={state.fieldErrors?.['endsOn']?.[0]}
         >
           <Input name="endsOn" type="date" defaultValue={template?.ends_on ?? ''} />

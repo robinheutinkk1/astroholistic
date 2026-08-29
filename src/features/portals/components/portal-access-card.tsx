@@ -66,10 +66,6 @@ export function PortalAccessCard({
           <Badge variant="success">Heeft toegang</Badge>
           <span className="text-[var(--tp-muted-foreground)]">{currentEmail}</span>
         </div>
-        <p className="text-sm text-[var(--tp-muted-foreground)]">
-          Deze persoon ziet in het portaal alleen de eigen ritten — nooit die van anderen,
-          en nooit de planning van de organisatie.
-        </p>
         {canManage ? (
           <form action={revokeAction}>
             <input type="hidden" name="kind" value={kind} />
@@ -99,7 +95,6 @@ export function PortalAccessCard({
         label="E-mailadres"
         htmlFor={`portal-email-${subjectId}`}
         required
-        hint="Er gaat een mail naar dit adres met een link om zelf een wachtwoord te kiezen. Jij ziet dat wachtwoord nooit."
         error={grantState.fieldErrors?.['email']?.[0]}
       >
         <Input name="email" type="email" autoComplete="off" required />

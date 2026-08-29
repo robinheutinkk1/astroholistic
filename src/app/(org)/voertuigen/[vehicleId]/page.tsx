@@ -1,12 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DeleteDialog } from '@/components/ui/delete-dialog';
 import { VehicleForm } from '@/features/vehicles/components/vehicle-form';
 import { getActiveMembership } from '@/features/organizations/active-organization';
@@ -49,9 +43,6 @@ export default async function VehicleDetailPage({
       <Card>
         <CardHeader>
           <CardTitle>Gegevens</CardTitle>
-          {!canManage ? (
-            <CardDescription>Je hebt geen rechten om dit te wijzigen.</CardDescription>
-          ) : null}
         </CardHeader>
         <CardContent>
           {canManage ? (

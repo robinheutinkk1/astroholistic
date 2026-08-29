@@ -608,6 +608,7 @@ export interface Database {
           created_at: string;
           updated_at: string;
           deleted_at: string | null;
+          care_organization_id: string | null;
         };
         Insert: {
           id?: string;
@@ -628,6 +629,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
           deleted_at?: string | null;
+          care_organization_id?: string | null;
         };
         Update: {
           id?: string;
@@ -648,8 +650,16 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
           deleted_at?: string | null;
+          care_organization_id?: string | null;
         };
         Relationships: [
+          {
+            foreignKeyName: 'locations_care_org_same_tenant';
+            columns: ['organization_id', 'care_organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'care_organizations';
+            referencedColumns: ['organization_id', 'id'];
+          },
           {
             foreignKeyName: 'locations_organization_id_fkey';
             columns: ['organization_id'];
@@ -2292,6 +2302,8 @@ export interface Database {
           p_organization_id: string;
           p_from: string;
           p_to: string;
+          p_care_organization_id?: string;
+          p_location_id?: string;
         };
         Returns: {
           reason: Database['public']['Enums']['absence_reason'] | null;
@@ -2303,6 +2315,8 @@ export interface Database {
           p_organization_id: string;
           p_from: string;
           p_to: string;
+          p_care_organization_id?: string;
+          p_location_id?: string;
         };
         Returns: {
           client_id: string | null;
@@ -2319,6 +2333,8 @@ export interface Database {
           p_organization_id: string;
           p_from: string;
           p_to: string;
+          p_care_organization_id?: string;
+          p_location_id?: string;
         };
         Returns: {
           driver_id: string | null;
@@ -2329,6 +2345,25 @@ export interface Database {
           measured: number | null;
           on_time: number | null;
           avg_delay_seconds: number | null;
+        }[];
+      };
+      report_by_location: {
+        Args: {
+          p_organization_id: string;
+          p_from: string;
+          p_to: string;
+          p_care_organization_id?: string;
+          p_location_id?: string;
+        };
+        Returns: {
+          location_id: string | null;
+          location_name: string | null;
+          care_organization_id: string | null;
+          care_organization_name: string | null;
+          total: number | null;
+          completed: number | null;
+          absent: number | null;
+          cancelled: number | null;
         }[];
       };
       report_portal_client_summary: {
@@ -2350,6 +2385,8 @@ export interface Database {
           p_organization_id: string;
           p_from: string;
           p_to: string;
+          p_care_organization_id?: string;
+          p_location_id?: string;
         };
         Returns: {
           total: number | null;
@@ -2372,6 +2409,8 @@ export interface Database {
           p_organization_id: string;
           p_from: string;
           p_to: string;
+          p_care_organization_id?: string;
+          p_location_id?: string;
         };
         Returns: {
           day: string | null;

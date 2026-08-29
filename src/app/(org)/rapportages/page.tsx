@@ -1,16 +1,10 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { getActiveMembership } from '@/features/organizations/active-organization';
 import { getOrganizationTimezone } from '@/features/organizations/settings';
-import { PeriodPicker } from '@/features/reports/components/period-picker';
+import { ScopePicker } from '@/features/reports/components/scope-picker';
 import {
   CheckinMethods,
   SummaryCards,
@@ -19,9 +13,11 @@ import {
   PerClientTable,
   PerDayTable,
   PerDriverTable,
+  PerLocationTable,
 } from '@/features/reports/components/report-tables';
 import { getReports } from '@/features/reports/service';
-import { resolvePeriod } from '@/features/reports/schema';
+import { getFilterOptions } from '@/features/reports/filters';
+import { hasFilter, resolveScope } from '@/features/reports/schema';
 import { ABSENCE_REASON_LABELS } from '@/features/rides/schema';
 import { todayInTimezone } from '@/lib/datetime/timezone';
 
@@ -30,7 +26,12 @@ export const metadata: Metadata = { title: 'Rapportages' };
 export default async function ReportsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ from?: string; to?: string }>;
+  searchParams: Promise<{
+    from?: string;
+    to?: string;
+    opdrachtgever?: string;
+    locatie?: string;
+  }>;
 }) {
   const membership = await getActiveMembership();
   if (!membership) redirect('/dashboard');
@@ -38,24 +39,47 @@ export default async function ReportsPage({
 
   const timeZone = await getOrganizationTimezone(membership.organizationId);
   const params = await searchParams;
-  const period = resolvePeriod(params, todayInTimezone(timeZone));
+  const scope = resolveScope(params, todayInTimezone(timeZone));
 
-  const reports = await getReports(membership.organizationId, period);
+  const [reports, filters] = await Promise.all([
+    getReports(membership.organizationId, scope),
+    getFilterOptions(membership.organizationId),
+  ]);
 
-  const exportHref = (kind: string) =>
-    `/api/rapportages/export?kind=${kind}&from=${period.from}&to=${period.to}`;
+  // Het filter gaat mee de export in, zodat het bestand precies bevat wat er op
+  // het scherm staat.
+  const exportHref = (kind: string) => {
+    const query = new URLSearchParams({ kind, from: scope.from, to: scope.to });
+    if (scope.careOrganizationId) query.set('opdrachtgever', scope.careOrganizationId);
+    if (scope.locationId) query.set('locatie', scope.locationId);
+    return `/api/rapportages/export?${query.toString()}`;
+  };
+
+  const scopeLabel = (() => {
+    if (!hasFilter(scope)) return null;
+    const careOrg = filters.careOrganizations.find(
+      (option) => option.id === scope.careOrganizationId,
+    );
+    const location = filters.locations.find((option) => option.id === scope.locationId);
+    return [careOrg?.name, location?.name].filter(Boolean).join(', ') || null;
+  })();
 
   return (
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-xl font-semibold tracking-tight">Rapportages</h1>
-        <p className="mt-1 max-w-prose text-sm text-[var(--tp-muted-foreground)]">
-          Cijfers over de gereden ritten. De periode staat in het adres van deze pagina,
-          dus u kunt hem delen — wie hem opent ziet zijn eigen cijfers.
-        </p>
+        {scopeLabel ? (
+          <p className="mt-1 text-sm text-[var(--tp-muted-foreground)]">
+            Gefilterd op {scopeLabel}
+          </p>
+        ) : null}
       </div>
 
-      <PeriodPicker period={period} />
+      <ScopePicker
+        scope={scope}
+        careOrganizations={filters.careOrganizations}
+        locations={filters.locations}
+      />
 
       <SummaryCards summary={reports.summary} />
 
@@ -65,10 +89,6 @@ export default async function ReportsPage({
         <Card>
           <CardHeader>
             <CardTitle>Waarom ritten niet doorgingen</CardTitle>
-            <CardDescription>
-              Voor de hele organisatie. Bewust niet per cliënt — zie de toelichting
-              onderaan.
-            </CardDescription>
           </CardHeader>
           <CardContent>
             {reports.absenceReasons.length === 0 ? (
@@ -93,60 +113,40 @@ export default async function ReportsPage({
         </Card>
       </div>
 
-      <ReportSection
-        title="Ritten per dag"
-        href={exportHref('per-dag')}
-        description="Hoeveel ritten er per dag gepland stonden en hoe ze afliepen."
-      >
+      <ReportSection title="Per locatie" href={exportHref('per-locatie')}>
+        <PerLocationTable rows={reports.perLocation} />
+      </ReportSection>
+
+      <ReportSection title="Ritten per dag" href={exportHref('per-dag')}>
         <PerDayTable rows={reports.perDay} />
       </ReportSection>
 
-      <ReportSection
-        title="Per chauffeur"
-        href={exportHref('per-chauffeur')}
-        description="Volume en punctualiteit per chauffeur. Bedoeld om te zien welke routes structureel krap staan — niet als beoordeling."
-      >
+      <ReportSection title="Per chauffeur" href={exportHref('per-chauffeur')}>
         <PerDriverTable rows={reports.perDriver} />
       </ReportSection>
 
-      <ReportSection
-        title="Per cliënt"
-        href={exportHref('per-client')}
-        description="Hoe vaak een cliënt vervoerd is en hoe vaak een rit niet doorging."
-      >
+      <ReportSection title="Per cliënt" href={exportHref('per-client')}>
         <PerClientTable rows={reports.perClient} />
       </ReportSection>
-
-      <p className="max-w-prose text-xs text-[var(--tp-muted-foreground)]">
-        Er is met opzet geen overzicht van afwezigheidsredenen per cliënt. Eén van de
-        redenen is &ldquo;ziek&rdquo;, en een telling daarvan per persoon is een
-        gezondheidsdossier — precies wat dit product niet bijhoudt. De reden per rit
-        blijft zichtbaar bij de rit zelf.
-      </p>
     </div>
   );
 }
 
 function ReportSection({
   title,
-  description,
   href,
   children,
 }: {
   title: string;
-  description: string;
   href: string;
   children: React.ReactNode;
 }) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-4">
-        <div>
-          <CardTitle>{title}</CardTitle>
-          <CardDescription>{description}</CardDescription>
-        </div>
-        {/* A plain anchor, not <Link>: this is a file download, and Next would
-            prefetch a route and record an export nobody asked for. */}
+        <CardTitle>{title}</CardTitle>
+        {/* Een gewone anchor en geen <Link>: dit is een download, en Next zou
+            een route prefetchen en een export vastleggen die niemand vroeg. */}
         <Button asChild variant="outline" size="sm">
           <a href={href} download>
             Exporteer CSV

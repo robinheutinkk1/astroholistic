@@ -1,12 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ProfileForm } from '@/features/auth/components/profile-form';
 import { getCurrentUser } from '@/features/rbac/session';
 import { createClient } from '@/lib/supabase/server';
@@ -31,9 +25,6 @@ export default async function ProfilePage() {
       <Card>
         <CardHeader>
           <CardTitle>Gegevens</CardTitle>
-          <CardDescription>
-            Deze naam zien collega&apos;s bij ritten die jij aanpast.
-          </CardDescription>
         </CardHeader>
         <CardContent>
           <ProfileForm

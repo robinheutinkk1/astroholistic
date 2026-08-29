@@ -1,12 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SignInForm } from '@/features/auth/components/sign-in-form';
 import { getCurrentUser } from '@/features/rbac/session';
 
@@ -28,7 +22,6 @@ export default async function LoginPage({
         <CardTitle as="h1" className="text-lg">
           Inloggen
         </CardTitle>
-        <CardDescription>Log in om verder te gaan naar je planning.</CardDescription>
       </CardHeader>
       <CardContent>
         <SignInForm redirectTo={next} />
