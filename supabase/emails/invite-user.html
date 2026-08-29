@@ -1,0 +1,310 @@
+<!--
+  TagPoint Taxi Dispatch - uitnodiging voor een account.
+
+  Supabase: Authentication > Emails > Invite user.
+
+  WAAROM DIT ERUITZIET ALS HTML UIT 2005. Mailprogramma's zijn geen browsers.
+  Outlook rendert met de engine van Word, Gmail knipt <style> soms weg, en
+  flexbox bestaat in geen van beide betrouwbaar. Tabellen en stijlen op het
+  element zelf zijn niet ouderwets maar het enige dat overal aankomt.
+
+  Niet aanpassen zonder te testen: {{ .ConfirmationURL }} is de eenmalige link.
+  Zonder die exacte schrijfwijze komt niemand binnen.
+-->
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <meta name="color-scheme" content="light" />
+    <meta name="supported-color-schemes" content="light" />
+    <title>Je bent uitgenodigd voor TagPoint Taxi Dispatch</title>
+    <!--[if mso]>
+      <style>
+        body,
+        table,
+        td,
+        a {
+          font-family: Arial, sans-serif !important;
+        }
+      </style>
+    <![endif]-->
+  </head>
+
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      background-color: #f1f5f9;
+      -webkit-font-smoothing: antialiased;
+    "
+  >
+    <!--
+      De regel die in de inbox naast het onderwerp staat. Zonder deze regel
+      pakt de mailclient de eerste zichtbare tekst, en dat is bij de meeste
+      mails de link zelf.
+    -->
+    <div
+      style="
+        display: none;
+        max-height: 0;
+        overflow: hidden;
+        mso-hide: all;
+        font-size: 1px;
+        line-height: 1px;
+        color: #f1f5f9;
+      "
+    >
+      Stel je wachtwoord in en je kunt aan de slag.
+      &#8199;&#8199;&#8199;&#8199;&#8199;&#8199;&#8199;&#8199;&#8199;&#8199;&#8199;&#8199;&#8199;&#8199;&#8199;&#8199;&#8199;&#8199;&#8199;&#8199;&#8199;&#8199;&#8199;&#8199;&#8199;&#8199;&#8199;&#8199;&#8199;&#8199;
+    </div>
+
+    <table
+      role="presentation"
+      cellpadding="0"
+      cellspacing="0"
+      border="0"
+      width="100%"
+      style="background-color: #f1f5f9"
+    >
+      <tr>
+        <td align="center" style="padding: 32px 16px">
+          <table
+            role="presentation"
+            cellpadding="0"
+            cellspacing="0"
+            border="0"
+            width="100%"
+            style="max-width: 560px; margin: 0 auto"
+          >
+            <!-- Afzender -->
+            <tr>
+              <td style="padding: 0 0 20px 4px">
+                <span
+                  style="
+                    font-family:
+                      -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+                    font-size: 15px;
+                    font-weight: 600;
+                    letter-spacing: -0.01em;
+                    color: #0f172a;
+                  "
+                  >TagPoint Taxi Dispatch</span
+                >
+              </td>
+            </tr>
+
+            <!-- Kaart -->
+            <tr>
+              <td
+                style="
+                  background-color: #ffffff;
+                  border: 1px solid #e2e8f0;
+                  border-radius: 12px;
+                  padding: 36px 32px;
+                "
+              >
+                <h1
+                  style="
+                    margin: 0 0 16px 0;
+                    font-family:
+                      -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+                    font-size: 22px;
+                    line-height: 30px;
+                    font-weight: 600;
+                    letter-spacing: -0.02em;
+                    color: #0f172a;
+                  "
+                >
+                  Je bent uitgenodigd
+                </h1>
+
+                <p
+                  style="
+                    margin: 0 0 12px 0;
+                    font-family:
+                      -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+                    font-size: 16px;
+                    line-height: 26px;
+                    color: #334155;
+                  "
+                >
+                  Er is een account voor je aangemaakt in TagPoint Taxi Dispatch, het
+                  systeem waarmee ritten worden gepland en geregistreerd.
+                </p>
+
+                <p
+                  style="
+                    margin: 0 0 28px 0;
+                    font-family:
+                      -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+                    font-size: 16px;
+                    line-height: 26px;
+                    color: #334155;
+                  "
+                >
+                  Kies hieronder een wachtwoord, dan kun je meteen aan de slag.
+                </p>
+
+                <!-- Knop. De VML-versie is voor Outlook, dat padding op een
+                     link negeert en er anders een kale tekstregel van maakt. -->
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td>
+                      <!--[if mso]>
+                        <v:roundrect
+                          xmlns:v="urn:schemas-microsoft-com:vml"
+                          xmlns:w="urn:schemas-microsoft-com:office:word"
+                          href="{{ .ConfirmationURL }}"
+                          style="height: 48px; v-text-anchor: middle; width: 260px"
+                          arcsize="17%"
+                          strokecolor="#0f172a"
+                          fillcolor="#0f172a"
+                        >
+                          <w:anchorlock />
+                          <center
+                            style="
+                              color: #ffffff;
+                              font-family: Arial, sans-serif;
+                              font-size: 16px;
+                              font-weight: bold;
+                            "
+                          >
+                            Wachtwoord instellen
+                          </center>
+                        </v:roundrect>
+                      <![endif]-->
+                      <!--[if !mso]><!-- -->
+                      <a
+                        href="{{ .ConfirmationURL }}"
+                        style="
+                          display: inline-block;
+                          background-color: #0f172a;
+                          color: #ffffff;
+                          font-family:
+                            -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial,
+                            sans-serif;
+                          font-size: 16px;
+                          font-weight: 600;
+                          line-height: 20px;
+                          text-decoration: none;
+                          padding: 14px 28px;
+                          border-radius: 8px;
+                        "
+                        >Wachtwoord instellen</a
+                      >
+                      <!--<![endif]-->
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- De link ook uitgeschreven. Bedrijfsmail knipt knoppen weg,
+                     en dan is dit het enige dat overblijft. -->
+                <p
+                  style="
+                    margin: 28px 0 0 0;
+                    font-family:
+                      -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+                    font-size: 13px;
+                    line-height: 20px;
+                    color: #64748b;
+                  "
+                >
+                  Werkt de knop niet? Kopieer deze link naar je browser:
+                </p>
+                <p style="margin: 6px 0 0 0; word-break: break-all">
+                  <a
+                    href="{{ .ConfirmationURL }}"
+                    style="
+                      font-family:
+                        'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+                      font-size: 12px;
+                      line-height: 18px;
+                      color: #475569;
+                      text-decoration: underline;
+                    "
+                    >{{ .ConfirmationURL }}</a
+                  >
+                </p>
+
+                <!-- Scheidingslijn als tabelrij: een <hr> valt in Outlook uit
+                     elkaar. -->
+                <table
+                  role="presentation"
+                  cellpadding="0"
+                  cellspacing="0"
+                  border="0"
+                  width="100%"
+                  style="margin: 28px 0 0 0"
+                >
+                  <tr>
+                    <td
+                      style="
+                        border-top: 1px solid #e2e8f0;
+                        font-size: 0;
+                        line-height: 0;
+                        height: 1px;
+                      "
+                    >
+                      &nbsp;
+                    </td>
+                  </tr>
+                </table>
+
+                <p
+                  style="
+                    margin: 20px 0 0 0;
+                    font-family:
+                      -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+                    font-size: 13px;
+                    line-height: 21px;
+                    color: #64748b;
+                  "
+                >
+                  Deze link is 24 uur geldig en werkt één keer. Is hij verlopen, vraag dan
+                  degene die je heeft uitgenodigd om een nieuwe.
+                </p>
+
+                <p
+                  style="
+                    margin: 10px 0 0 0;
+                    font-family:
+                      -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+                    font-size: 13px;
+                    line-height: 21px;
+                    color: #64748b;
+                  "
+                >
+                  Verwacht je deze uitnodiging niet? Dan hoef je niets te doen. Zonder
+                  wachtwoord wordt het account niet actief.
+                </p>
+              </td>
+            </tr>
+
+            <!-- Voettekst -->
+            <tr>
+              <td style="padding: 20px 4px 0 4px">
+                <p
+                  style="
+                    margin: 0;
+                    font-family:
+                      -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+                    font-size: 12px;
+                    line-height: 19px;
+                    color: #94a3b8;
+                  "
+                >
+                  Deze mail is verstuurd naar {{ .Email }} omdat er een account is
+                  aangemaakt in TagPoint Taxi Dispatch. Antwoorden op dit bericht kan
+                  niet.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

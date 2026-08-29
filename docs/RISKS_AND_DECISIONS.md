@@ -945,6 +945,31 @@ meteen weer uit vliegen.
 *De gebruiker krijgt te horen waarom.* Automatisch uitloggen zonder uitleg ziet
 eruit als een storing, en dat is precies het moment waarop mensen gaan bellen.
 
+### D-48 — De uitnodigingsmail draagt de naam van TagPoint, niet die van de klant
+
+*Situatie:* de applicatie is white-label. Elke vervoerder heeft een eigen logo,
+eigen kleuren en straks een eigen domein. De mails die Supabase verstuurt gaan
+daar niet in mee: er is één sjabloon voor het hele project, en op het moment van
+versturen weet Supabase niet bij welke organisatie de ontvanger hoort.
+
+*Gevolg:* een chauffeur van Taxi Ontzorgd krijgt een uitnodiging op naam van
+TagPoint. Te verdedigen zolang TagPoint zichtbaar de leverancier is, maar het
+wringt zodra een klant zijn eigen merk wil voeren, en dat is precies wat je
+verkoopt bij een white-label product.
+
+*Besluit voor nu:* accepteren, en de sjablonen zo schrijven dat ze
+vertrouwenwekkend zijn zonder klantlogo. Ze staan in `supabase/emails/`.
+
+*Wat het echt oplossen kost:* de applicatie moet de uitnodiging zelf versturen
+via een eigen mailkoppeling, met de branding van de organisatie erbij, in plaats
+van dat aan Supabase over te laten. Dat betekent `inviteUserByEmail` vervangen
+door een aangemaakt account plus een zelf gegenereerde link, en een mailer in het
+product. Een op zichzelf staande klus, geen bijvangst.
+
+*Wanneer dit gaat knellen:* bij de eerste klant die vraagt of de mail van hém kan
+komen. Dat is een verkoopgesprek, geen bug, dus het hoort hier vastgelegd te
+staan en niet in een issue dat niemand terugvindt.
+
 ## Openstaande vragen aan jou
 
 1. ~~Bestaat er al een Supabase-project?~~ **Beantwoord: nee.** Zie hierboven.

@@ -183,10 +183,13 @@ onder **Authentication → Emails → SMTP Settings**.
 
 Pas daarna de sjablonen aan. Ze staan standaard in het Engels en met de naam van
 het project erin; de ontvanger is een chauffeur of een ouder die van niets weet.
-Minimaal **Invite user** en **Reset password** in het Nederlands, met de naam van
-het platform.
 
-Laat `{{ .ConfirmationURL }}` staan zoals hij is — dat is de eenmalige link.
+De vervangers staan klaar in **`supabase/emails/`**: `invite-user.html` en
+`reset-password.html`, met een installatiehandleiding in dezelfde map. Kopieer
+en plak ze over de standaardinhoud heen.
+
+Laat `{{ .ConfirmationURL }}` staan zoals hij is: dat is de eenmalige link, en
+zonder die exacte schrijfwijze komt niemand binnen.
 
 ### 4d. Attack Protection
 
