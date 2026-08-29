@@ -135,22 +135,87 @@ zelf controleert in **Storage → Configuration**:
 
 ## 4. Auth
 
-**Authentication → URL Configuration:**
+Het Authentication-menu van Supabase is lang. Hieronder staat per onderdeel wat
+deze applicatie ervan nodig heeft, en waarom. Alles wat er niet in staat, laat
+je met rust.
 
-- Site URL: `https://app.tagpoint.nl`
-- Redirect URLs: `https://app.tagpoint.nl/auth/callback` én — voor elk
+### 4a. URL Configuration — de belangrijkste
+
+- **Site URL:** `https://taxi.tagpoint.nl` (het eigen domein, niet dat van de
+  hostingpartij).
+- **Redirect URLs:** `https://taxi.tagpoint.nl/auth/callback` én — voor elk
   klantdomein — `https://<klantdomein>/auth/callback`.
 
-> Dit is de stap die na een nieuw klantdomein vergeten wordt. Zonder de
-> redirect-URL werkt inloggen op dat domein wel, maar komt de gebruiker na het
-> herstellen van een wachtwoord op een foutpagina. Zet hem erbij op het moment
-> dat je het domein aanzet, niet later.
+De applicatie stuurt uitnodigingen en wachtwoordherstel naar
+`/auth/callback?next=…` (zie `src/features/auth/invite.ts` en
+`src/features/auth/service.ts`). Staat die URL hier niet in de lijst, dan
+weigert Supabase de doorverwijzing en komt de gebruiker op een foutpagina — het
+account is dan wel aangemaakt, maar niemand kan erin.
 
-**Authentication → Providers:** alleen e-mail en wachtwoord. Geen magic links
-(§3) en geen social login.
+> Dit is de stap die na een nieuw klantdomein wordt vergeten. Zonder de
+> redirect-URL werkt inloggen op dat domein wel, maar strandt het herstellen van
+> een wachtwoord. Zet hem erbij op het moment dat je het domein aanzet.
 
-**Authentication → Rate limits:** laat de standaardlimieten staan. Die van ons
-(`consume_rate_limit`) komen daar bovenop, ze vervangen hem niet.
+### 4b. Sign In / Providers — registratie uitzetten
+
+- **Email** aan. Verder niets: geen social login, geen magic links (§3).
+- **Allow new users to sign up: UIT.**
+- Minimale wachtwoordlengte: **12**, gelijk aan `src/features/auth/schema.ts`.
+
+Registratie uitzetten is geen nettigheid maar een beveiligingsmaatregel. De
+applicatie heeft geen registratiepagina en roept nergens `signUp` aan: mensen
+komen binnen via een uitnodiging. Maar de anon key staat in elke browser, en
+zolang registratie aanstaat kan iedereen daarmee rechtstreeks bij de Supabase-API
+een account aanmaken. Zo iemand ziet niets — hij heeft geen lidmaatschap, dus RLS
+geeft hem nul rijen — maar hij vult wel `auth.users` en `profiles`, en dat is een
+open deur voor rommel die je daarna met de hand moet opruimen.
+
+De wachtwoordlengte op 12 zetten voorkomt het omgekeerde probleem: staat Supabase
+hoger dan onze eigen regel, dan keurt ons formulier een wachtwoord goed dat
+Supabase daarna weigert, met een foutmelding die de gebruiker niet kan plaatsen.
+
+### 4c. Emails — vóór de eerste echte klant
+
+De ingebouwde mail van Supabase is bedoeld om te testen en is hard begrensd
+(enkele mails per uur). Bij de derde uitnodiging komt er niets meer aan, zonder
+zichtbare fout. Stel een eigen SMTP-provider in (Resend, Postmark, SendGrid)
+onder **Authentication → Emails → SMTP Settings**.
+
+Pas daarna de sjablonen aan. Ze staan standaard in het Engels en met de naam van
+het project erin; de ontvanger is een chauffeur of een ouder die van niets weet.
+Minimaal **Invite user** en **Reset password** in het Nederlands, met de naam van
+het platform.
+
+Laat `{{ .ConfirmationURL }}` staan zoals hij is — dat is de eenmalige link.
+
+### 4d. Attack Protection
+
+- **Leaked password protection:** aan. Controleert tegen bekende gelekte
+  wachtwoorden.
+- **Captcha:** optioneel. Onze eigen limiet (`consume_rate_limit`, migratie
+  0023) dekt het bruteforcen van inloggen en wachtwoordherstel al.
+
+### 4e. Rate Limits
+
+Laat de standaarden staan. Die van ons komen erbovenop, ze vervangen hem niet.
+Verhoog hooguit het aantal e-mails per uur nadat eigen SMTP werkt.
+
+### 4f. Sessions
+
+De standaard voldoet. Zet een **Time-box user sessions** alleen als een klant
+daarom vraagt; het betekent dat een planner midden op de dag opnieuw moet
+inloggen.
+
+`getUser()` valideert het token bij elke aanvraag opnieuw bij Supabase (zie
+`src/proxy.ts`), dus een ingetrokken sessie werkt meteen niet meer — daar is geen
+korte sessieduur voor nodig.
+
+### 4g. Wat je met rust laat
+
+**OAuth Apps**, **OAuth Server**, **Passkeys**, **Auth Hooks**, **Multi-Factor**
+en **Audit Logs** hebben we niet nodig. Multi-Factor is de enige die later
+interessant wordt, als een klant erom vraagt; de rest is voor heel andere
+soorten applicaties.
 
 ## 5. Secrets genereren
 
