@@ -136,6 +136,30 @@ if (production) {
     fail('NEXT_PUBLIC_PLATFORM_HOST points at localhost in production');
   }
 
+  /*
+   * A warning rather than a failure, because a first deploy on the hosting
+   * provider's own domain is a legitimate step. It is loud because of what it
+   * costs later: NEXT_PUBLIC_APP_URL ends up inside the link written to a
+   * physical NFC tag. Change the domain afterwards and every tag already
+   * written keeps pointing at the old host, with no way to rewrite them — the
+   * token cannot be read back, only a hash of it is stored.
+   */
+  const appHost = (() => {
+    try {
+      return new URL(env.NEXT_PUBLIC_APP_URL ?? '').hostname;
+    } catch {
+      return '';
+    }
+  })();
+
+  if (appHost.endsWith('.vercel.app') || appHost.endsWith('.netlify.app')) {
+    warn(
+      `NEXT_PUBLIC_APP_URL is still the hosting provider's own domain (${appHost}). ` +
+        'Set it to your own domain BEFORE writing any physical NFC tag: the ' +
+        'hostname is baked into the tag and cannot be changed afterwards.',
+    );
+  }
+
   // Not fatal: a tenant domain can be attached without this, it just has to be
   // done by hand at the hosting provider (see docs/DEPLOYMENT.md).
   const hostingProject = env.HOSTING_PROJECT_ID || env.VERCEL_PROJECT_ID;
