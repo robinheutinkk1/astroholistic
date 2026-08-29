@@ -145,8 +145,9 @@ gemigreerd is — zeg het als je liever (b) wilt.
 
 ### D-01 — Repositorynaam
 
-De repo heet `astroholistic`, het product `TagPoint Taxi Dispatch`. Er staat
-geen `astroholistic`-code in. Advies: hernoemen vóór er externe developers of
+De repo heette `astroholistic`, het product `TagPoint Taxi Dispatch`. Er stond
+geen `astroholistic`-code in. **Opgelost: hernoemd naar `tagpoint-taxi-dispatch`.**
+Het advies was hernoemen vóór er externe developers of
 klanten meekijken. Puur cosmetisch, blokkeert niets.
 
 ### D-04 — Geen organisatie-claim in het JWT
@@ -356,7 +357,7 @@ valstrik dat `app.nottagpoint.nl` niet als platformhost mag tellen.
 
 | Onderdeel                | Status                                                                                     | Wanneer nodig                     |
 | ------------------------ | ------------------------------------------------------------------------------------------ | --------------------------------- |
-| GitHub-repository        | **Bestaat**: `robinheutinkk1/astroholistic`, branch `claude/tagpoint-taxi-dispatch-d69dpb` | Nu in gebruik                     |
+| GitHub-repository        | **Bestaat**: `robinheutinkk1/tagpoint-taxi-dispatch`, branch `claude/tagpoint-taxi-dispatch-d69dpb` | Nu in gebruik                     |
 | Supabase-project (cloud) | Bestaat niet                                                                               | Pas aan het eind van Fase 2       |
 | Vercel-project           | Bestaat niet                                                                               | Fase 14 (of eerder voor previews) |
 | Domein `tagpoint.nl`     | Onbekend                                                                                   | Fase 10                           |
@@ -905,6 +906,44 @@ een gevolg, en het tweede is de enige inhoud die er op dat moment is.
 
 *Wat dit niet raakt:* het commentaar in de code. Dat is voor de volgende
 ontwikkelaar en komt nooit op een scherm.
+
+### D-47 — De chauffeur blijft ingelogd, de rest niet
+
+*Situatie:* één sessieduur voor iedereen past niet. Een planner werkt op een
+computer die op kantoor blijft staan, vaak gedeeld, en die 's avonds aan blijft.
+Een chauffeur heeft de app als PWA op zijn eigen telefoon, met een
+schermvergrendeling ervoor, en moet om zes uur 's ochtends met handschoenen aan
+kunnen inchecken.
+
+*Besluit:* een inactiviteitsklok van vier uur op alle schermen behalve de
+chauffeursapp. Vier uur haalt een werkende planner nooit, en een nacht standby
+altijd.
+
+*Waarom niet in Supabase instellen:* de sessieduur daar geldt voor het hele
+project en kent geen onderscheid per rol. De klok zit daarom in de proxy, waar
+elke aanvraag toch al langskomt.
+
+*Waarom op pad en niet op rol:* de proxy draait bij elke aanvraag en het
+opzoeken van een rol zou daar een databasevraag per klik kosten. Het gevolg is
+te overzien: wie op een chauffeurspagina blijft staan houdt zijn sessie in
+leven, maar zodra hij een plannerscherm opent geldt de klok weer, en dáár staat
+de planning.
+
+*Wat dit wel en niet is:* een slot op een onbeheerd scherm, geen
+autorisatiegrens. Wie de sessiecookie in handen heeft, heeft de sessie; daar
+verandert een tijdstempel niets aan. De echte grens blijft RLS en de
+permissiecontrole.
+
+*Er wordt echt uitgelogd,* niet alleen doorgestuurd: anders blijft de sessie bij
+Supabase geldig en is één stap terug genoeg om er weer in te zitten.
+
+*Een ontbrekende tijdstempel betekent "nu net begonnen" en niet "verlopen".*
+Zonder die regel zou het invoeren van deze functie iedereen in één klap
+uitloggen, en zou een chauffeur die voor het eerst een plannerpagina opent er
+meteen weer uit vliegen.
+
+*De gebruiker krijgt te horen waarom.* Automatisch uitloggen zonder uitleg ziet
+eruit als een storing, en dat is precies het moment waarop mensen gaan bellen.
 
 ## Openstaande vragen aan jou
 

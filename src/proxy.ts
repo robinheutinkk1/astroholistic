@@ -2,6 +2,13 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { publicEnv } from '@/lib/env';
 import { buildCsp, generateNonce } from '@/lib/security/csp';
+import {
+  IDLE_LIMIT_SECONDS,
+  LAST_SEEN_COOKIE,
+  isExemptFromTimeout,
+  isIdleExpired,
+  stamp,
+} from '@/lib/security/session-timeout';
 
 /**
  * Proxy (formerly "middleware") refreshes the Supabase session cookie and
@@ -83,12 +90,49 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user && !isPublicPath(request.nextUrl.pathname)) {
+  const pathname = request.nextUrl.pathname;
+
+  if (!user && !isPublicPath(pathname)) {
     const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('next', request.nextUrl.pathname);
+    loginUrl.searchParams.set('next', pathname);
     const redirect = NextResponse.redirect(loginUrl);
     redirect.headers.set('content-security-policy', csp);
     return redirect;
+  }
+
+  /*
+   * De inactiviteitsklok. Loopt niet in de chauffeursapp: die staat als PWA op
+   * een eigen telefoon met een schermvergrendeling ervoor, en een chauffeur die
+   * om zes uur 's ochtends met handschoenen aan opnieuw moet inloggen registreert
+   * uiteindelijk niets meer. Zie src/lib/security/session-timeout.ts.
+   */
+  if (user && !isPublicPath(pathname) && !isExemptFromTimeout(pathname)) {
+    const nowSeconds = Date.now() / 1000;
+    const lastSeen = request.cookies.get(LAST_SEEN_COOKIE)?.value;
+
+    if (isIdleExpired(lastSeen, nowSeconds)) {
+      // Echt uitloggen en niet alleen doorsturen: anders blijft de sessie bij
+      // Supabase gewoon geldig en is één stap terug genoeg om er weer in te
+      // zitten.
+      await supabase.auth.signOut();
+
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('reden', 'verlopen');
+      const redirect = NextResponse.redirect(loginUrl);
+      redirect.headers.set('content-security-policy', csp);
+      redirect.cookies.delete(LAST_SEEN_COOKIE);
+      return redirect;
+    }
+
+    response.cookies.set(LAST_SEEN_COOKIE, stamp(nowSeconds), {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      // Iets langer dan de limiet, zodat het verschil tussen "verlopen" en
+      // "cookie weg" niet van de browser afhangt.
+      maxAge: IDLE_LIMIT_SECONDS * 2,
+    });
   }
 
   return response;

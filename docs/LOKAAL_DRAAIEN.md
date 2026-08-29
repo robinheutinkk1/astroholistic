@@ -31,8 +31,8 @@ git --version
 ## Stap 2 — Haal de code op
 
 ```bash
-git clone https://github.com/robinheutinkk1/astroholistic.git
-cd astroholistic
+git clone https://github.com/robinheutinkk1/tagpoint-taxi-dispatch.git
+cd tagpoint-taxi-dispatch
 git checkout claude/tagpoint-taxi-dispatch-d69dpb
 ```
 

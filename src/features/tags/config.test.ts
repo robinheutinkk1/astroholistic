@@ -33,7 +33,7 @@ describe('isTagFeatureConfigured', () => {
 
 describe('tijdelijk adres van de hostingpartij', () => {
   it('herkent het standaardadres van de hostingpartij', () => {
-    expect(isTemporaryHost('https://astroholistic.vercel.app')).toBe(true);
+    expect(isTemporaryHost('https://tagpoint-taxi-dispatch.vercel.app')).toBe(true);
     expect(isTemporaryHost('https://mijn-app.netlify.app')).toBe(true);
   });
 

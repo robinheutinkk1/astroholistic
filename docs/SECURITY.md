@@ -62,6 +62,7 @@ Beschermwaardig, in volgorde van ernst bij verlies:
 | T35 | De code van een NFC-tag komt in een URL terecht, en daarmee in de geschiedenis van de browser en in de logboeken van elke tussenliggende server | De QR wordt in de browser getekend uit de code die daar al in het geheugen staat; er is geen route die een tagcode in een pad zet (D-40) |
 | T36 | Een locatie wijst naar de opdrachtgever van een andere vervoerder, waarmee diens cijfers in de rapportage van deze vervoerder belanden | Samengestelde foreign key op `(organization_id, care_organization_id)`; de combinatie bestaat simpelweg niet (S89) |
 | T37 | Een rapportagefilter dat wordt genegeerd, waardoor de ene opdrachtgever de cijfers van de andere op zijn factuur ziet | Het filter zit in de SQL-functie, niet in de query van het scherm; S90-S93 falen zodra het niets doet, en S96 vangt een achtergebleven ongefilterde variant |
+| T38 | Een onbeheerde computer in de centrale blijft ingelogd, zodat de volgende die erachter gaat zitten in de planning van zijn collega werkt | Inactiviteitsklok van vier uur op alle schermen behalve de chauffeursapp; er wordt écht uitgelogd bij Supabase, niet alleen doorgestuurd (D-47) |
 
 ## 3. Authenticatie
 

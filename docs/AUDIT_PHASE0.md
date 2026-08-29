@@ -1,7 +1,7 @@
 # Fase 0 — Repository audit
 
 **Datum:** 2026-08-27
-**Repository:** `robinheutinkk1/astroholistic`
+**Repository:** `robinheutinkk1/tagpoint-taxi-dispatch` (heette bij de start `astroholistic`)
 **Branch:** `claude/tagpoint-taxi-dispatch-d69dpb`
 
 ---
@@ -41,9 +41,9 @@ architectuur schoon neerzetten zonder legacy-compromissen.
 
 ## 3. Punt van aandacht: repositorynaam
 
-De repository heet `astroholistic`. Het product heet **TagPoint Taxi Dispatch**.
+De repository heette `astroholistic`. Het product heet **TagPoint Taxi Dispatch**.
 Er is geen inhoudelijke relatie tussen die twee namen en er staat geen
-`astroholistic`-code in de repo.
+`astroholistic`-code in de repo. **Inmiddels hernoemd naar `tagpoint-taxi-dispatch`.**
 
 **Advies:** hernoem de repository naar bijvoorbeeld `tagpoint-taxi-dispatch`
 vóór de eerste externe developer of klant meekijkt. Dit is puur cosmetisch en

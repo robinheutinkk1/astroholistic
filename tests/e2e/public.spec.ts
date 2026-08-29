@@ -230,3 +230,42 @@ test.describe('routing for a signed-out visitor', () => {
     expect(response.headers()['content-type']).toContain('application/json');
   });
 });
+
+test.describe('automatisch uitloggen na inactiviteit', () => {
+  /*
+   * Alleen wat zonder ingelogde sessie te bewijzen valt: dat de melding
+   * verschijnt en dat de chauffeursapp buiten de regel valt. Of de klok echt
+   * afloopt zit in de unittest op session-timeout.ts; hier gaat het erom dat de
+   * gebruiker te zien krijgt wat er is gebeurd in plaats van een loginscherm
+   * dat op een storing lijkt.
+   */
+  test('de loginpagina legt uit waarom je bent uitgelogd', async ({ page }) => {
+    await page.goto('/login?reden=verlopen');
+
+    await expect(page.getByRole('status')).toContainText('automatisch uitgelogd');
+  });
+
+  test('zonder die reden staat er geen melding', async ({ page }) => {
+    await page.goto('/login');
+
+    await expect(page.getByRole('status')).toHaveCount(0);
+  });
+
+  test('een onbekende reden verzint geen melding', async ({ page }) => {
+    // De query string is door de gebruiker te bewerken. Een willekeurige waarde
+    // mag geen tekst op het scherm zetten.
+    await page.goto('/login?reden=<script>alert(1)</script>');
+
+    await expect(page.getByRole('status')).toHaveCount(0);
+  });
+
+  test('de chauffeursapp stuurt door naar login met zijn eigen bestemming', async ({
+    page,
+  }) => {
+    // De vrijstelling gaat over de inactiviteitsklok, niet over inloggen zelf:
+    // zonder sessie komt ook een chauffeur op het loginscherm.
+    await page.goto('/driver');
+
+    await expect(page).toHaveURL(/\/login\?next=%2Fdriver/);
+  });
+});
