@@ -9,6 +9,21 @@ die "waarschijnlijk goed ging" is geen deploy.
 > instructies hieronder gaan daarover. Wat er verandert bij Cloudflare for SaaS
 > staat in besluit D-23 en in §9 hieronder.
 
+## Controleren of een migratie is aangekomen
+
+`supabase/production/verify-migrations.sql` in de SQL Editor plakken en draaien.
+Zeven regels, alles moet `OK` zijn. Staat er `MIST`, dan is die migratie niet
+aangekomen en mag het migratiebestand gewoon opnieuw worden gedraaid — de
+migraties zijn herhaalbaar.
+
+De controle zoekt naar de vergelijking `organization_id = c.organization_id` en
+niet naar een tabelnaam. Dat is met opzet: de eerste versie van deze query
+zocht op het woord `contacts`, en dat staat óók in de oude, lekke policy (in
+`contact_id` en in `'contacts.manage'`). Die versie meldde dus `OK` terwijl het
+gat gewoon openstond. De query is daarna getoetst door de oude policies terug te
+zetten en te controleren dat er wél `MIST` uit komt.
+
+
 ## 0. Wat je nodig hebt
 
 | Nodig                | Waarvoor                                  |
