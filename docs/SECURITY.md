@@ -1,4 +1,4 @@
-# TagPoint Taxi Dispatch — Security
+# Tagpoint Taxi Dispatch — Security
 
 > Status: **ontwerp (Fase 0/1)**.
 > Dit document beschrijft het beveiligingsmodel. Afwijken mag alleen door dit
@@ -306,7 +306,7 @@ blijven.
 ## 9. GDPR en privacy
 
 **Grondslag en rollen.** De vervoersorganisatie is verwerkingsverantwoordelijke,
-TagPoint is verwerker. Het platform moet daarom per organisatie kunnen
+Tagpoint is verwerker. Het platform moet daarom per organisatie kunnen
 exporteren, wissen en aantonen wie wat wanneer zag.
 
 **Data-minimalisatie — wat we bewust NIET opslaan:**

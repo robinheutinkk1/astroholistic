@@ -1,4 +1,4 @@
-# TagPoint Taxi Dispatch — Rollen en permissies
+# Tagpoint Taxi Dispatch — Rollen en permissies
 
 > Status: **ontwerp (Fase 0/1)**.
 

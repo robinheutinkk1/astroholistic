@@ -1,4 +1,4 @@
-# TagPoint Taxi Dispatch — Architectuur
+# Tagpoint Taxi Dispatch — Architectuur
 
 > Status: **voorstel (Fase 0/1)** — nog niet geïmplementeerd.
 > Wijzigingen aan dit document horen bij de PR die het gedrag verandert.
@@ -7,7 +7,7 @@
 
 ## 1. Wat we bouwen
 
-TagPoint Taxi Dispatch is een **multi-tenant SaaS-platform** voor
+Tagpoint Taxi Dispatch is een **multi-tenant SaaS-platform** voor
 vervoersbedrijven: cliëntenbeheer, terugkerende ritplanning, dispatching,
 een chauffeurs-PWA met NFC/QR check-in, en portalen voor cliënten,
 contactpersonen en opdrachtgevers.

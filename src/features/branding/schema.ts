@@ -40,7 +40,7 @@ export const brandingFormSchema = z.object({
       message: 'Vul een geldig e-mailadres in.',
     }),
   supportPhone: optionalText(30, 'Dat telefoonnummer is te lang.'),
-  // Whether "Powered by TagPoint" is shown. In a finished SaaS this belongs in
+  // Whether "Powered by Tagpoint" is shown. In a finished SaaS this belongs in
   // plans.limits as a paid entitlement (§36); today every organisation may set
   // it, and the plan gate is a deliberate later addition rather than an
   // oversight (docs/RISKS_AND_DECISIONS.md D-20).

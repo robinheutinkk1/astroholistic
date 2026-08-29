@@ -103,7 +103,7 @@ begin
   -- The first version looked up the tag, then checked the driver, and answered
   -- UNKNOWN_TAG for a token that does not exist but NO_ACCESS for a real token
   -- belonging to another organisation. That difference is an oracle: anyone
-  -- with any driver account could tell a genuine TagPoint tag from a random
+  -- with any driver account could tell a genuine Tagpoint tag from a random
   -- string, and confirm which organisation it did not belong to.
   --
   -- So: establish who the caller is first, and treat "not a tag" and "not YOUR

@@ -39,7 +39,7 @@ export function ScanPanel() {
       reader.addEventListener('reading', (event) => {
         const token = extractToken((event as NdefReadingEvent).message);
         if (token) router.push(`/t/${token}` as never);
-        else setError('Deze tag bevat geen geldige TagPoint-code.');
+        else setError('Deze tag bevat geen geldige Tagpoint-code.');
       });
     } catch {
       // Permission refused, or NFC switched off in the OS. Not an error the

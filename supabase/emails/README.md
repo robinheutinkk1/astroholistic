@@ -5,7 +5,7 @@ alles wat deze applicatie gebruikt: een uitnodiging en een wachtwoordherstel.
 
 | Bestand                 | Supabase                                  | Onderwerp                                   |
 | ----------------------- | ----------------------------------------- | ------------------------------------------- |
-| `invite-user.html`      | Authentication → Emails → **Invite user**    | `Je bent uitgenodigd voor TagPoint`         |
+| `invite-user.html`      | Authentication → Emails → **Invite user**    | `Je bent uitgenodigd voor Tagpoint`         |
 | `reset-password.html`   | Authentication → Emails → **Reset password** | `Nieuw wachtwoord instellen`                |
 
 ## Installeren
@@ -16,38 +16,42 @@ alles wat deze applicatie gebruikt: een uitnodiging en een wachtwoordherstel.
 4. Zet het onderwerp uit de tabel hierboven in het veld **Subject**.
 5. Nodig jezelf uit op een tweede adres en kijk hoe hij aankomt.
 
-## Het logo moet er eerst zijn
+## Het logo: beeldmerk als plaatje, woordmerk als tekst
 
-De mails verwijzen naar `https://taxi.tagpoint.nl/email-logo.png`. Dat bestand
-hoort in `public/email-logo.png` in dit project; alles in `public/` is zonder
-inloggen bereikbaar, en dat is precies wat een mailprogramma nodig heeft.
+Boven in de mail staat het beeldmerk (`public/email-mark.png`, de drie staven)
+met het woord Tagpoint ernaast als gewone tekst.
 
-**Zolang dat bestand er niet staat, ziet de ontvanger een kapot plaatje.** Dat is
-slechter dan de tekstregel die er eerst stond, dus dit is geen detail voor later.
+Dat is geen halve oplossing maar de betere voor e-mail:
 
-Eisen aan het bestand:
+- **Outlook blokkeert plaatjes standaard.** Staat de naam als tekst, dan is hij
+  er nog steeds. Was het één plaatje geweest, dan zag de ontvanger een leeg vak.
+- **Tekst blijft scherp** op elk scherm, ongeacht de pixeldichtheid.
+- **Voorlezen werkt.**
 
-- **PNG met transparante achtergrond.** De mail heeft een lichte achtergrond;
-  een JPG krijgt daar een grijs blokje omheen.
-- **264 bij 64 pixels**, dus twee keer de weergavemaat van 132x32. Schermen zijn
-  tegenwoordig scherper dan de maat die in de HTML staat, en een logo op ware
-  grootte oogt daarop wazig.
-- **Donkere inkt.** De mail is licht van achtergrond en er is geen donkere versie:
-  een wit logo wordt onzichtbaar.
+Het beeldmerk wordt getekend door `scripts/make-email-mark.mjs`: drie
+rechthoeken met ronde hoeken, oplopend in hoogte, in de kleuren van het merk.
+Kloppen de kleuren niet precies, pas ze daar aan en draai het script opnieuw.
 
-Wijkt jouw logo af van 132x32 in verhouding, pas dan `width` en `height` in
-allebei de sjablonen aan. Laat ze niet weg: zonder die attributen springt de
-opmaak in Outlook uit elkaar terwijl het plaatje nog laadt.
+Het woordmerk is bewust géén plaatje. De letter uit het echte logo is een
+geometrische schreefloze die in de mail niet beschikbaar is; namaken met een
+andere letter levert een logo op dat er nét naast zit, en dat valt bij een merk
+meer op dan wanneer je het niet probeert.
 
-## Waarom er geen uitgeschreven link meer onder de knop staat
+Wil je later tóch het volledige logo als plaatje: lever een PNG van 264 bij 64
+pixels met transparante achtergrond en donkere inkt aan, en vervang in beide
+sjablonen de tabel met de twee cellen door één `<img>`. Zet de naam dan wel in
+de `alt`, anders is er bij geblokkeerde plaatjes niets meer te zien.
 
-Die stond er eerst, voor het geval een mailprogramma de knop wegknipt. Bewust
-verwijderd omdat hij rommelig oogt.
+## De uitgeschreven link onder de knop
 
-Wat je daarmee opgeeft: bij een ontvanger wiens mailprogramma de knop niet
-rendert, is er geen tweede weg naar binnen. Dat is bij zakelijke Outlook geen
-theoretisch scenario. Gebeurt dat, dan is de terugweg de link hier weer
-toevoegen.
+Die staat er bewust, voor het geval een mailprogramma de knop wegknipt. Bij
+zakelijke Outlook is dat geen theoretisch scenario, en dan is die regel de enige
+weg naar binnen.
+
+`{{ .ConfirmationURL }}` staat daarom twee keer in het sjabloon: een keer als
+bestemming van de link en een keer als zichtbare tekst. Het is geen vaste link
+maar een plaatshouder die Supabase bij het versturen invult, voor elke ontvanger
+met zijn eigen eenmalige adres.
 
 ## Niet aanpassen zonder te testen
 
@@ -89,7 +93,7 @@ mails niet. Supabase verstuurt één sjabloon voor het hele project, en weet op 
 moment niet bij welke organisatie de ontvanger hoort.
 
 Voor een chauffeur of ouder van Taxi Ontzorgd komt de uitnodiging dus binnen op
-naam van TagPoint en niet van Taxi Ontzorgd. Dat is te verdedigen zolang TagPoint
+naam van Tagpoint en niet van Taxi Ontzorgd. Dat is te verdedigen zolang Tagpoint
 zichtbaar de leverancier is, maar het wringt zodra een klant zijn eigen merk wil
 voeren.
 

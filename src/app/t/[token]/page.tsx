@@ -17,7 +17,7 @@ import { isPlausibleToken } from '@/features/tags/token';
  * into an oracle for finding real tags.
  */
 export const metadata: Metadata = {
-  title: 'TagPoint',
+  title: 'Tagpoint',
   robots: { index: false, follow: false },
 };
 
@@ -36,7 +36,7 @@ export default async function TagLandingPage({
   if (!user) {
     return (
       <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center gap-5 p-6 text-center">
-        <p className="text-lg font-semibold">TagPoint</p>
+        <p className="text-lg font-semibold">Tagpoint</p>
         <p className="text-sm text-[var(--tp-muted-foreground)]">
           Deze tag hoort bij een vervoersorganisatie. Log in om verder te gaan.
         </p>

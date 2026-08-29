@@ -121,7 +121,7 @@ export function BrandingForm({ branding }: { branding: BrandingRow | null }) {
           className="mt-0.5"
         />
         <span>
-          Verberg &ldquo;Mogelijk gemaakt door TagPoint&rdquo; op pagina&apos;s die
+          Verberg &ldquo;Mogelijk gemaakt door Tagpoint&rdquo; op pagina&apos;s die
           cliënten en ouders zien.
         </span>
       </label>

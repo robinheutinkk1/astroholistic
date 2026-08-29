@@ -47,12 +47,12 @@ export function BrandMark({
   return <span className={className ?? 'truncate text-base font-semibold'}>{name}</span>;
 }
 
-/** "Mogelijk gemaakt door TagPoint", unless the tenant chooses to hide it. */
+/** "Mogelijk gemaakt door Tagpoint", unless the tenant chooses to hide it. */
 export function PlatformCredit({ visible }: { visible: boolean }) {
   if (!visible) return null;
   return (
     <p className="text-xs text-[var(--tp-muted-foreground)]">
-      Mogelijk gemaakt door TagPoint
+      Mogelijk gemaakt door Tagpoint
     </p>
   );
 }

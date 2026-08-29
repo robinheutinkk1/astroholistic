@@ -28,7 +28,7 @@ export default async function SettingsPage() {
       href: '/instellingen/support' as Route,
       title: 'Privacy en support',
       description:
-        'Bewaartermijnen, en tijdelijke toegang voor TagPoint als u hulp nodig heeft.',
+        'Bewaartermijnen, en tijdelijke toegang voor Tagpoint als u hulp nodig heeft.',
       permission: 'organization.manage' as const,
     },
     {

@@ -1,4 +1,4 @@
-# TagPoint — NFC en QR
+# Tagpoint — NFC en QR
 
 > Status: **ontwerp (Fase 0/1)**. Implementatie in Fase 7.
 
@@ -6,7 +6,7 @@
 
 ## 1. Eén systeem, twee dragers
 
-NFC en QR zijn **niet** twee functies. Er is één entiteit — een TagPoint-tag —
+NFC en QR zijn **niet** twee functies. Er is één entiteit — een Tagpoint-tag —
 met één identifier, één statusmodel, één intrekpad en één check-in flow. NFC en
 QR zijn twee manieren om diezelfde identifier aan te bieden (§21).
 
@@ -85,7 +85,7 @@ het token überhaupt bestaat. Een onbekend token en een geldig token van een
 andere organisatie geven exact dezelfde pagina — anders is de route een orakel
 waarmee je geldige tags kunt vinden.
 
-Een niet-ingelogde bezoeker ziet: het TagPoint- (of white-label-) logo, de tekst
+Een niet-ingelogde bezoeker ziet: het Tagpoint- (of white-label-) logo, de tekst
 "Deze tag hoort bij een vervoersorganisatie. Log in om verder te gaan", en een
 loginknop. Meer niet.
 

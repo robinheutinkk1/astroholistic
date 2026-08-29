@@ -17,7 +17,7 @@
 **✅ BESLOTEN: optie (a) — geen toegang, `support_access_grants` in Fase 12.**
 **Impact: security, GDPR, supportproces**
 
-Ik heb ervoor gekozen dat een TagPoint-platformbeheerder via RLS **geen** rijen
+Ik heb ervoor gekozen dat een Tagpoint-platformbeheerder via RLS **geen** rijen
 uit `clients`, `contacts`, `rides` of `ride_events` kan lezen. Alleen
 organisatiemetadata, abonnementen en aantallen.
 
@@ -145,7 +145,7 @@ gemigreerd is — zeg het als je liever (b) wilt.
 
 ### D-01 — Repositorynaam
 
-De repo heette `astroholistic`, het product `TagPoint Taxi Dispatch`. Er stond
+De repo heette `astroholistic`, het product `Tagpoint Taxi Dispatch`. Er stond
 geen `astroholistic`-code in. **Opgelost: hernoemd naar `tagpoint-taxi-dispatch`.**
 Het advies was hernoemen vóór er externe developers of
 klanten meekijken. Puur cosmetisch, blokkeert niets.
@@ -412,7 +412,7 @@ organisatie geverifieerd". Dat is bewust — een generieke fout zou de beheerder
 uren naar zijn DNS laten staren — en het lekt niets wat een DNS-lookup niet ook
 vertelt.
 
-### D-22 — "Mogelijk gemaakt door TagPoint" verbergen is nu voor iedereen
+### D-22 — "Mogelijk gemaakt door Tagpoint" verbergen is nu voor iedereen
 **Impact: SaaS, commercieel**
 
 `hide_platform_branding` is instelbaar door elke organisatie met
@@ -639,7 +639,7 @@ is een Vercel-implementatie en een handmatige standaard.
 
 *Het risico dat je moet kennen:* zonder `HOSTING_API_TOKEN` verifieert een
 domein wél maar wordt het niet aangezet. Dat
-is bewust zichtbaar — de organisatie krijgt te lezen dat TagPoint het domein
+is bewust zichtbaar — de organisatie krijgt te lezen dat Tagpoint het domein
 aanzet — maar het is dan wel iemands taak om dat ook te doen. Zet die twee
 variabelen, of maak er een vast onderdeel van je aanmeldproces van.
 
@@ -945,7 +945,7 @@ meteen weer uit vliegen.
 *De gebruiker krijgt te horen waarom.* Automatisch uitloggen zonder uitleg ziet
 eruit als een storing, en dat is precies het moment waarop mensen gaan bellen.
 
-### D-48 — De uitnodigingsmail draagt de naam van TagPoint, niet die van de klant
+### D-48 — De uitnodigingsmail draagt de naam van Tagpoint, niet die van de klant
 
 *Situatie:* de applicatie is white-label. Elke vervoerder heeft een eigen logo,
 eigen kleuren en straks een eigen domein. De mails die Supabase verstuurt gaan
@@ -953,7 +953,7 @@ daar niet in mee: er is één sjabloon voor het hele project, en op het moment v
 versturen weet Supabase niet bij welke organisatie de ontvanger hoort.
 
 *Gevolg:* een chauffeur van Taxi Ontzorgd krijgt een uitnodiging op naam van
-TagPoint. Te verdedigen zolang TagPoint zichtbaar de leverancier is, maar het
+Tagpoint. Te verdedigen zolang Tagpoint zichtbaar de leverancier is, maar het
 wringt zodra een klant zijn eigen merk wil voeren, en dat is precies wat je
 verkoopt bij een white-label product.
 

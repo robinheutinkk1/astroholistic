@@ -306,7 +306,7 @@ account. Een project-id hoef je op Vercel niet te zetten: die levert
 > "Environment variable ... is invalid".
 
 **Zonder die variabelen** blijft alles werken, maar krijgt de organisatie de
-melding dat TagPoint het domein aanzet — en dan moet dat met de hand. Dat is
+melding dat Tagpoint het domein aanzet — en dan moet dat met de hand. Dat is
 bewust zichtbaar gemaakt: een domein dat verifieert en daarna stilletjes niets
 serveert is de slechtste van de drie uitkomsten.
 

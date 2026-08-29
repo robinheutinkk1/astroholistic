@@ -5,7 +5,7 @@ import { getHostBranding } from '@/features/branding/host';
 /**
  * Shell for the signed-out pages.
  *
- * On the platform's own host this is plain TagPoint. On a tenant's verified
+ * On the platform's own host this is plain Tagpoint. On a tenant's verified
  * domain it shows their name and logo — a parent who was sent a link by their
  * transport company should not land on a login page belonging to a product
  * they have never heard of.
@@ -21,7 +21,7 @@ export default async function PublicLayout({ children }: { children: React.React
     <div className="flex min-h-dvh flex-col items-center justify-center gap-6 px-4 py-10">
       <Link href="/" className="flex items-center">
         <BrandMark
-          name={branding?.displayName ?? 'TagPoint'}
+          name={branding?.displayName ?? 'Tagpoint'}
           logoUrl={branding?.logoUrl}
           className="text-lg font-semibold tracking-tight"
           imageClassName="h-10 w-auto max-w-[12rem] object-contain"

@@ -12,8 +12,8 @@ import type { MetadataRoute } from 'next';
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'TagPoint Taxi Dispatch',
-    short_name: 'TagPoint',
+    name: 'Tagpoint Taxi Dispatch',
+    short_name: 'Tagpoint',
     description: 'Ritten, check-in en registratie voor chauffeurs.',
     start_url: '/driver',
     scope: '/',

@@ -25,7 +25,7 @@ export default async function SupportAccessPage() {
       <div>
         <h1 className="text-xl font-semibold tracking-tight">Privacy en support</h1>
         <p className="mt-1 max-w-prose text-sm text-[var(--tp-muted-foreground)]">
-          Medewerkers van TagPoint kunnen uw gegevens <strong>niet</strong> inzien. Wilt u
+          Medewerkers van Tagpoint kunnen uw gegevens <strong>niet</strong> inzien. Wilt u
           hulp bij een vraag waarvoor dat wel nodig is, dan geeft u hier zelf tijdelijk
           toegang. Die loopt vanzelf af en u kunt hem op elk moment intrekken.
         </p>

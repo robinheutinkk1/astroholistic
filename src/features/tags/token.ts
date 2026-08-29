@@ -1,5 +1,5 @@
 /**
- * TagPoint tag identifiers (docs/NFC.md §2).
+ * Tagpoint tag identifiers (docs/NFC.md §2).
  *
  * Every tag carries two identifiers with different jobs:
  *

@@ -1,5 +1,5 @@
 -- ---------------------------------------------------------------------------
--- 0007 — TagPoint NFC/QR tags.
+-- 0007 — Tagpoint NFC/QR tags.
 --
 -- One tag, one token, one status model. QR is a rendering of the same URL, not
 -- a second system, so there is no qr_codes table (decision D-05). Two tables

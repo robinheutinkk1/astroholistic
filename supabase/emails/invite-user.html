@@ -1,5 +1,5 @@
 <!--
-  TagPoint Taxi Dispatch - uitnodiging voor een account.
+  Tagpoint Taxi Dispatch - uitnodiging voor een account.
 
   Supabase: Authentication > Emails > Invite user.
 
@@ -81,35 +81,45 @@
           >
             <!-- Afzender -->
             <tr>
-              <td style="padding: 0 0 20px 4px">
+              <td style="padding: 0 0 20px 0">
                 <!--
-                  Een absolute https-URL, want een mailprogramma haalt het
-                  plaatje van internet en kan niets met een bestand uit de repo.
-                  Dit adres wijst naar public/email-logo.png in dit project.
+                  Beeldmerk als plaatje, woordmerk als tekst.
 
-                  De alt-tekst is niet optioneel: Outlook blokkeert plaatjes
-                  standaard, en dan is dit het enige dat de ontvanger boven de
-                  mail ziet staan.
+                  Dat laatste is met opzet: Outlook blokkeert plaatjes
+                  standaard, en dan staat de naam er nog steeds. Tekst blijft
+                  bovendien scherp op elk scherm en is voor te lezen.
+
+                  De tabel eromheen is nodig omdat float en flexbox in mail niet
+                  werken; twee cellen naast elkaar is de enige betrouwbare
+                  manier om een plaatje en tekst op één regel te krijgen.
                 -->
-                <img
-                  src="https://taxi.tagpoint.nl/email-logo.png"
-                  alt="TagPoint"
-                  width="132"
-                  height="32"
-                  style="
-                    display: block;
-                    width: 132px;
-                    height: 32px;
-                    border: 0;
-                    outline: none;
-                    text-decoration: none;
-                    font-family:
-                      -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-                    font-size: 15px;
-                    font-weight: 600;
-                    color: #0f172a;
-                  "
-                />
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="padding: 0 10px 0 0; vertical-align: middle">
+                      <img
+                        src="https://taxi.tagpoint.nl/email-mark.png"
+                        alt=""
+                        width="26"
+                        height="32"
+                        style="display: block; width: 26px; height: 32px; border: 0"
+                      />
+                    </td>
+                    <td style="vertical-align: middle">
+                      <span
+                        style="
+                          font-family:
+                            -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial,
+                            sans-serif;
+                          font-size: 22px;
+                          font-weight: 600;
+                          letter-spacing: -0.02em;
+                          color: #0f172a;
+                        "
+                        >Tagpoint</span
+                      >
+                    </td>
+                  </tr>
+                </table>
               </td>
             </tr>
 
@@ -215,6 +225,43 @@
                     </td>
                   </tr>
                 </table>
+
+                <!--
+                  De link ook uitgeschreven, voor het geval een mailprogramma de
+                  knop wegknipt. Zakelijke Outlook doet dat, en dan is dit het
+                  enige dat overblijft.
+
+                  {{ .ConfirmationURL }} staat er twee keer: een keer als
+                  bestemming en een keer als zichtbare tekst. Het is geen vaste
+                  link maar een plaatshouder die Supabase bij het versturen
+                  invult, voor elke ontvanger met zijn eigen eenmalige link.
+                -->
+                <p
+                  style="
+                    margin: 28px 0 0 0;
+                    font-family:
+                      -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+                    font-size: 13px;
+                    line-height: 20px;
+                    color: #64748b;
+                  "
+                >
+                  Werkt de knop niet? Kopieer deze link naar je browser:
+                </p>
+                <p style="margin: 6px 0 0 0; word-break: break-all">
+                  <a
+                    href="{{ .ConfirmationURL }}"
+                    style="
+                      font-family:
+                        'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+                      font-size: 12px;
+                      line-height: 18px;
+                      color: #475569;
+                      text-decoration: underline;
+                    "
+                    >{{ .ConfirmationURL }}</a
+                  >
+                </p>
 
                 <!-- Scheidingslijn als tabelrij: een <hr> valt in Outlook uit
                      elkaar. -->

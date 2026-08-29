@@ -9,7 +9,7 @@ import { err, ok, type Result } from '@/lib/result/result';
 import { encodeBase32, formatPublicCode, organizationPrefix, TOKEN_BYTES } from './token';
 
 /**
- * TagPoint tags. One tag, one token, one status model — QR is a rendering of
+ * Tagpoint tags. One tag, one token, one status model — QR is a rendering of
  * the same URL, not a second system (decision D-05).
  */
 

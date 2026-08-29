@@ -33,7 +33,7 @@ Het masterprompt (§66, Fase 0) vroeg om analyse van:
 | Environment variables              | Niet aanwezig (geen `.env*`)          |
 | Huidige database                   | Geen migrations, geen `supabase/` map |
 | Bestaande routes                   | Niet aanwezig                         |
-| Bestaande TagPoint functionaliteit | Niet aanwezig                         |
+| Bestaande Tagpoint functionaliteit | Niet aanwezig                         |
 
 Regel §67.1 ("breek geen bestaande functionaliteit") is daarmee niet van toepassing:
 er is niets om te breken en niets om te behouden. Dat is gunstig — we kunnen de
@@ -41,7 +41,7 @@ architectuur schoon neerzetten zonder legacy-compromissen.
 
 ## 3. Punt van aandacht: repositorynaam
 
-De repository heette `astroholistic`. Het product heet **TagPoint Taxi Dispatch**.
+De repository heette `astroholistic`. Het product heet **Tagpoint Taxi Dispatch**.
 Er is geen inhoudelijke relatie tussen die twee namen en er staat geen
 `astroholistic`-code in de repo. **Inmiddels hernoemd naar `tagpoint-taxi-dispatch`.**
 
@@ -84,6 +84,6 @@ De documenten die in deze fase zijn opgeleverd staan in `docs/`:
 - `DATABASE.md` — ER-model, tabellen, constraints, indexes
 - `SECURITY.md` — dreigingsmodel, RLS-strategie, GDPR
 - `ROLES_AND_PERMISSIONS.md` — RBAC-model en volledige permissiecatalogus
-- `NFC.md` — TagPoint tag/QR-ontwerp en check-in flow
+- `NFC.md` — Tagpoint tag/QR-ontwerp en check-in flow
 - `IMPLEMENTATION_PLAN.md` — fasering met Definition of Done per fase
 - `RISKS_AND_DECISIONS.md` — expliciete beslispunten die bevestiging vragen

@@ -1,4 +1,4 @@
-# Ontwikkelen aan TagPoint Taxi Dispatch
+# Ontwikkelen aan Tagpoint Taxi Dispatch
 
 ## Vereisten
 

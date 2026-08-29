@@ -17,7 +17,7 @@ const VERIFY_MESSAGES: Record<service.VerifyResult['status'], FormState> = {
   VERIFIED_MANUAL: {
     status: 'success',
     message:
-      'De domeinnaam is geverifieerd. Hij wordt door TagPoint aangezet zodra het certificaat klaar is; u hoeft verder niets te doen.',
+      'De domeinnaam is geverifieerd. Hij wordt door Tagpoint aangezet zodra het certificaat klaar is; u hoeft verder niets te doen.',
   },
   VERIFIED_NOT_ATTACHED: {
     status: 'success',

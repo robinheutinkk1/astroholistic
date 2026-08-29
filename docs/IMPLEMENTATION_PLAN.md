@@ -320,7 +320,7 @@ server.
 en controleerde dáárna de chauffeur. Gevolg: een onbekend token gaf
 `UNKNOWN_TAG`, maar een echt token van een ánder vervoersbedrijf gaf
 `NO_ACCESS`. Dat verschil is een orakel — iedereen met een willekeurig
-chauffeursaccount kon een echte TagPoint-tag onderscheiden van een verzonnen
+chauffeursaccount kon een echte Tagpoint-tag onderscheiden van een verzonnen
 code. Nu wordt eerst vastgesteld wie de beller is, en zijn "geen tag" en "niet
 jouw tag" hetzelfde antwoord.
 

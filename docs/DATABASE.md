@@ -1,4 +1,4 @@
-# TagPoint Taxi Dispatch — Database
+# Tagpoint Taxi Dispatch — Database
 
 > Status: **ontwerp (Fase 0/1)**. De SQL wordt in Fase 2 als Supabase migrations
 > geschreven. Dit document is de bron van waarheid voor het datamodel.

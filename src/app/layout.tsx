@@ -5,15 +5,15 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: 'TagPoint Taxi Dispatch',
-    template: '%s · TagPoint',
+    default: 'Tagpoint Taxi Dispatch',
+    template: '%s · Tagpoint',
   },
   description: 'Planning, dispatch en ritregistratie voor vervoersbedrijven.',
   // Personal data must never reach a search index or a link preview.
   robots: { index: false, follow: false },
   appleWebApp: {
     capable: true,
-    title: 'TagPoint',
+    title: 'Tagpoint',
     statusBarStyle: 'default',
   },
 };

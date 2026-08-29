@@ -68,4 +68,6 @@ const out = await sharp(trimmed)
 
 writeFileSync('public/email-logo.png', out);
 const final = await sharp(out).metadata();
-console.log(`Geschreven: public/email-logo.png (${final.width}x${final.height}, ${out.length} bytes)`);
+console.log(
+  `Geschreven: public/email-logo.png (${final.width}x${final.height}, ${out.length} bytes)`,
+);

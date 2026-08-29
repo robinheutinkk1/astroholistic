@@ -1,4 +1,4 @@
-# TagPoint Taxi Dispatch
+# Tagpoint Taxi Dispatch
 
 Multi-tenant SaaS-platform voor vervoersbedrijven: cliëntenbeheer, terugkerende
 ritplanning, dispatching, een chauffeurs-PWA met NFC/QR check-in, en portalen
@@ -21,7 +21,7 @@ voor cliënten, contactpersonen en opdrachtgevers.
 | [`docs/DATABASE.md`](docs/DATABASE.md)                           | ER-model, tabellen, constraints, indexes                |
 | [`docs/SECURITY.md`](docs/SECURITY.md)                           | Dreigingsmodel, RLS-strategie, GDPR, testmatrix         |
 | [`docs/ROLES_AND_PERMISSIONS.md`](docs/ROLES_AND_PERMISSIONS.md) | RBAC-model en permissiecatalogus                        |
-| [`docs/NFC.md`](docs/NFC.md)                                     | TagPoint tag/QR-ontwerp en check-in flow                |
+| [`docs/NFC.md`](docs/NFC.md)                                     | Tagpoint tag/QR-ontwerp en check-in flow                |
 | [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md)     | Fasering en Definition of Done                          |
 | [`docs/RISKS_AND_DECISIONS.md`](docs/RISKS_AND_DECISIONS.md)     | **Openstaande beslispunten en aannames**                |
 | [`docs/SECURITY_AUDIT.md`](docs/SECURITY_AUDIT.md)               | Beveiligingsaudit met bevindingen en openstaande gaten  |
