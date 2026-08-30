@@ -158,6 +158,7 @@ export async function getDriverTrip(
 export async function markStopArrived(
   context: DriverContext,
   stopId: string,
+  occurredAt: Date = new Date(),
 ): Promise<boolean> {
   const supabase = await createClient();
 
@@ -165,7 +166,7 @@ export async function markStopArrived(
   // someone else's run simply matches nothing.
   const { error, count } = await supabase
     .from('trip_stops')
-    .update({ arrived_at: new Date().toISOString() }, { count: 'exact' })
+    .update({ arrived_at: occurredAt.toISOString() }, { count: 'exact' })
     .eq('id', stopId)
     .is('arrived_at', null);
 

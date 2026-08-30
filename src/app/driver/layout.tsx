@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { getDriverContext } from '@/features/driver/service';
+import { DriverOfflineProvider } from '@/features/driver/offline/context';
+import { OfflineBanner } from '@/features/driver/offline/offline-banner';
 import { getCurrentUser } from '@/features/rbac/session';
 import { signOutAction } from '@/features/auth/actions';
 import { Button } from '@/components/ui/button';
@@ -72,7 +74,17 @@ export default async function DriverLayout({ children }: { children: React.React
         </form>
       </header>
 
-      <main className="flex-1 p-4 pb-10">{children}</main>
+      <main className="flex-1 p-4 pb-10">
+        {/* De wachtrij hoort bij de chauffeur, niet bij één pagina: de teller
+            en het opnieuw versturen moeten ook lopen terwijl hij tussen rit en
+            groepsrit wisselt. */}
+        <DriverOfflineProvider userId={context.userId}>
+          <div className="mb-3 empty:hidden">
+            <OfflineBanner />
+          </div>
+          {children}
+        </DriverOfflineProvider>
+      </main>
     </div>
   );
 }

@@ -970,6 +970,53 @@ product. Een op zichzelf staande klus, geen bijvangst.
 komen. Dat is een verkoopgesprek, geen bug, dus het hoort hier vastgelegd te
 staan en niet in een issue dat niemand terugvindt.
 
+### D-49 — Offline chauffeursacties: localStorage-wachtrij, geen service worker
+
+*Situatie:* er rijden echte chauffeurs, en een check-in in een parkeergarage
+faalde tot nu toe hard: de mislukte fetch van de server action gooide de fout
+naar de foutgrens en de registratie was weg.
+
+*Besluit:* de vier chauffeursacties (ritstap, aankomst bij een halte,
+afwezigheid, probleem) gaan niet meer via `<form action>` maar via een hook die
+de actie zelf aanroept. Een antwoord van de server — ook een afwijzing — wordt
+gewoon getoond; een verbindingsfout wordt een wachtrijregel in localStorage,
+met het klikmoment erbij. Een banner in de chauffeursshell verstuurt de rij
+zodra er weer verbinding is: bij het openen, op het online-event, en elke
+twintig seconden.
+
+*Waarom geen service worker met Background Sync:* dat bestaat niet op iOS, en
+chauffeurs rijden met iPhones. localStorage overleeft het sluiten van de PWA en
+werkt overal.
+
+*De regels die ertoe doen:*
+
+- **Klikvolgorde is verzendvolgorde.** Instappen vóór rijden is geen detail
+  maar de statusmachine.
+- **Een afwijzing haalt de regel uit de rij**, met een wegklikbare melding. De
+  wereld is intussen veranderd (de planner heeft de rit al bijgewerkt); eeuwig
+  herhalen maakt dat niet anders, stilzwijgend laten verdwijnen is erger.
+- **Eén wachtrij per gebruiker.** Een gedeeld toestel mag de rij van chauffeur
+  A niet als chauffeur B afspelen. De server zou dat ook weigeren, maar dan met
+  een melding die B niet kan plaatsen.
+- **Een plafond van twintig pogingen** voor fouten die geen verbindingsfout
+  zijn, anders blokkeert één gifpil alles erachter.
+
+*Het tijdstip:* de wachtrijregel draagt `occurredAt` van het moment van de
+klik. De server klemt dat (`clampOccurredAt`): onleesbaar wordt "nu", toekomst
+wordt "nu", ouder dan een etmaal wordt op een etmaal geknepen — antedateren
+naar vorige week kan dus ook via de wachtrij niet. `recorded_at` blijft altijd
+de serverklok, dus het verschil blijft zichtbaar in de administratie. Dit is
+precies waarvoor het datamodel die twee kolommen al uit elkaar hield.
+
+*Bijvangst:* de GPS-knop bleek een lus te bevatten (preventDefault +
+requestSubmit vuurde de onSubmit opnieuw af) waardoor de actie nooit vertrok
+zodra GPS aanstond. Verdwenen met de nieuwe verzendweg; een test staat ervoor.
+
+*Grens die blijft:* de pagina's zelf zijn niet offline te openen. Wie de app
+start zonder bereik ziet zijn dagplanning niet. Dat is een aparte, veel
+grotere klus (service worker, cache-strategie voor geauthenticeerde data) en
+staat bewust niet in deze stap.
+
 ## Openstaande vragen aan jou
 
 1. ~~Bestaat er al een Supabase-project?~~ **Beantwoord: nee.** Zie hierboven.

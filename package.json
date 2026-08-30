@@ -36,7 +36,8 @@
     "perf": "node scripts/volume-test.mjs",
     "sql:bundle": "node scripts/bundle-migrations.mjs",
     "check:env": "node scripts/check-env.mjs",
-    "check:env:production": "node scripts/check-env.mjs --production"
+    "check:env:production": "node scripts/check-env.mjs --production",
+    "db:reseed:local": "bash scripts/reseed-local.sh"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

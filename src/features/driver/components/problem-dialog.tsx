@@ -1,20 +1,9 @@
 'use client';
 
-import { useActionState, useState } from 'react';
-import { useFormStatus } from 'react-dom';
+import { useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Button } from '@/components/ui/button';
-import { IDLE, type FormState } from '@/lib/errors/form-state';
-import { reportProblemAction } from '../actions';
-
-function Submit() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" size="touch" loading={pending}>
-      Versturen
-    </Button>
-  );
-}
+import { useDriverSubmit } from '../offline/use-driver-submit';
 
 /**
  * Reporting a problem does NOT change the ride status.
@@ -25,10 +14,7 @@ function Submit() {
  */
 export function ProblemDialog({ rideId }: { rideId: string }) {
   const [open, setOpen] = useState(false);
-  const [state, formAction] = useActionState<FormState, FormData>(
-    reportProblemAction,
-    IDLE,
-  );
+  const { state, pending, submit } = useDriverSubmit('problem');
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -46,7 +32,13 @@ export function ProblemDialog({ rideId }: { rideId: string }) {
             De rit gaat gewoon door; de planning kijkt mee.
           </Dialog.Description>
 
-          <form action={formAction} className="mt-4 flex flex-col gap-3">
+          <form
+            className="mt-4 flex flex-col gap-3"
+            onSubmit={(event) => {
+              event.preventDefault();
+              submit(new FormData(event.currentTarget), 'Probleemmelding');
+            }}
+          >
             <input type="hidden" name="rideId" value={rideId} />
             <textarea
               name="note"
@@ -70,7 +62,9 @@ export function ProblemDialog({ rideId }: { rideId: string }) {
               </p>
             ) : null}
 
-            <Submit />
+            <Button type="submit" size="touch" loading={pending}>
+              Versturen
+            </Button>
             <Dialog.Close asChild>
               <Button type="button" variant="ghost" size="touch">
                 Sluiten

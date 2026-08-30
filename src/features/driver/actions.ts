@@ -14,6 +14,7 @@ import {
   reportProblem,
 } from './service';
 import { markStopArrived } from './trips';
+import { clampOccurredAt } from './occurred-at';
 
 const CONTEXT = 'driver action';
 
@@ -31,6 +32,15 @@ const gpsSchema = z
   })
   .nullable()
   .catch(null);
+
+/**
+ * Het moment van de klik, meegegeven door de browser. Aanwezig omdat een
+ * handeling uit de offline-wachtrij later binnenkomt dan hij gebeurde; geklemd
+ * omdat het invoer van een toestel is (zie occurred-at.ts).
+ */
+function parseOccurredAt(formData: FormData): Date {
+  return clampOccurredAt(formData.get('occurredAt'));
+}
 
 function parseGps(formData: FormData) {
   const latitude = formData.get('latitude');
@@ -57,7 +67,14 @@ export async function driverActionAction(
 
   try {
     const context = await requireDriverContext();
-    const result = await performDriverAction(context, rideId, action, parseGps(formData));
+    const result = await performDriverAction(
+      context,
+      rideId,
+      action,
+      parseGps(formData),
+      'MANUAL',
+      parseOccurredAt(formData),
+    );
     if (!result.ok) return toFormState(result.error, CONTEXT);
   } catch (error) {
     return toFormState(error, CONTEXT);
@@ -99,6 +116,7 @@ export async function reportAbsenceAction(
       parsed.data.reason,
       parsed.data.note,
       parseGps(formData),
+      parseOccurredAt(formData),
     );
     if (!result.ok) return toFormState(result.error, CONTEXT);
   } catch (error) {
@@ -131,7 +149,12 @@ export async function reportProblemAction(
 
   try {
     const context = await requireDriverContext();
-    const result = await reportProblem(context, parsed.data.rideId, parsed.data.note);
+    const result = await reportProblem(
+      context,
+      parsed.data.rideId,
+      parsed.data.note,
+      parseOccurredAt(formData),
+    );
     if (!result.ok) return toFormState(result.error, CONTEXT);
   } catch (error) {
     return toFormState(error, CONTEXT);
@@ -153,7 +176,7 @@ export async function markStopArrivedAction(
 
   try {
     const context = await requireDriverContext();
-    const marked = await markStopArrived(context, stopId);
+    const marked = await markStopArrived(context, stopId, parseOccurredAt(formData));
     if (!marked) {
       return { status: 'error', message: 'Deze stop is al afgemeld of niet van jou.' };
     }

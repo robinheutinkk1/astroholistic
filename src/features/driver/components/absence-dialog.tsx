@@ -1,21 +1,10 @@
 'use client';
 
-import { useActionState, useState } from 'react';
-import { useFormStatus } from 'react-dom';
+import { useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Button } from '@/components/ui/button';
-import { IDLE, type FormState } from '@/lib/errors/form-state';
+import { useDriverSubmit } from '../offline/use-driver-submit';
 import { ABSENCE_REASON_LABELS, ABSENCE_REASONS } from '@/features/rides/schema';
-import { reportAbsenceAction } from '../actions';
-
-function Submit() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" variant="danger" size="touch" loading={pending}>
-      Afwezigheid doorgeven
-    </Button>
-  );
-}
 
 /**
  * "Client not present."
@@ -26,10 +15,7 @@ function Submit() {
  */
 export function AbsenceDialog({ rideId }: { rideId: string }) {
   const [open, setOpen] = useState(false);
-  const [state, formAction] = useActionState<FormState, FormData>(
-    reportAbsenceAction,
-    IDLE,
-  );
+  const { state, pending, submit } = useDriverSubmit('absence');
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -49,7 +35,13 @@ export function AbsenceDialog({ rideId }: { rideId: string }) {
             De planning krijgt dit meteen te zien.
           </Dialog.Description>
 
-          <form action={formAction} className="mt-4 flex flex-col gap-3">
+          <form
+            className="mt-4 flex flex-col gap-3"
+            onSubmit={(event) => {
+              event.preventDefault();
+              submit(new FormData(event.currentTarget), 'Afwezigheidsmelding');
+            }}
+          >
             <input type="hidden" name="rideId" value={rideId} />
 
             <fieldset className="flex flex-col gap-2">
@@ -84,8 +76,15 @@ export function AbsenceDialog({ rideId }: { rideId: string }) {
                 {state.message}
               </p>
             ) : null}
+            {state.status === 'success' && state.message ? (
+              <p role="status" className="text-sm text-[var(--tp-muted-foreground)]">
+                {state.message}
+              </p>
+            ) : null}
 
-            <Submit />
+            <Button type="submit" variant="danger" size="touch" loading={pending}>
+              Afwezigheid doorgeven
+            </Button>
             <Dialog.Close asChild>
               <Button type="button" variant="ghost" size="touch">
                 Annuleren

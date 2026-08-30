@@ -1,32 +1,11 @@
 'use client';
 
-import { useActionState } from 'react';
-import { useFormStatus } from 'react-dom';
 import { Check, MapPin, Navigation } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { IDLE, type FormState } from '@/lib/errors/form-state';
 import { TRANSPORT_REQUIREMENT_LABELS } from '@/features/rides/schema';
-import { driverActionAction, markStopArrivedAction } from '../actions';
+import { useDriverSubmit } from '../offline/use-driver-submit';
 import type { DriverStop } from '../trips';
-
-function ArrivedButton() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" size="touch" loading={pending}>
-      Ik ben aangekomen
-    </Button>
-  );
-}
-
-function PassengerButton({ label }: { label: string }) {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" size="sm" variant="outline" loading={pending}>
-      {label}
-    </Button>
-  );
-}
 
 function PassengerRow({
   passenger,
@@ -35,10 +14,7 @@ function PassengerRow({
   passenger: DriverStop['passengers'][number];
   stopReached: boolean;
 }) {
-  const [state, formAction] = useActionState<FormState, FormData>(
-    driverActionAction,
-    IDLE,
-  );
+  const { state, pending, submit } = useDriverSubmit('ride-action');
 
   // Which single step this passenger is at, in this driver's words.
   const step = passenger.boardsHere
@@ -105,10 +81,20 @@ function PassengerRow({
       {/* Nothing is tappable until the driver has reported arriving: checking
           someone in from the road would be a fiction in the audit trail. */}
       {step && stopReached ? (
-        <form action={formAction}>
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            submit(
+              new FormData(event.currentTarget),
+              `${step.label} voor ${passenger.firstName}`,
+            );
+          }}
+        >
           <input type="hidden" name="rideId" value={passenger.rideId} />
           <input type="hidden" name="action" value={step.action} />
-          <PassengerButton label={step.label} />
+          <Button type="submit" size="sm" variant="outline" loading={pending}>
+            {step.label}
+          </Button>
         </form>
       ) : null}
     </li>
@@ -124,10 +110,7 @@ export function StopCard({
   tripId: string;
   isNext: boolean;
 }) {
-  const [state, formAction] = useActionState<FormState, FormData>(
-    markStopArrivedAction,
-    IDLE,
-  );
+  const { state, pending, submit } = useDriverSubmit('stop-arrived');
   const reached = stop.arrivedAt !== null;
 
   const query = [
@@ -231,12 +214,28 @@ export function StopCard({
       {/* One press for the whole stop — the reason the trip layer exists
           (decision D-17). Four passengers is not four "I have arrived" taps. */}
       {!reached ? (
-        <form action={formAction} className="mt-4">
+        <form
+          className="mt-4"
+          onSubmit={(event) => {
+            event.preventDefault();
+            submit(
+              new FormData(event.currentTarget),
+              `Aankomst bij ${stop.location.name}`,
+            );
+          }}
+        >
           <input type="hidden" name="stopId" value={stop.id} />
           <input type="hidden" name="tripId" value={tripId} />
-          <ArrivedButton />
+          <Button type="submit" size="touch" loading={pending}>
+            Ik ben aangekomen
+          </Button>
           {state.status === 'error' ? (
             <p role="alert" className="mt-2 text-sm text-[var(--tp-danger)]">
+              {state.message}
+            </p>
+          ) : null}
+          {state.status === 'success' && state.message ? (
+            <p role="status" className="mt-2 text-sm text-[var(--tp-muted-foreground)]">
               {state.message}
             </p>
           ) : null}

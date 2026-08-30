@@ -148,6 +148,10 @@ export async function performDriverAction(
   actionKey: string,
   gps: GpsFix | null,
   source: Tables<'ride_events'>['source'] = 'MANUAL',
+  // Het moment van de handeling zelf. Wijkt alleen af van "nu" wanneer de
+  // registratie uit de offline-wachtrij komt; de aanroeper heeft hem dan al
+  // geklemd (occurred-at.ts). recorded_at blijft altijd de serverklok.
+  occurredAt: Date = new Date(),
 ): Promise<Result<{ status: RideStatus }>> {
   const action = DRIVER_ACTIONS[actionKey];
   if (!action) return err(new NotFoundError('Onbekende actie.'));
@@ -181,14 +185,17 @@ export async function performDriverAction(
     return err(new StateTransitionError(RIDE_STATUS_REFUSAL_MESSAGES[check.reason]));
   }
 
+  // De mijlpalen dragen het werkelijke moment: een check-in van 08:14 die om
+  // 09:02 uit de wachtrij binnenkomt, hoort in de administratie op 08:14.
+  const at = occurredAt.toISOString();
   const milestone: Partial<Tables<'rides'>> = {};
   if (action.to === 'CLIENT_CHECKED_IN') {
-    milestone.checked_in_at = new Date().toISOString();
+    milestone.checked_in_at = at;
     milestone.checked_in_method = source;
   }
-  if (action.to === 'TRIP_STARTED') milestone.started_at = new Date().toISOString();
-  if (action.to === 'ARRIVED') milestone.arrived_at = new Date().toISOString();
-  if (action.to === 'COMPLETED') milestone.completed_at = new Date().toISOString();
+  if (action.to === 'TRIP_STARTED') milestone.started_at = at;
+  if (action.to === 'ARRIVED') milestone.arrived_at = at;
+  if (action.to === 'COMPLETED') milestone.completed_at = at;
 
   const { error } = await supabase
     .from('rides')
@@ -210,6 +217,7 @@ export async function performDriverAction(
       organization_id: ride.organization_id,
       ride_id: rideId,
       event_type: eventType,
+      occurred_at: at,
       actor_user_id: context.userId,
       actor_kind: 'DRIVER',
       source,
@@ -230,6 +238,7 @@ export async function reportAbsence(
   reason: Tables<'rides'>['absence_reason'],
   note: string | null,
   gps: GpsFix | null,
+  occurredAt: Date = new Date(),
 ): Promise<Result<null>> {
   const supabase = await createClient();
 
@@ -265,6 +274,7 @@ export async function reportAbsence(
     organization_id: ride.organization_id,
     ride_id: rideId,
     event_type: 'CLIENT_ABSENT',
+    occurred_at: occurredAt.toISOString(),
     actor_user_id: context.userId,
     actor_kind: 'DRIVER',
     source: 'MANUAL',
@@ -281,6 +291,7 @@ export async function reportProblem(
   context: DriverContext,
   rideId: string,
   note: string,
+  occurredAt: Date = new Date(),
 ): Promise<Result<null>> {
   const supabase = await createClient();
 
@@ -299,6 +310,7 @@ export async function reportProblem(
     organization_id: ride.organization_id,
     ride_id: rideId,
     event_type: 'PROBLEM_REPORTED',
+    occurred_at: occurredAt.toISOString(),
     actor_user_id: context.userId,
     actor_kind: 'DRIVER',
     source: 'MANUAL',
