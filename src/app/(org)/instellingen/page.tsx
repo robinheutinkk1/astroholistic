@@ -32,6 +32,12 @@ export default async function SettingsPage() {
       permission: 'organization.manage' as const,
     },
     {
+      href: '/instellingen/logboek' as Route,
+      title: 'Logboek',
+      description: 'Wie deed wat, en wanneer.',
+      permission: 'audit.view' as const,
+    },
+    {
       href: '/instellingen/domeinen' as Route,
       title: 'Domeinnamen',
       description: 'Draai het platform op uw eigen domeinnaam.',
