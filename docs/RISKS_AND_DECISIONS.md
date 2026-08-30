@@ -1017,6 +1017,38 @@ start zonder bereik ziet zijn dagplanning niet. Dat is een aparte, veel
 grotere klus (service worker, cache-strategie voor geauthenticeerde data) en
 staat bewust niet in deze stap.
 
+### D-50 — Een eigen mailkanaal, en wat er bewust niet in een mail staat
+
+*Situatie:* Supabase verstuurt alleen zijn eigen auth-mails en kent de
+applicatie niet. Alles wat het product zélf wil zeggen — "je verzoek is
+beoordeeld", straks een dagrapport — had geen kanaal.
+
+*Besluit:* `src/lib/mail/`: configuratie (`MAIL_PROVIDER=resend`,
+`MAIL_API_KEY`, `MAIL_FROM`), een verzender via een kale fetch (geen
+dependency), en één gedeelde kaartopmaak in de stijl van de auth-sjablonen.
+Eerste gebruiker: de indiener van een portaalverzoek krijgt mail zodra de
+planning heeft beoordeeld.
+
+*De twee regels die alles bepalen:*
+
+1. **Versturen mag nooit de handeling laten mislukken waar het bij hoort.**
+   Een beoordeeld verzoek is beoordeeld, ook als de mail niet weg kan.
+2. **Niet kunnen versturen is nooit stil.** Elke overslag staat met reden in
+   het logboek van de hosting; "geen kanaal ingesteld" is een geldige
+   toestand, geen fout.
+
+*Wat er bewust niet in de mail staat:* de naam van de cliënt, de rit, en de
+toelichting van de planner. Een mail reist over servers van derden en ligt in
+gedeelde inboxen; de details staan achter de inlog van het portaal en de mail
+is alleen het duwtje daarheen. Er is een test die dit bewaakt.
+
+*Adres opzoeken is de achtste service-role-taak:* de beoordelaar mag lang niet
+altijd het profiel van de indiener lezen, en dat hoeft ook niet — er komt geen
+gegeven terug naar zijn scherm, er gaat alleen een bericht naar de indiener.
+
+*Nog niet gedaan:* dit kanaal ook gebruiken voor uitnodigingen in de huisstijl
+van de klant (D-48) en voor het dagrapport. De naad ligt er nu.
+
 ## Openstaande vragen aan jou
 
 1. ~~Bestaat er al een Supabase-project?~~ **Beantwoord: nee.** Zie hierboven.

@@ -1,6 +1,7 @@
 import 'server-only';
 import { requirePermission } from '@/features/rbac/session';
 import { recordAudit } from '@/features/audit/service';
+import { notifyRequesterReviewed } from './notify';
 import { createClient } from '@/lib/supabase/server';
 import { ConflictError, NotFoundError } from '@/lib/errors/app-error';
 import { err, ok, type Result } from '@/lib/result/result';
@@ -123,6 +124,13 @@ export async function reviewRequest(
     entityId: requestId,
     changedFields: [decision],
   });
+
+  // Ná het vastleggen, en nooit blokkerend: de indiener hoort dat er een
+  // besluit ligt, maar een mailstoring mag de beoordeling niet tegenhouden.
+  // Een verzoek zonder indiener (geanonimiseerd account) heeft geen adres.
+  if (request.requested_by_user_id) {
+    await notifyRequesterReviewed(request.requested_by_user_id, decision);
+  }
 
   return ok(null);
 }

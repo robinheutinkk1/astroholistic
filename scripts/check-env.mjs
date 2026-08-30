@@ -152,6 +152,13 @@ if (production) {
     }
   })();
 
+  if (!env.MAIL_PROVIDER) {
+    warn(
+      'MAIL_PROVIDER is not set: the app cannot send its own e-mail ' +
+        '(request-review notifications). Auth mail via Supabase still works.',
+    );
+  }
+
   if (appHost.endsWith('.vercel.app') || appHost.endsWith('.netlify.app')) {
     warn(
       `NEXT_PUBLIC_APP_URL is still the hosting provider's own domain (${appHost}). ` +
