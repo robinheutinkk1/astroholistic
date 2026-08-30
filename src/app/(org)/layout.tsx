@@ -36,6 +36,12 @@ const ALL_NAV_ITEMS: readonly NavItem[] = [
     icon: 'dispatch',
     permission: 'rides.dispatch',
   },
+  {
+    href: '/aanwezigheid',
+    label: 'Aanwezigheid',
+    icon: 'clients',
+    permission: 'rides.view',
+  },
   { href: '/clienten', label: 'Cliënten', icon: 'clients', permission: 'clients.view' },
   {
     href: '/chauffeurs',
