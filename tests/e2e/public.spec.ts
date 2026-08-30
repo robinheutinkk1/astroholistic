@@ -231,6 +231,21 @@ test.describe('routing for a signed-out visitor', () => {
   });
 });
 
+test.describe('de 404-pagina', () => {
+  test('een onbekend publiek adres toont de Nederlandse uitleg, niet de frameworkpagina', async ({
+    page,
+  }) => {
+    // Onder een publiek pad, want een uitgelogde bezoeker wordt elders eerst
+    // naar het loginscherm gestuurd voordat de 404 aan bod komt.
+    await page.goto('/login/bestaat-niet');
+
+    await expect(
+      page.getByRole('heading', { name: 'Deze pagina bestaat niet' }),
+    ).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Naar het beginscherm' })).toBeVisible();
+  });
+});
+
 test.describe('automatisch uitloggen na inactiviteit', () => {
   /*
    * Alleen wat zonder ingelogde sessie te bewijzen valt: dat de melding
