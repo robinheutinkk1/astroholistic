@@ -1,6 +1,12 @@
 import 'server-only';
 import { createClient } from '@/lib/supabase/server';
-import { AuthorizationError, ConflictError, NotFoundError } from '@/lib/errors/app-error';
+import {
+  AuthorizationError,
+  ConflictError,
+  NotFoundError,
+  ValidationError,
+} from '@/lib/errors/app-error';
+import { validateAbsencePeriod, type AbsencePeriod } from './absence-period';
 import { err, ok, type Result } from '@/lib/result/result';
 import { todayInTimezone } from '@/lib/datetime/timezone';
 import { type RideStatus } from '@/features/rides/status';
@@ -109,6 +115,8 @@ export interface PortalRequest {
   readonly createdAt: string;
   readonly reviewNote: string | null;
   readonly rideDate: string | null;
+  readonly periodFrom: string | null;
+  readonly periodTo: string | null;
 }
 
 export async function getClientRequests(client: PortalClient): Promise<PortalRequest[]> {
@@ -116,21 +124,26 @@ export async function getClientRequests(client: PortalClient): Promise<PortalReq
   const { data } = await supabase
     .from('change_requests')
     .select(
-      `id, kind, status, created_at, review_note,
+      `id, kind, status, created_at, review_note, payload,
        ride:rides!change_requests_ride_id_fkey (scheduled_date)`,
     )
     .eq('client_id', client.id)
     .order('created_at', { ascending: false })
     .limit(20);
 
-  return (data ?? []).map((row) => ({
-    id: row.id,
-    kind: row.kind,
-    status: row.status,
-    createdAt: row.created_at,
-    reviewNote: row.review_note,
-    rideDate: row.ride?.scheduled_date ?? null,
-  }));
+  return (data ?? []).map((row) => {
+    const payload = row.payload as { from?: string; to?: string } | null;
+    return {
+      id: row.id,
+      kind: row.kind,
+      status: row.status,
+      createdAt: row.created_at,
+      reviewNote: row.review_note,
+      rideDate: row.ride?.scheduled_date ?? null,
+      periodFrom: payload?.from ?? null,
+      periodTo: payload?.to ?? null,
+    };
+  });
 }
 
 export type RequestKind =
@@ -141,6 +154,9 @@ export interface SubmitRequestInput {
   readonly rideId: string | null;
   readonly kind: RequestKind;
   readonly note: string | null;
+  /** Alleen bij een periode-afmelding: eerste en laatste dag, `YYYY-MM-DD`. */
+  readonly from?: string | null;
+  readonly to?: string | null;
 }
 
 export async function submitRequest(
@@ -163,6 +179,47 @@ export async function submitRequest(
   }
 
   const supabase = await createClient();
+
+  // Een periode ("van 2 t/m 13 september") is een afmelding zonder losse rit.
+  // De datums leven in payload; het schema verandert er niet voor.
+  let period: AbsencePeriod | null = null;
+  if (input.from || input.to) {
+    if (input.kind !== 'ABSENCE' || input.rideId) {
+      return err(
+        new ValidationError('Een periode kan alleen bij een afmelding zonder rit.'),
+      );
+    }
+    const today = todayInTimezone(await organizationTimezone(client.organizationId));
+    const checked = validateAbsencePeriod(input.from, input.to, today);
+    if (!checked.ok) return err(new ValidationError(checked.message));
+    period = checked.period;
+  }
+  if (input.kind === 'ABSENCE' && !input.rideId && !period) {
+    return err(new ValidationError('Kies een rit, of vul een periode in.'));
+  }
+
+  if (period) {
+    // Eén open periode-afmelding per cliënt tegelijk. Twee wachtende periodes
+    // naast elkaar kan de planning niet meer uit elkaar houden; eerst laten
+    // beoordelen, dan eventueel een nieuwe indienen.
+    const { data: existing } = await supabase
+      .from('change_requests')
+      .select('id')
+      .eq('client_id', client.id)
+      .eq('kind', 'ABSENCE')
+      .is('ride_id', null)
+      .eq('status', 'PENDING')
+      .limit(1)
+      .maybeSingle();
+
+    if (existing) {
+      return err(
+        new ConflictError(
+          'Er staat al een periode-afmelding open. Wacht tot de planning die heeft beoordeeld.',
+        ),
+      );
+    }
+  }
 
   if (input.rideId) {
     // Only rides of this client, and only ones still ahead. A request about a
@@ -204,7 +261,10 @@ export async function submitRequest(
           ? 'CONTACT'
           : 'CARE_ORG',
       kind: input.kind,
-      payload: input.note ? { note: input.note } : {},
+      payload: {
+        ...(input.note ? { note: input.note } : {}),
+        ...(period ? { from: period.from, to: period.to } : {}),
+      },
     })
     .select('id')
     .maybeSingle();

@@ -1049,6 +1049,27 @@ gegeven terug naar zijn scherm, er gaat alleen een bericht naar de indiener.
 *Nog niet gedaan:* dit kanaal ook gebruiken voor uitnodigingen in de huisstijl
 van de klant (D-48) en voor het dagrapport. De naad ligt er nu.
 
+### D-51 — Periode-afmelding: jsonb in het bestaande verzoek, geen nieuwe tabel
+
+"Jan is drie weken op vakantie" was tot nu vijftien keer afmelden per rit. Nu
+is het één verzoek: kind `ABSENCE`, `ride_id` leeg, en `{from, to}` in de
+bestaande `payload`-jsonb van `change_requests`. Geen migratie, geen nieuwe
+tabel, en het verzoek doorloopt exact dezelfde molen als alle andere (D-08):
+de planning beoordeelt, en past daarna zelf de ritten aan.
+
+*Waarom niet automatisch de ritten annuleren bij goedkeuring?* Om dezelfde
+reden als D-08: "meld af" van een ouder en "annuleer" van de planning zijn
+niet dezelfde handeling. Bovendien kunnen er in de periode ritten zijn die
+tóch doorgaan (een ziekenhuisafspraak) — de planner ziet dat, een query niet.
+Als dit in de praktijk te veel klikwerk blijkt, is "ritten in deze periode
+selecteren en annuleren" een losse plannersfunctie, geen portaalfunctie.
+
+*De grenzen* (in `absence-period.ts`, getest): begin niet in het verleden en
+hooguit 180 dagen vooruit, lengte hooguit 92 dagen, en één openstaande
+periode-afmelding per cliënt tegelijk. Langer of verder is een gesprek met de
+vervoerder, geen wachtrijregel. "Vandaag" is de vandaag van de organisatie
+(tijdzone), niet van de server of het toestel.
+
 ## Openstaande vragen aan jou
 
 1. ~~Bestaat er al een Supabase-project?~~ **Beantwoord: nee.** Zie hierboven.

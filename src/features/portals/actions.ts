@@ -30,6 +30,22 @@ const requestSchema = z.object({
     .transform((value) => (value.length === 0 ? null : value))
     .nullable()
     .catch(null),
+  // Alleen gevuld bij een periode-afmelding; de inhoudelijke controle (volgorde,
+  // verleden, horizon) gebeurt in de service tegen de tijdzone van de organisatie.
+  from: z
+    .string()
+    .max(10)
+    .transform((value) => value.trim())
+    .transform((value) => (value.length === 0 ? null : value))
+    .nullable()
+    .catch(null),
+  to: z
+    .string()
+    .max(10)
+    .transform((value) => value.trim())
+    .transform((value) => (value.length === 0 ? null : value))
+    .nullable()
+    .catch(null),
 });
 
 export async function submitRequestAction(
@@ -41,6 +57,8 @@ export async function submitRequestAction(
     rideId: formData.get('rideId') ?? '',
     kind: formData.get('kind'),
     note: formData.get('note'),
+    from: formData.get('from') ?? '',
+    to: formData.get('to') ?? '',
   });
   if (!parsed.success) return fromValidationIssues(parsed.error.flatten().fieldErrors);
 

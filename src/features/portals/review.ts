@@ -26,6 +26,8 @@ export interface ReviewableRequest {
   readonly rideId: string | null;
   readonly rideDate: string | null;
   readonly rideTime: string | null;
+  readonly periodFrom: string | null;
+  readonly periodTo: string | null;
 }
 
 export async function listRequests(
@@ -56,7 +58,7 @@ export async function listRequests(
       last_name: string;
     } | null;
     const ride = row.ride;
-    const payload = row.payload as { note?: string } | null;
+    const payload = row.payload as { note?: string; from?: string; to?: string } | null;
 
     return {
       id: row.id,
@@ -70,6 +72,8 @@ export async function listRequests(
       rideId: row.ride_id,
       rideDate: ride?.scheduled_date ?? null,
       rideTime: ride?.scheduled_pickup_time ?? null,
+      periodFrom: payload?.from ?? null,
+      periodTo: payload?.to ?? null,
     };
   });
 }

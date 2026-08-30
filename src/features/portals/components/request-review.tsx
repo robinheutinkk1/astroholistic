@@ -100,7 +100,9 @@ export function RequestReview({
                 <p className="text-sm text-[var(--tp-muted-foreground)]">
                   {request.rideDate
                     ? `Rit op ${request.rideDate} om ${request.rideTime?.slice(0, 5)}`
-                    : 'Geen specifieke rit'}
+                    : request.periodFrom && request.periodTo
+                      ? `Periode van ${request.periodFrom} t/m ${request.periodTo}`
+                      : 'Geen specifieke rit'}
                   {' · aangevraagd door '}
                   {REQUESTER_LABELS[request.requesterKind] ?? request.requesterKind}
                 </p>

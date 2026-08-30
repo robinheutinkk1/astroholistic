@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/states';
+import { PeriodAbsenceDialog } from '@/features/portals/components/period-absence-dialog';
 import { RequestDialog } from '@/features/portals/components/request-dialog';
 import { getPortalAccess, getPortalClient } from '@/features/portals/access';
 import { getClientRequests, getClientRides } from '@/features/portals/service';
@@ -143,6 +144,11 @@ export default async function PortalClientPage({
             Jij staat geregistreerd als {client.relationLabel}.
           </p>
         ) : null}
+        {client.canReportAbsence ? (
+          <div className="mt-3">
+            <PeriodAbsenceDialog clientId={client.id} clientName={name} />
+          </div>
+        ) : null}
         {!client.canReportAbsence && !client.canRequestChanges ? (
           // A care organisation follows the transport but does not speak for
           // the client, so say that instead of showing dead buttons.
@@ -188,9 +194,11 @@ export default async function PortalClientPage({
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="font-medium">
                     {REQUEST_KIND_LABELS[request.kind] ?? request.kind}
-                    {request.rideDate
-                      ? ` · ${DATE.format(new Date(`${request.rideDate}T12:00:00Z`))}`
-                      : ''}
+                    {request.periodFrom && request.periodTo
+                      ? ` · ${DATE.format(new Date(`${request.periodFrom}T12:00:00Z`))} t/m ${DATE.format(new Date(`${request.periodTo}T12:00:00Z`))}`
+                      : request.rideDate
+                        ? ` · ${DATE.format(new Date(`${request.rideDate}T12:00:00Z`))}`
+                        : ''}
                   </span>
                   <Badge
                     variant={
