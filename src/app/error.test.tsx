@@ -40,13 +40,18 @@ describe('de foutpagina', () => {
     expect(screen.queryByText(/interne details/)).not.toBeInTheDocument();
   });
 
-  it('biedt een uitweg naar het beginscherm', () => {
+  it('biedt een uitweg naar het beginscherm, als harde navigatie', async () => {
+    // Geen router-link: na een fout is een verse paginalading betrouwbaarder
+    // dan navigeren binnen de kapotte componentenboom.
+    const user = userEvent.setup();
+    const assign = vi.fn();
+    vi.stubGlobal('location', { ...window.location, assign });
     render(<ErrorPage error={boom()} reset={vi.fn()} />);
 
-    expect(screen.getByRole('link', { name: 'Naar het beginscherm' })).toHaveAttribute(
-      'href',
-      '/',
-    );
+    await user.click(screen.getByRole('button', { name: 'Naar het beginscherm' }));
+
+    expect(assign).toHaveBeenCalledWith('/');
+    vi.unstubAllGlobals();
   });
 });
 

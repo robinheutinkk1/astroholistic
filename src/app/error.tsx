@@ -43,10 +43,17 @@ export default function ErrorPage({
         <Button type="button" onClick={reset}>
           Opnieuw proberen
         </Button>
-        <Button asChild variant="outline">
-          {/* Een echte <a> en geen router-link: na een fout is een verse
-              paginalading betrouwbaarder dan navigeren binnen de kapotte boom. */}
-          <a href="/">Naar het beginscherm</a>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            // Een harde navigatie en geen router-link: na een fout is een
+            // verse paginalading betrouwbaarder dan navigeren binnen de
+            // kapotte componentenboom.
+            window.location.assign('/');
+          }}
+        >
+          Naar het beginscherm
         </Button>
       </div>
     </main>
