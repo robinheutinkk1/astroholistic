@@ -118,7 +118,12 @@ test.describe('the NFC landing page tells an anonymous visitor nothing', () => {
       const response = await page.goto(`/t/${encodeURIComponent(token)}`);
       expect(response?.status()).toBe(200);
 
-      const body = (await page.textContent('body')) ?? '';
+      // innerText, not textContent: textContent also reads the framework's
+      // serialized payload in <script>, and since the Dutch 404 page exists
+      // that payload carries "Deze pagina bestaat niet" on every page — for
+      // every token the same bytes, so no oracle, but it trips the regex.
+      // What matters here is what a visitor can see.
+      const body = await page.innerText('body');
 
       // The strictest rule in the product (docs/NFC.md §5): no name, no
       // organisation, and no hint about whether the token is real.
